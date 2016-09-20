@@ -1,5 +1,8 @@
 # TAbular DAta classification of soft clusters
 
+###Plan
+* *Work first with numerical data*: So first, for each column I'll create n-features, each feature will some kind of statistical test e.g. t-test, Kolmogorov–Smirnov, ...etc.
+
 
 ###Assumptions
 * There are no similar columns in the training set, e.g. city_name_english, city_name_french
