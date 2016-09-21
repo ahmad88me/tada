@@ -17,7 +17,7 @@
 
 ###Ideas
 * Add further (dummy) data to the training set if the user classified one column in the data set to be the same as one column in the training set that is not very similar.
-
+* Maybe use the central limit theorem for the training samples incase we are using Standard Error of the Mean
 
 ###Open Questions
 * What about sources that are neither RDF not CSV e.g. (databases)
