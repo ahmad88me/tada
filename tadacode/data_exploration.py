@@ -4,14 +4,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib import colors as matplot_colors
 import six
+import math
 
 colors = list(six.iteritems(matplot_colors.cnames))
 
 
-def draw_as_catogories(data):
+def draw_as_catogories(data, color_idx):
+    all_color_palette = ["Reds", "Blues"]
+    color_palette = all_color_palette[color_idx%len(all_color_palette)]
     #print "min type"
     #print type(data['temp'].min())
-    range_len = 10
+    range_len = 1
     min_num = data['temp'].min()
     max_num = data['temp'].max()
     print "min: %f " % min_num
@@ -41,9 +44,10 @@ def draw_as_catogories(data):
     df.rename_axis({0: "freq"}, axis="columns", inplace=True)
     print df
     sns.set_style("whitegrid")
-    ax = sns.barplot(x="intervals", y="freq", data=df)
+    #ax = sns.barplot(x="intervals", y="freq", data=df)
+    ax = sns.barplot(x="intervals", y="freq", data=df, palette=sns.color_palette(color_palette, n_colors=7), alpha=0.5)
     ax.set(xlabel='Intervals', ylabel='Frequency')
-    sns.plt.show()
+    #sns.plt.show()
 
 
 def draw_as_points(data, color_idx=0):
@@ -57,7 +61,11 @@ def draw_as_points(data, color_idx=0):
     #data['freq'] = freqv
     print temp_freq
     print temp_freq.axes
-    plt.scatter(temp_freq.axes, temp_freq.values, c=colors[color_idx])
+    fff = []
+    for i in temp_freq.values:
+        fff.append(math.log(i))
+    plt.scatter(fff, temp_freq.values, c=colors[color_idx])
+    #plt.scatter(temp_freq.axes, temp_freq.values, c=colors[color_idx])
     plt.xlabel('Temperature', fontsize=16)
     plt.ylabel('Frequencies', fontsize=16)
     #data.iloc(0).value_counts()
@@ -65,8 +73,8 @@ def draw_as_points(data, color_idx=0):
     plt.show()
 
 
-def explore():
-    data = pd.read_csv("novHighC.csv", header=None, error_bad_lines=False, warn_bad_lines=False, names=['temp'])  # dtype=np.float64
+def explore(fname, color_idx=1):
+    data = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=['temp'])  # dtype=np.float64
     num_before = data.count()
     print "number of rows before cleaning: %d" % num_before
     # print data.iloc(0)[581] # invalid input
@@ -81,7 +89,11 @@ def explore():
     print "standard deviation: %.2f" % (data.std())
     #draw(data)
     #return data
-    draw_as_catogories(data)
+    draw_as_catogories(data, color_idx)
+
     #draw_as_points(data)
 
-explore()
+explore("CountrynovHighC.csv", 1)
+explore("novHighC.csv", 0)
+
+sns.plt.show()
