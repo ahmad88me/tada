@@ -7,6 +7,45 @@ import matplotlib.pyplot as plt
 import math
 
 
+def colors_mean(colors):
+    """
+    :param colors: list of colors
+    :return: average hex formatted color
+    """
+    import textwrap
+    new_color = [0.0, 0.0, 0.0]
+    for whole_color in colors:
+        for c in range(len(new_color)):
+            new_color[c] += int("0x"+textwrap.wrap(whole_color.replace("#", ""), 2)[c], 0) / len(colors)
+    return "#%02x%02x%02x" % (new_color[0], new_color[1], new_color[2])
+
+def compute_single_color(p, color):
+    """
+    :param p: probability
+    :param color: a hex formatted color
+    :return: computed color in hex
+    """
+    #print "compute single color"
+    #print color
+    if p<0.30:
+        p = 0.0
+    elif p<0.70:
+        p = 0.50
+    else:
+        p = 1.0
+
+    import textwrap
+    new_color = [0.0, 0.0, 0.0]
+    for c in range(len(new_color)):
+        #print "[%d] = %d" % (c, int("0x"+textwrap.wrap(color.replace("#", ""), 2)[c], 0))
+        new_color[c] += int("0x"+textwrap.wrap(color.replace("#", ""), 2)[c], 0) * p
+        new_color[c] = int(new_color[c])
+    #     print new_color[c]
+    # print new_color
+    return "#%02x%02x%02x" % (new_color[0], new_color[1], new_color[2])
+    # return new_color
+
+# This doesn't seem right, check the for loop below
 def compute_color(membership, colors):
     """
     :param membership: a matrix of probabilities for belonging to each cluster
@@ -16,7 +55,7 @@ def compute_color(membership, colors):
     import textwrap
     new_color = [0.0, 0.0, 0.0]
     for i, p in enumerate(membership):
-        for c in range(len(colors)):
+        for c in range(len(colors)):  # check this for loop
             #print "part: "+textwrap.wrap(colors[i].replace("#", ""),2)[c]
             new_color[c] += int("0x"+textwrap.wrap(colors[i].replace("#", ""), 2)[c], 0) * p
     #print new_color
@@ -45,8 +84,17 @@ class KMeans:
 
     def eucl_dist(self, p1, p2):
         dist = 0
+        # print "eucl_dist:"
+        # print "diff"
+        # print "p1"
+        # print p1
+        # print "p2"
+        # print p2
         for i in range(len(p1)):
             dist += (p1[i] - p2[i]) ** 2
+        # print "dist: "
+        # print dist
+        # print math.sqrt(dist)
         return math.sqrt(dist)
 
     def label_data(self, X, centers):
@@ -233,8 +281,7 @@ class KMeans:
         reduced_data = X
         kmeans = model
         # Step size of the mesh. Decrease to increase the quality of the VQ.
-        h = .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
-        #h = 0.05
+        h = 0.02#.02  # point in the mesh [x_min, x_max]x[y_min, y_max].
         # Plot the decision boundary. For that, we will assign a color to each
         x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
         y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
@@ -242,11 +289,14 @@ class KMeans:
 
         # Obtain labels for each point in mesh. Use last trained model.
         Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
-        # print Z
+        print "Z[0]: "
+        print Z[0]
+        print "\n\nZ: "
+        print Z
         # Put the result into a color plot
         Z = Z.reshape(xx.shape)
-        # print "Z: "
-        # print Z[0]
+        print "Z: reshaped"
+        print Z
         plt.figure(1)
         plt.clf()
         # plt.imshow(Z,
@@ -261,7 +311,49 @@ class KMeans:
         #            # cmap=plt.cm.Set3,
         #            aspect='auto', origin='lower'
         #            )
-        plt.scatter(xx, yy, c=Z, marker="s", lw = 0)
+        #plt.scatter(xx, yy, c=Z, marker="s", lw = 0)
+        from matplotlib import colors as matplot_colors
+        import six
+        colors = list(six.iteritems(matplot_colors.cnames))
+        colors = zip(*colors)[1]
+        colors = ["#FF0000", "#00FF00", "#0000FF"]
+        new_Z = []
+        print "xx: "
+        print xx
+        print "yy: "
+        print yy
+
+        #I will try to flatten xx, yy and Z to see what would happen
+        xx = xx.flatten()
+        yy = yy.flatten()
+        Z = Z.flatten()
+
+        print "xx: flatten "
+        print xx
+        print "yy: flatten"
+        print yy
+
+        # Commented the below for testing purposes
+        for xy_idx in xrange(xx.shape[0]):
+            x = xx[xy_idx]
+            y = yy[xy_idx]
+            # print "x: "
+            # print x
+            # print "y: "
+            # print y
+            # print "zip: "
+            # print zip(xx,yy)
+            colors_for_single_cluster = []
+            for clusid, clus_center in enumerate(self.cluster_centers_):
+                #print "clus_center: "
+                #print clus_center
+                dist = self.eucl_dist([x,y], clus_center)
+                p = self.compute_prop_from_dist(dist, x_min, x_max, y_min, y_max)
+                colors_for_single_cluster.append(compute_single_color(p, colors[clusid]))
+            new_Z.append(colors_mean(colors_for_single_cluster))
+
+        plt.scatter(xx, yy, c=new_Z, marker="o", lw=0)
+        #plt.scatter(xx, yy, c=Z, marker=".", lw=0, alpha=0.1)
         plt.plot(reduced_data[:, 0], reduced_data[:, 1], 'ko', markersize=2)
         # Plot the centroids as a white X
         centroids = kmeans.cluster_centers_
@@ -275,6 +367,16 @@ class KMeans:
         plt.xticks(())
         plt.yticks(())
         plt.show()
+
+    def compute_prop_from_dist(self, dist, x_min, x_max, y_min, y_max):
+        x_diff = x_max - x_min
+        y_diff = y_max - y_min
+        x_diff /=3
+        y_diff /=3
+        if (x_diff) < (y_diff):
+            return dist / x_diff
+        else:
+            return dist / y_diff
 
 
 # I managed to use scatter instead of imshow
