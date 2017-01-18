@@ -1,5 +1,6 @@
 
 from clustering import KMeans
+from fuzzy_clustering import FCM
 import numpy as np
 
 def dbscan_test():
@@ -16,9 +17,9 @@ def dbscan_test():
     # Number of clusters in labels, ignoring noise if present.
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
     # print X
-    kmeans = KMeans(n_clusters=n_clusters_).fit(X)
+    fcm = FCM(n_clusters=n_clusters_).fit(X)
     #kmeans.draw_with_areas(X, kmeans)
-    kmeans.draw_membership_area(X, kmeans)
+    #kmeans.draw_membership_area(X, kmeans)
 
 def iris_test():
     from sklearn import datasets
@@ -28,9 +29,9 @@ def iris_test():
 
 def sklean_example_text():
     X = np.array([[1.0, 2.0], [1.0, 4.0], [1.0, 0.0], [4.0, 2.0], [4.0, 4.0], [4.0, 0.0]])
-    kmeans = KMeans(n_clusters=2).fit(X)
+    fcm = FCM(n_clusters=2).fit(X)
     #kmeans.draw_with_areas(X, kmeans)
-    kmeans.draw_membership_area(X, kmeans)
+    #kmeans.draw_membership_area(X, kmeans)
 
 
 def kmeans_area_example():
