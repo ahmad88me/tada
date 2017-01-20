@@ -21,14 +21,27 @@ def dbscan_test():
     #kmeans.draw_with_areas(X, kmeans)
     #kmeans.draw_membership_area(X, kmeans)
 
+
 def iris_test():
     from sklearn import datasets
     iris = datasets.load_iris()
     X = iris.data[:, :2]  # we only take the first two features.
-    kmeans = KMeans(n_clusters=3).fit(X)
+    #kmeans = KMeans(n_clusters=3).fit(X)
+    fcm = FCM(n_clusters=3).fit(X)
+
 
 def sklean_example_text():
     X = np.array([[1.0, 2.0], [1.0, 4.0], [1.0, 0.0], [4.0, 2.0], [4.0, 4.0], [4.0, 0.0]])
+    fcm = FCM(n_clusters=2).fit(X)
+    #kmeans.draw_with_areas(X, kmeans)
+    #kmeans.draw_membership_area(X, kmeans)
+
+
+def example1():
+    X = np.array([[1,10],
+                           [2,10],
+                           [4,20],
+                           [5,20]])
     fcm = FCM(n_clusters=2).fit(X)
     #kmeans.draw_with_areas(X, kmeans)
     #kmeans.draw_membership_area(X, kmeans)
