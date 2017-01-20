@@ -1,4 +1,4 @@
-# TAbular DAta classification of soft clusters
+# TAbular DAta soft clustering
 
 ###Detailed Plan
 * learning different statistical tests.
