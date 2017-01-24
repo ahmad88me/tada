@@ -12,7 +12,6 @@
 3. Compute the average of the membership matrix to each cluster. and consider it the membership of this column.
 
 ### Things to consider
-Notes:
 * think about the use of statistical tests.
 * check if the average is a good measure.
 * Use a test bed for comparison.
