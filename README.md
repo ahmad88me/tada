@@ -1,6 +1,31 @@
 # TAbular DAta soft clustering
 
-###Detailed Plan
+## new plan January, 2017
+
+### Assumptions
+* We are dealing with numerical numbers only
+
+
+### Algorithm
+1. From the training data, set the center of clusters using the hard k-means way (with membership being 0 or 1). As in the beginning the training set belongs to a single type
+2. Classify the column of interest using its data via FCM.
+3. Compute the average of the membership matrix to each cluster. and consider it the membership of this column.
+
+### Things to consider
+Notes:
+======
+* think about the use of statistical tests.
+* check if the average is a good measure.
+* Use a test bed for comparison.
+* Why it should performs better.
+* What about the relation between columns.
+* What about the subclasses.
+* learning from new data sources e.g. (is the error is too high, or it is far from any of the clusters, we add this new cluster)
+* allow human intervension to correct the classification.
+
+##### The below are not part of the new idea
+================================
+### Detailed Plan
 * learning different statistical tests.
 * Check out this paper [14.3 Are Two Distributions Different?](http://www.aip.de/groups/soe/local/numres/bookcpdf/c14-3.pdf). Which seems to be really relavant.
 * Implement statistical tests.
@@ -10,16 +35,16 @@
 * Compare our algorithm with the gold standard.
 
 
-###Highlevel Plan
+### Highlevel Plan
 1. *Work first with numerical data*: So first, for each column I'll create n-features, each feature will some kind of statistical test e.g. t-test, Kolmogorov–Smirnov, ...etc.
 2. *Include Categorical data, (see the papers __"Approximation Algorithms for k-models clustering"__ and __"Extensions to the k-Means Algorithm for Clustering Large Data Sets with Categorical Values"__)*
 
 
-###Assumptions
+### Assumptions
 * There are no similar columns in the training set, e.g. city_name_english, city_name_french
 
 
-###Ideas
+### Ideas
 * Run K means multiple times and obtain the probabilites (Juan manuel's idea)
 * Use PCA from the collection of tests to reduce the dimensionality.
 * Add further (dummy) data to the training set if the user classified one column in the data set to be the same as one column in the training set that is not very similar.
@@ -32,7 +57,7 @@
 * It would be nice to include something from this paper to justfy the use of statistical tests [On the Appropriateness of Statistical Tests in Machine Learning](http://www.site.uottawa.ca/ICML08WS/papers/J_Demsar.pdf).
 * Use Continuous Reinforcement Learning to learn the types corrected manually by the domain expert. I have to idea how this would be done, but it is an interesting approach.
 
-###Open Questions
+### Open Questions
 * What about sources that are neither RDF not CSV e.g. (databases)
 * Should we distinguish between temperature of cities and temperatures in the cosmos domain? (I will for now). 
 
