@@ -21,7 +21,7 @@
 * learning from new data sources e.g. (is the error is too high, or it is far from any of the clusters, we add this new cluster)
 * allow human intervension to correct the classification.
 
-##### The below are not part of the new idea
+** The below are not part of the new idea **
 ================================
 ### Detailed Plan
 * learning different statistical tests.
