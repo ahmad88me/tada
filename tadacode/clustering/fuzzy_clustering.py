@@ -176,10 +176,10 @@ class FCM:
 
         For performance, the distance can be computed once, before the loop instead of computing it every time
         """
-        print "shape of u: %s" % str(self.u.shape)
+        # print "shape of u: %s" % str(self.u.shape)
         for i in xrange(X.shape[0]):
             for c in xrange(len(self.cluster_centers_)):
-                print "i: %d c: %d" % (i,c)
+                # print "i: %d c: %d" % (i,c)
                 self.u[i][c] = self.compute_membership_single(X, i, c)
 
     def fit(self, X):
