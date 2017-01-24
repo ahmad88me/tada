@@ -11,7 +11,7 @@ import fcm_examples
 #dbscan_test()
 #iris_test()
 #fcm_examples.sklean_example_text()
-fcm_examples.dbscan_test()
+#fcm_examples.dbscan_test()
 #fcm_examples.iris_test()
 #fcm_examples.example1()
 

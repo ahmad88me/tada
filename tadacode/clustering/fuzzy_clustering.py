@@ -39,11 +39,12 @@ class FCM:
             return to step 2)
     """
 
-    def __init__(self, n_clusters=2, m=2):
+    def __init__(self, n_clusters=2, m=2, max_iter=10):
         self.n_clusters = n_clusters
         self.cluster_centers_ = None
         self.u = None  # The membership
         self.m = m  # the fuzziness, m=1 is hard not fuzzy. see the paper for more info
+        self.max_iter = max_iter
 
     def test_membership(self):
         # self.u = np.array([[ 0.9,  0.1],
@@ -60,7 +61,6 @@ class FCM:
 
     def init_membership_equal(self, num_of_points):
         """
-
         :param num_of_points:
         :return: nothing
 
@@ -183,22 +183,30 @@ class FCM:
                 self.u[i][c] = self.compute_membership_single(X, i, c)
 
     def fit(self, X):
-        print "X: "
-        print X
+        if self.cluster_centers_ is None:
+            do_compute_cluster_centers = True
+        else:
+            do_compute_cluster_centers = False
+
+        # print "X: "
+        # print X
         self.init_membership(X.shape[0])
         #self.test_membership()
-        print "============\nmembership is: "
-        print self.u
+        # print "============\nmembership is: "
+        # print self.u
         list_of_centers = []
         membership_history = []
         membership_history.append(self.u.copy())
-        for i in xrange(15):
+        for i in xrange(self.max_iter):
             # print "compute cluster centers"
-            centers = self.compute_cluster_centers(X)
-            # print centers
-            if i==0:
-                init_centers = centers
-            list_of_centers.append(centers)
+            if do_compute_cluster_centers:
+                centers = self.compute_cluster_centers(X)
+                if i == 0:
+                    init_centers = centers
+                list_of_centers.append(centers)
+            else:
+                init_centers = self.cluster_centers_
+                list_of_centers = [init_centers]
             self.update_membership(X)
             membership_history.append(self.u.copy())
             # print "updated membership is: "
