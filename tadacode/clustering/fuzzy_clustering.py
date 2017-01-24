@@ -7,6 +7,21 @@ import random
 from moviepy.editor import VideoClip, ImageSequenceClip
 from moviepy.video.io.bindings import mplfig_to_npimage
 
+import matplotlib
+matplotlib.use("Agg")# the below line is needed for pygame to be used int moviepy preview
+
+
+def compute_single_color(p, color):
+    import textwrap
+    if p >= 80:
+        p = 1.0
+    new_color = [0.0, 0.0, 0.0]
+    for c in range(len(new_color)):
+        new_color[c] += int("0x" + textwrap.wrap(color.replace("#", ""), 2)[c], 0) * p
+        new_color[c] = int(new_color[c])
+    return "#%02x%02x%02x" % (new_color[0], new_color[1], new_color[2])
+
+
 class FCM:
     """
         This algorithm is from the paper
@@ -105,7 +120,6 @@ class FCM:
 
     def compute_cluster_centers(self, X):
         """
-
         :param X:
         :return:
 
@@ -117,32 +131,15 @@ class FCM:
         centers = []
         for c in xrange(self.n_clusters):
             sum1_vec = np.zeros(num_of_features)
-            sum2_vec = 0.0#np.zeros(num_of_features)
-            # sum2_vec = np.full(num_of_features, 0.01)  # to avoid division by zero
+            sum2_vec = 0.0
             for i in xrange(num_of_points):
-                # print "u %d %d: %f" % (i, c, self.u[i][c])
-                # print "m: "+str(self.m)
                 interm1 = (self.u[i][c] ** self.m)
-                # print "interm1: "
-                # print interm1
                 interm2 = interm1 * X[i]
-                # print "interm2: "
-                # print interm2
-                # print "sum1_vec: "
-                # print sum1_vec
                 sum1_vec += interm2
                 sum2_vec += (self.u[i][c] ** self.m)
-            # This loop is to replace zeros by another small value to avoid division by zero
-            # for i in xrange(num_of_features):
-            #     if sum2_vec[i] == 0:
-            #         sum2_vec[i] = 0.000000000001
             if sum2_vec == 0:
                 sum2_vec = 0.000001
-            # print "cluster: %d" % c
-            # print "sum1: "+str(sum1_vec)
-            # print "sum2: "+str(sum2_vec)
             centers.append(sum1_vec/sum2_vec)
-        #centers = np.array(centers)
         self.cluster_centers_ = centers
         return centers
 
@@ -157,7 +154,6 @@ class FCM:
         for i in xrange(len(x)):
             sum_of_sq += (x[i]-c[i]) ** 2
         return sum_of_sq
-        # return math.sqrt(sum_of_sq)
 
     def compute_membership_single(self, X, datapoint_idx, cluster_idx):
         """
@@ -166,16 +162,10 @@ class FCM:
         :return: return computer membership for the given ids
         """
         d1 = self.distance_squared(X[datapoint_idx], self.cluster_centers_[cluster_idx])
-        # print "distance: point %d and cluster %d is %f" % (datapoint_idx+1, cluster_idx+1, d1)
         sum1 = 0.0
-        #print "==============\npoint %d and cluster %d: " % (datapoint_idx + 1, cluster_idx + 1)
         for c in self.cluster_centers_: # this is to compute the sigma
-            #d2 = self.distance_squared(X[datapoint_idx], c)
             d2 = self.distance_squared(c, X[datapoint_idx])
-            #print " %f  / %f  = (%f) ^ (%f) => %f" %(d1, d2, (d1/d2), (1.0/(self.m-1)) ,(d1/d2) ** (1.0/(self.m-1)))
-            # print "single: %f" % ((d1/d2) ** (1.0/self.m-1))
             sum1 += (d1/d2) ** (1.0/(self.m-1))
-        #print "datapoint %d, cluster %d, sum: %f" % (datapoint_idx+1, cluster_idx+1,sum1)
         return sum1 ** -1
 
     def update_membership(self, X):
@@ -198,215 +188,52 @@ class FCM:
         print "============\nmembership is: "
         print self.u
         list_of_centers = []
-        for i in xrange(10):
-            print "compute cluster centers"
+        membership_history = []
+        membership_history.append(self.u.copy())
+        for i in xrange(15):
+            # print "compute cluster centers"
             centers = self.compute_cluster_centers(X)
-            print centers
+            # print centers
             if i==0:
                 init_centers = centers
             list_of_centers.append(centers)
             self.update_membership(X)
-            print "updated membership is: "
-            print self.u
-        #self.draw_both_centers(init_centers, self.cluster_centers_, X)
-        self.draw_centers_animation(list_of_centers, init_centers, X)
+            membership_history.append(self.u.copy())
+            # print "updated membership is: "
+            # print self.u
+        self.draw_animation(list_of_centers, init_centers, X, membership_history)
 
+    def draw_points(self, ax, X, colors, u):
+        for idx, xx in enumerate(X):
+            x, y = xx
+            c = []
+            # for clus, m in enumerate(self.u[idx]):
+            #     c.append(compute_single_color(m, colors[clus]))
+            # ax.scatter([x], [y], c=colors_mean(c), marker="o", alpha=1.0)
+            for clus, m in enumerate(u[idx]):
+                ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker="o", alpha=m)
+        return ax
 
-    def draw_centers_animation(self, list_of_centers, init_centers, X):
-        from matplotlib import colors as matplot_colors
-        import six
-        colors = list(six.iteritems(matplot_colors.cnames))
-        colors = ["red", "blue", "green", "pink", "yellow", "brown", "black"]
-        plots = []
-        fig, ax = plt.subplots(1, figsize=(4, 4), facecolor=(1, 1, 1))
-        for center in list_of_centers:
-            plt.scatter(X[:, 0], X[:, 1], marker="o", alpha=0.3)
-            for clus in range(self.n_clusters):
-                x, y = init_centers[clus]
-                ax.scatter([x], [y], c=colors[clus], marker="x", s=360, linewidths=5)
-            for clus in range(self.n_clusters):
-                x, y = center[clus]
-                ax.scatter([x], [y], c=colors[clus], marker="+", s=560, linewidths=5)
-                # ax.scatter([x], [y], c=colors[clus + len(self.cluster_centers_) + 1], marker="+", s=560, linewidths=5)
-                # ax.scatter([x], [y], marker="+", c=colors[len(self.cluster_centers_)+1], s=560, linewidths=5, alpha=0.7)
-            plots.append(mplfig_to_npimage(fig))
-            ax.clear()
-        #plt.show()
-        clip = ImageSequenceClip(plots, fps=1)
-        clip.write_gif('test.gif', fps=1)
-
-
-    def draw_both_centers(self, centers1, centers2, X):
-        from matplotlib import colors as matplot_colors
-        import six
-        colors = list(six.iteritems(matplot_colors.cnames))
-        # for idx, x in enumerate(X):
-        #     x0, x1 = x
-        #     for clus in range(n_clusters):
-        #         if model.labels_[idx] == clus:
-        #             cc = colors[clus]
-        #             plt.scatter([x0], [x1], c=cc)  # draw points
-        # plt.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], color="red")
-        plt.scatter(X[:,0], X[:,1], marker="o", alpha=0.3)
-        for clus in range(self.n_clusters):
-            x, y = centers1[clus]
-            plt.scatter([x], [y], c=colors[clus], marker="x", s=360, linewidths=5)  # draw x
-        for clus in range(self.n_clusters):
-            x, y = centers2[clus]
-            plt.scatter([x], [y], c=colors[clus+len(self.cluster_centers_)], marker="+", s=560, alpha=0.7, linewidths=5)  # draw x
-        plt.show()
-
-
-
-    ### The below is from the initial k-means, just to be used as a reference
-
-
-
-
-    def draw_with_areas(self, X, model):
-        reduced_data = X
-        kmeans = model
-        # Step size of the mesh. Decrease to increase the quality of the VQ.
-        h = .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
-
-        # Plot the decision boundary. For that, we will assign a color to each
-        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
-        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
-        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
-
-        # Obtain labels for each point in mesh. Use last trained model.
-        Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
-        # print Z
-        # Put the result into a color plot
-        Z = Z.reshape(xx.shape)
-        # print "Z: "
-        # print Z[0]
-        plt.figure(1)
-        plt.clf()
-        plt.imshow(Z,
-                   interpolation='nearest',
-                   extent=(xx.min(), xx.max(), yy.min(), yy.max()),
-                   #cmap=plt.cm.Paired,
-                   #cmap=plt.cm.Pastel1,
-                   #cmap=plt.get_cmap('jet'),
-                   #cmap=plt.cm.cool,
-                   cmap=plt.cm.winter,
-                   #cmap=plt.cm.Set1,
-                   #cmap=plt.cm.Set3,
-                   aspect='auto', origin='lower'
-                   )
-
-        plt.plot(reduced_data[:, 0], reduced_data[:, 1], 'ko', markersize=2)
-        # Plot the centroids as a white X
-        centroids = kmeans.cluster_centers_
-        plt.scatter(centroids[:, 0], centroids[:, 1],
-                    marker='x', s=169, linewidths=3,
-                    color='w', zorder=10)
-        plt.title('K-means clustering on the digits dataset (PCA-reduced data)\n'
-                  'Centroids are marked with white cross')
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
-        plt.xticks(())
-        plt.yticks(())
-        plt.show()
-
-    def draw_membership_area(self, X, model):
-        reduced_data = X
-        kmeans = model
-        # Step size of the mesh. Decrease to increase the quality of the VQ.
-        h = 0.07#.02  # point in the mesh [x_min, x_max]x[y_min, y_max].
-        # Plot the decision boundary. For that, we will assign a color to each
-        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
-        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
-        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
-
-        # Obtain labels for each point in mesh. Use last trained model.
-        Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
-        print "Z[0]: "
-        print Z[0]
-        print "\n\nZ: "
-        print Z
-        # Put the result into a color plot
-        Z = Z.reshape(xx.shape)
-        print "Z: reshaped"
-        print Z
-        plt.figure(1)
-        plt.clf()
-        # plt.imshow(Z,
-        #            interpolation='nearest',
-        #            extent=(xx.min(), xx.max(), yy.min(), yy.max()),
-        #            # cmap=plt.cm.Paired,
-        #            # cmap=plt.cm.Pastel1,
-        #            # cmap=plt.get_cmap('jet'),
-        #            # cmap=plt.cm.cool,
-        #            # cmap=plt.cm.winter,
-        #            # cmap=plt.cm.Set1,
-        #            # cmap=plt.cm.Set3,
-        #            aspect='auto', origin='lower'
-        #            )
-        # plt.scatter(xx, yy, c=Z, marker="s", lw = 0)
+    def draw_animation(self, list_of_centers, init_centers, X, membership_history):
         from matplotlib import colors as matplot_colors
         import six
         colors = list(six.iteritems(matplot_colors.cnames))
         colors = zip(*colors)[1]
-        colors = ["#FF0000", "#00FF00", "#0000FF"]
-        new_Z = []
-        print "xx: "
-        print xx
-        print "yy: "
-        print yy
+        plots = []
+        fig, ax = plt.subplots(1, figsize=(4, 4), facecolor=(1, 1, 1))
+        for idx, center in enumerate(list_of_centers):
+            ax = self.draw_points(ax, X, colors, membership_history[idx])
+            # for clus in range(self.n_clusters):
+            #     x, y = init_centers[clus]
+            #     ax.scatter([x], [y], c=colors[clus], marker="x", s=360, linewidths=5)
+            for clus in range(self.n_clusters):
+                x, y = center[clus]
+                ax.scatter([x], [y], c=colors[clus], marker="+", s=560, linewidths=5)
 
-        # I will try to flatten xx, yy and Z to see what would happen
-        xx = xx.flatten()
-        yy = yy.flatten()
-        Z = Z.flatten()
+            plots.append(mplfig_to_npimage(fig))
+            ax.clear()
+        clip = ImageSequenceClip(plots, fps=2)
+        clip.write_gif('test.gif', fps=2)
+        clip.preview()
 
-        print "xx: flatten "
-        print xx
-        print "yy: flatten"
-        print yy
 
-        # Commented the below for testing purposes
-        for xy_idx in xrange(xx.shape[0]):
-            x = xx[xy_idx]
-            y = yy[xy_idx]
-            # print "x: "
-            # print x
-            # print "y: "
-            # print y
-            # print "zip: "
-            # print zip(xx,yy)
-            colors_for_single_cluster = []
-            for clusid, clus_center in enumerate(self.cluster_centers_):
-                # print "clus_center: "
-                # print clus_center
-                dist = self.eucl_dist([x, y], clus_center)
-                p = self.compute_prop_from_dist(dist, x_min, x_max, y_min, y_max)
-                colors_for_single_cluster.append(compute_single_color(p, colors[clusid]))
-            new_Z.append(colors_mean(colors_for_single_cluster))
-
-        plt.scatter(xx, yy, c=new_Z, marker="s", lw=0)
-        plt.scatter(xx, yy, c=Z, marker=".", lw=0, alpha=0.1)
-        plt.plot(reduced_data[:, 0], reduced_data[:, 1], 'ko', markersize=2)
-        # Plot the centroids as a white X
-        centroids = kmeans.cluster_centers_
-        plt.scatter(centroids[:, 0], centroids[:, 1],
-                    marker='x', s=169, linewidths=3,
-                    color='w', zorder=10)
-        plt.title('K-means clustering on the digits dataset (PCA-reduced data)\n'
-                  'Centroids are marked with white cross')
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
-        plt.xticks(())
-        plt.yticks(())
-        plt.show()
-
-    def compute_prop_from_dist(self, dist, x_min, x_max, y_min, y_max):
-        x_diff = x_max - x_min
-        y_diff = y_max - y_min
-        x_diff /=3
-        y_diff /=3
-        if (x_diff) < (y_diff):
-            return dist / x_diff
-        else:
-            return dist / y_diff

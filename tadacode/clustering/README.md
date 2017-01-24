@@ -7,7 +7,7 @@
 - [x] compute squared error
 - [ ] check the difference, and if it is less than a threshold, stop
 - [x] draw the points
-- [ ] compute the colors for the points to reflect the fuzziness
+- [x] compute the colors for the points to reflect the fuzziness
 
 
 

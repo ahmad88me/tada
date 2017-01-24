@@ -1,7 +1,8 @@
 
 #The below two lines is to resolve the conflict of Tkinter with matplotlib
 import matplotlib
-matplotlib.use("TkAgg")
+matplotlib.use("Agg")
+#matplotlib.use("TkAgg")
 
 
 from kmeans_examples import dbscan_test, iris_test, sklean_example_text
