@@ -13,7 +13,6 @@
 
 ### Things to consider
 Notes:
-======
 * think about the use of statistical tests.
 * check if the average is a good measure.
 * Use a test bed for comparison.
