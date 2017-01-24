@@ -19,7 +19,8 @@
 * What about the relation between columns.
 * What about the subclasses.
 * learning from new data sources e.g. (is the error is too high, or it is far from any of the clusters, we add this new cluster)
-* allow human intervension to correct the classification.
+* allow human intervention to correct the classification.
+* verify the case where similar columns co-exists in the same dataset e.g. city_name_english, city_name_spanish
 
 ** The below are not part of the new idea **
 ================================
