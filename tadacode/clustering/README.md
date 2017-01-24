@@ -8,7 +8,8 @@
 - [ ] check the difference, and if it is less than a threshold, stop
 - [x] draw the points
 - [x] compute the colors for the points to reflect the fuzziness
-
+- [x] show the areas in fuzziness settings
+- [x] predict method
 
 
 

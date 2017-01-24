@@ -1,7 +1,7 @@
 
 #The below two lines is to resolve the conflict of Tkinter with matplotlib
-import matplotlib
-matplotlib.use("Agg")
+# import matplotlib
+# matplotlib.use("Agg")
 #matplotlib.use("TkAgg")
 
 

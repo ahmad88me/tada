@@ -316,7 +316,7 @@ class KMeans:
         import six
         colors = list(six.iteritems(matplot_colors.cnames))
         colors = zip(*colors)[1]
-        colors = ["#FF0000", "#00FF00", "#0000FF"]
+        #colors = ["#FF0000", "#00FF00", "#0000FF"]
         new_Z = []
         print "xx: "
         print xx

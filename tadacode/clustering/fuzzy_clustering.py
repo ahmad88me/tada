@@ -13,7 +13,7 @@ matplotlib.use("Agg")# the below line is needed for pygame to be used int moviep
 
 def compute_single_color(p, color):
     import textwrap
-    if p >= 80:
+    if p >= 0.75:
         p = 1.0
     new_color = [0.0, 0.0, 0.0]
     for c in range(len(new_color)):
@@ -176,8 +176,10 @@ class FCM:
 
         For performance, the distance can be computed once, before the loop instead of computing it every time
         """
+        print "shape of u: %s" % str(self.u.shape)
         for i in xrange(X.shape[0]):
             for c in xrange(len(self.cluster_centers_)):
+                print "i: %d c: %d" % (i,c)
                 self.u[i][c] = self.compute_membership_single(X, i, c)
 
     def fit(self, X):
@@ -202,8 +204,22 @@ class FCM:
             # print "updated membership is: "
             # print self.u
         self.draw_animation(list_of_centers, init_centers, X, membership_history)
+        # self.draw_membership_area(X)
 
-    def draw_points(self, ax, X, colors, u):
+    def predict(self, X):
+        # print "will copy the membership"
+        u = self.u.copy()
+        # print "will construct a new array for the prediction"
+        self.u = np.zeros((X.shape[0], self.n_clusters))
+        # print "will update the membership"
+        self.update_membership(X)
+        # print "will copy the predicted membership"
+        predicted_u = self.u.copy()
+        # print "will revert back to the old membership"
+        self.u = u
+        return predicted_u
+
+    def draw_points(self, ax, X, colors, u, marker="o", lw=1):
         for idx, xx in enumerate(X):
             x, y = xx
             c = []
@@ -211,7 +227,7 @@ class FCM:
             #     c.append(compute_single_color(m, colors[clus]))
             # ax.scatter([x], [y], c=colors_mean(c), marker="o", alpha=1.0)
             for clus, m in enumerate(u[idx]):
-                ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker="o", alpha=m)
+                ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker=marker, alpha=m, lw=lw)
         return ax
 
     def draw_animation(self, list_of_centers, init_centers, X, membership_history):
@@ -236,4 +252,55 @@ class FCM:
         clip.write_gif('test.gif', fps=2)
         clip.preview()
 
+    def draw_membership_area(self, X):
+        print "draw membership"
+        reduced_data = X
+        model = self
+        # Step size of the mesh. Decrease to increase the quality of the VQ.
+        h = 0.06 # .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
+        # Plot the decision boundary. For that, we will assign a color to each
+        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
+        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+        print "will predict now"
+        # Obtain labels for each point in mesh. Use last trained model.
+        ttt =  np.c_[xx.ravel(), yy.ravel()]
+        print ttt
+        print ttt.shape
+        u = model.predict(np.c_[xx.ravel(), yy.ravel()])
+        print "predicted"
+        plt.figure(1)
+        plt.clf()
+        from matplotlib import colors as matplot_colors
+        import six
+        colors = list(six.iteritems(matplot_colors.cnames))
+        colors = zip(*colors)[1]
+        print "xx: "
+        print xx
+        print "yy: "
+        print yy
 
+        # I will try to flatten xx, yy and Z to see what would happen
+        xx = xx.flatten()
+        yy = yy.flatten()
+        # print "xx: flatten "
+        # print xx
+        # print "yy: flatten"
+        # print yy
+        ax = plt
+        print "will draw points"
+        # ax = self.draw_points(ax, X, colors, u)
+        ax = self.draw_points(ax, zip(xx,yy), colors, u, marker="s", lw=0)
+        ax = self.draw_points(ax, X, colors, self.u, marker="o")
+        print "will draw centers"
+        for clus in range(self.n_clusters):
+            ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x", s=560, linewidths=5)
+        print "will show"
+        #ax.show()
+        plt.title('K-means clustering on the digits dataset (PCA-reduced data)\n'
+                  'Centroids are marked with white cross')
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.xticks(())
+        plt.yticks(())
+        plt.show()
