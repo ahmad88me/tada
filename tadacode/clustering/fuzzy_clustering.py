@@ -55,7 +55,6 @@ class FCM:
         #  [ 0.6,  0.4]])
         self.u = np.array([[0.9, 0.1], [0.9, 0.1], [0.2, 0.8], [0.2, 0.8]])
 
-
     def init_membership(self, num_of_points):
         self.init_membership_random(num_of_points)
 
@@ -145,14 +144,27 @@ class FCM:
 
     def distance_squared(self, x, c):
         """
-        Computer the Euclidean distance
+        Compute the Euclidean distance
         :param x: is a single point from the original data X
         :param c: is a single point that represent a center or a cluster
         :return: the distance
         """
         sum_of_sq = 0.0
+        # print "compute distance squared"
+        # print "x: "
+        # print x
+        # print "c: "
+        # print c
+        # print "len x: "
+        # print len(x)
+        # print "x[0]: "
+        # print x[0]
+        # print "c[0]: "
+        # print c[0]
         for i in xrange(len(x)):
             sum_of_sq += (x[i]-c[i]) ** 2
+        # print "sum or sq: "
+        # print sum_of_sq
         return sum_of_sq
 
     def compute_membership_single(self, X, datapoint_idx, cluster_idx):
@@ -161,11 +173,20 @@ class FCM:
         :param cluster_idx:
         :return: return computer membership for the given ids
         """
+        # print "compute membership single"
+        # print "cluster centers: "
+        # print self.cluster_centers_
+        # print "cluster centers [%d]: " % cluster_idx
+        # print self.cluster_centers_[cluster_idx]
         d1 = self.distance_squared(X[datapoint_idx], self.cluster_centers_[cluster_idx])
+        # print "d1: "
+        # print d1
         sum1 = 0.0
-        for c in self.cluster_centers_: # this is to compute the sigma
+        for c in self.cluster_centers_:  # this is to compute the sigma
             d2 = self.distance_squared(c, X[datapoint_idx])
             sum1 += (d1/d2) ** (1.0/(self.m-1))
+        # print "sum1: "
+        # print sum1
         return sum1 ** -1
 
     def update_membership(self, X):
@@ -191,14 +212,13 @@ class FCM:
         # print "X: "
         # print X
         self.init_membership(X.shape[0])
-        #self.test_membership()
+        # self.test_membership()
         # print "============\nmembership is: "
         # print self.u
         list_of_centers = []
         membership_history = []
         membership_history.append(self.u.copy())
         for i in xrange(self.max_iter):
-            # print "compute cluster centers"
             if do_compute_cluster_centers:
                 centers = self.compute_cluster_centers(X)
                 if i == 0:
@@ -209,10 +229,10 @@ class FCM:
                 list_of_centers = [init_centers]
             self.update_membership(X)
             membership_history.append(self.u.copy())
-            # print "updated membership is: "
-            # print self.u
-        self.draw_animation(list_of_centers, init_centers, X, membership_history)
-        # self.draw_membership_area(X)
+            print "updated membership is: "
+            print self.u
+        # self.draw_animation(list_of_centers, init_centers, X, membership_history)
+        self.draw_membership_area(X)
 
     def predict(self, X):
         # print "will copy the membership"
@@ -265,14 +285,14 @@ class FCM:
         reduced_data = X
         model = self
         # Step size of the mesh. Decrease to increase the quality of the VQ.
-        h = 0.06 # .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
+        h = 1000 #0.06 # .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
         # Plot the decision boundary. For that, we will assign a color to each
         x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
         y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
         print "will predict now"
         # Obtain labels for each point in mesh. Use last trained model.
-        ttt =  np.c_[xx.ravel(), yy.ravel()]
+        ttt = np.c_[xx.ravel(), yy.ravel()]
         print ttt
         print ttt.shape
         u = model.predict(np.c_[xx.ravel(), yy.ravel()])
@@ -304,7 +324,7 @@ class FCM:
         for clus in range(self.n_clusters):
             ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x", s=560, linewidths=5)
         print "will show"
-        #ax.show()
+        # ax.show()
         plt.title('K-means clustering on the digits dataset (PCA-reduced data)\n'
                   'Centroids are marked with white cross')
         plt.xlim(x_min, x_max)
