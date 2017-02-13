@@ -18,7 +18,9 @@ def dbscan_test():
     # print X
     kmeans = KMeans(n_clusters=n_clusters_).fit(X)
     #kmeans.draw_with_areas(X, kmeans)
-    kmeans.draw_membership_area(X, kmeans)
+    #kmeans.draw_membership_area(X, kmeans)
+    kmeans.draw(n_clusters_, X, kmeans)
+
 
 def iris_test():
     from sklearn import datasets

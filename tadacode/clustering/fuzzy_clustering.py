@@ -1,5 +1,8 @@
 
 import numpy as np
+import matplotlib
+# To speed-up things in mac
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import math
 import random
@@ -232,7 +235,7 @@ class FCM:
             print "updated membership is: "
             print self.u
         # self.draw_animation(list_of_centers, init_centers, X, membership_history)
-        self.draw_membership_area(X)
+        # self.draw_membership_area(X, 10000)
 
     def predict(self, X):
         # print "will copy the membership"
@@ -248,6 +251,15 @@ class FCM:
         return predicted_u
 
     def draw_points(self, ax, X, colors, u, marker="o", lw=1):
+        """
+        :param ax: plot or sub
+        :param X: data points
+        :param colors: list of colors in hex format e.g. #FFAA00
+        :param u: membership matrix
+        :param marker: to be used for drawing the points
+        :param lw: line width
+        :return: return the drawn plot or sub
+        """
         for idx, xx in enumerate(X):
             x, y = xx
             c = []
@@ -255,7 +267,7 @@ class FCM:
             #     c.append(compute_single_color(m, colors[clus]))
             # ax.scatter([x], [y], c=colors_mean(c), marker="o", alpha=1.0)
             for clus, m in enumerate(u[idx]):
-                ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker=marker, alpha=m, lw=lw)
+                    ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker=marker, alpha=m, lw=lw)
         return ax
 
     def draw_animation(self, list_of_centers, init_centers, X, membership_history):
@@ -280,12 +292,18 @@ class FCM:
         clip.write_gif('test.gif', fps=2)
         clip.preview()
 
-    def draw_membership_area(self, X):
-        print "draw membership"
+    def draw_membership_area(self, X, step=1.0, show=True):
+        """
+        :param X: data points
+        :param step: the distance between the points
+        :return:
+        """
+        print "draw membership area"
         reduced_data = X
         model = self
         # Step size of the mesh. Decrease to increase the quality of the VQ.
-        h = 1000 #0.06 # .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
+        # h = 1000 #0.06 # .02  # point in the mesh [x_min, x_max]x[y_min, y_max].
+        h = step
         # Plot the decision boundary. For that, we will assign a color to each
         x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
         y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
@@ -327,8 +345,34 @@ class FCM:
         # ax.show()
         plt.title('K-means clustering on the digits dataset (PCA-reduced data)\n'
                   'Centroids are marked with white cross')
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
+        # plt.xlim(x_min, x_max)
+        # plt.ylim(y_min, y_max)
+        plt.xlim(x_min-h, x_max+h)
+        plt.ylim(y_min-h, y_max+h)
         plt.xticks(())
         plt.yticks(())
-        plt.show()
+        if show:
+            plt.show()
+
+    def draw_membership(self, X, show=True):
+        """
+        :param X: data points
+        :param show: whether to show the plt
+        :return:
+        """
+        print "draw membership"
+        reduced_data = X
+        model = self
+        from matplotlib import colors as matplot_colors
+        import six
+        colors = list(six.iteritems(matplot_colors.cnames))
+        colors = zip(*colors)[1]
+        ax = plt
+        print "will draw points"
+        ax = self.draw_points(ax, X, colors, self.u, marker="o")
+        print "will draw centers"
+        for clus in range(self.n_clusters):
+            ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x",
+                       s=560, linewidths=5)
+        if show:
+            plt.show()

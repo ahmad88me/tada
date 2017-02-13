@@ -100,6 +100,7 @@ class KMeans:
     def label_data(self, X, centers):
         labels = np.zeros(X.shape[0], dtype=np.int32)
         distances = np.zeros(X.shape[0])
+        distances = np.zeros(X.shape[0])
         for pid, p in enumerate(X):  # p for point
             min_dist = None
             for l, c in enumerate(centers):  # l for label and c for center

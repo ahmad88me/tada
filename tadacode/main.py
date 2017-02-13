@@ -1,6 +1,9 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib
+# To speed-up things in mac
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib import colors as matplot_colors
 import six
@@ -91,13 +94,15 @@ def explore_single_cluster(col, center, color):
 
 
 def training():
+    # files = ["code_postal.csv", "mayHighC.csv"]
     files = ["code_postal.csv", "entrada.csv", "mayHighC.csv"]
     colors = list(six.iteritems(matplot_colors.cnames))
     data_idx_ranges = []  # start and end idxs for each column
     prev_idx = -1
     data = np.empty([0,2])
     for idx, fname in enumerate(files):
-        col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname], dtype=np.float64).as_matrix()
+        col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
+                          dtype=np.float64).as_matrix()
         col = np.append(col, col, 1)  # this to append col to col, so it will result in a matrix with two identical cols
         #print "col: "
         #print col
@@ -114,7 +119,7 @@ def training():
         # center = center.flatten()
         # center = np.array([[center[0], center[0]],])
         centers.append(center)
-        explore_single_cluster(data[data_idx_ranges[i][0]: data_idx_ranges[i][1]], center, colors[i])
+        # explore_single_cluster(data[data_idx_ranges[i][0]: data_idx_ranges[i][1]], center, colors[i])
     print "centers: "
     print centers
     # print "new centers: "
@@ -130,19 +135,51 @@ def training():
     model = FCM(n_clusters=len(files))
     model.cluster_centers_ = centers  # np.array(centers)
     model.fit(data)
+    #model.draw_membership_area(data, step=10000, show=False)
+    model.draw_membership(data, show=False)
     return model
 
 
-def learning(model):  # testing
+def testing(model):
+    """
+    Machine Learning Testing (Comes after the training phase)
+    :param model: model that is the FCM
+    :return: the membership of the predicted data points
+    """
+    from matplotlib import colors as matplot_colors
+    import six
+    colors = list(six.iteritems(matplot_colors.cnames))
+    colors = zip(*colors)[1]
+
     files = ["novHighC.csv", "surface.csv"]
-    for fname in files:
-        pass
-    model = model.fit()
+    markers = ["|", "_"]
+    data = np.empty([0,2])
+    for idx, fname in enumerate(files):
+        print fname
+        col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
+                          dtype=np.float64)
+        print "convert to matrix"
+        col = col.as_matrix()
+        print "col is read"
+        col = np.append(col, col, 1) # this to append col to col, so it will result in a matrix with two identical cols
+        print "col is appended"
+        data = np.append(data, col, axis=0)
+        print "appended to data"
+        predicted_u = model.predict(col)
+        model.draw_points(ax=plt, X=col, colors=colors, u=predicted_u, marker=markers[idx], lw=50)
+    print "now will predict"
+    predicted_u = model.predict(data)
+    print "predicted"
+
+    #model.draw_points(ax=plt, X=data, colors=colors, u=predicted_u, marker="+", lw=50)
+    #return data, predicted_u
 
 
 def main():
+    model = None
     model = training()
-    # plt.show()
+    testing(model)
+    plt.show()
 
 main()
 
