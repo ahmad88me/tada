@@ -239,7 +239,10 @@ class FCM:
 
     def predict(self, X):
         # print "will copy the membership"
-        u = self.u.copy()
+        if self.u is None:
+            u = None
+        else:
+            u = self.u.copy()
         # print "will construct a new array for the prediction"
         self.u = np.zeros((X.shape[0], self.n_clusters))
         # print "will update the membership"

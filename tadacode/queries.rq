@@ -1,0 +1,28 @@
+
+
+
+select distinct ?Concept ?o where {?Concept <http://dbpedia.org/property/height> ?o.} LIMIT 100
+
+
+
+select ?Concept ?o where{?Concept a <http://schema.org/Place>. ?Concept <http://dbpedia.org/property/height> ?o}
+
+
+select ?Concept ?o where{?Concept a <http://schema.org/Place>. ?Concept <http://dbpedia.org/property/height> ?o. FILTER(isNumeric(?o))}
+
+
+
+
+
+select ?s ?o where{?s a <http://dbpedia.org/ontology/Person>. ?s <http://dbpedia.org/ontology/Person/height> ?o}
+
+
+
+
+select ?s ?o where{?s a <http://dbpedia.org/ontology/Person>. ?s <http://dbpedia.org/ontology/Person/height> ?o. FILTER(isNumeric(?o))}
+
+
+select ?s ?o where{?s a <http://xmlns.com/foaf/0.1/Person>. ?s <http://dbpedia.org/ontology/Person/height> ?o}
+
+
+
