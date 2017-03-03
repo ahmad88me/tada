@@ -48,6 +48,7 @@ def get_centroids_for_files(files):
 
 def measure_representativeness(model, files):
     """
+    This function is meant to measure the representativeness of the training set
     :param model: FCM model
     :param files: a list of file names, each with a single column of numbers
     :return: a list of representativeness (between 0 and 1 each for each file)
@@ -83,14 +84,27 @@ def train(training_files):
     return model
 
 
-def main():
-    training_files = ["code_postal.csv", "entrada.csv", "mayHighC.csv"]
-    model = train(training_files)
-    repr = measure_representativeness(model, training_files)
-    print "\nrepresentativeness of the training files is: \n"
-    for i in xrange(len(repr)):
-        print "%s: %f" % (training_files[i], repr[i])
-
-if __name__ == "__main__":
-    main()
+def test(model, files):
+    """
+    :param model: FCM model
+    :param files: list of files to be used for testing
+    :return: membership of the predictions
+    """
+    memberships = np.array([])
+    memberships.shape = (0, len(model.cluster_centers_))
+    membership_list = []
+    for idx, fname in enumerate(files):
+        col = pd.read_csv("data/" + fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
+                          dtype=np.float64).as_matrix()
+        col = get_features(col)
+        m = model.predict(col)
+        membership_list.append(m)
+    for idx, m in enumerate(membership_list):
+        print "for file: "+files[idx]
+        print "average: "
+        print np.average(m, axis=0)
+        print "median: "
+        print np.median(m, axis=0)
+        memberships = np.append(memberships, np.average(m, axis=0), axis=0)
+    return memberships
 
