@@ -2,21 +2,26 @@
 import numpy as np
 import matplotlib
 # To speed-up things in mac
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
+#matplotlib.use('GTKAgg')
+#matplotlib.use('GTK3Agg')
+#matplotlib.use('GTKCairo')
+#matplotlib.use('macosx')
 import matplotlib.pyplot as plt
 import math
 import random
 
-from moviepy.editor import VideoClip, ImageSequenceClip
-from moviepy.video.io.bindings import mplfig_to_npimage
+# from moviepy.editor import VideoClip, ImageSequenceClip
+# from moviepy.video.io.bindings import mplfig_to_npimage
 
-import matplotlib
-matplotlib.use("Agg")# the below line is needed for pygame to be used int moviepy preview
+#import matplotlib
+#matplotlib.use("Agg")# the below line is needed for pygame to be used int moviepy preview
 
 
 def compute_single_color(p, color):
     import textwrap
-    if p >= 0.75:
+    #if p >= 0.75:
+    if p> 0.85:
         p = 1.0
     new_color = [0.0, 0.0, 0.0]
     for c in range(len(new_color)):
@@ -375,7 +380,88 @@ class FCM:
         ax = self.draw_points(ax, X, colors, self.u, marker="o")
         print "will draw centers"
         for clus in range(self.n_clusters):
-            ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x",
-                       s=560, linewidths=5)
+            # ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x",
+            #            s=560, linewidths=5)
+            ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="X",
+                       s=560, lw=2, edgecolors=inv_color(colors[clus]))
         if show:
             plt.show()
+
+    def draw_membership_area_balanced(self, X, num_of_areas=20):
+        print "draw membership area balanced"
+        reduced_data = X
+        model = self
+        # Plot the decision boundary. For that, we will assign a color to each
+        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
+        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
+        h_x = (x_max - x_min) / num_of_areas
+        h_y = (y_max - y_min) / num_of_areas
+        if h_x < h_y:
+            h = h_x
+        else:
+            h = h_y
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, h_x), np.arange(y_min, y_max, h))
+        print "will predict now"
+        # Obtain labels for each point in mesh. Use last trained model.
+        ttt = np.c_[xx.ravel(), yy.ravel()]
+        print ttt
+        print ttt.shape
+        u = model.predict(np.c_[xx.ravel(), yy.ravel()])
+        print "predicted"
+        plt.figure(1)
+        plt.clf()
+        from matplotlib import colors as matplot_colors
+        import six
+        colors = list(six.iteritems(matplot_colors.cnames))
+        colors = zip(*colors)[1]
+        print "xx: "
+        print xx
+        print "yy: "
+        print yy
+        # I will try to flatten xx, yy and Z to see what would happen
+        xx = xx.flatten()
+        yy = yy.flatten()
+        # print "xx: flatten "
+        # print xx
+        # print "yy: flatten"
+        # print yy
+        ax = plt
+        print "will draw points"
+        ax = self.draw_points_a(ax, zip(xx,yy), colors, u, marker="s", lw=0, s=h)
+        plt.xlim(x_min-h, x_max+h)
+        plt.ylim(y_min-h, y_max+h)
+        plt.xticks(())
+        plt.yticks(())
+
+    # This is only used for draw mambership area balanced test
+    def draw_points_a(self, ax, X, colors, u, marker="o", lw=1, s=20):
+        """
+        :param s: the area/size of the point
+        :param ax: plot or sub
+        :param X: data points
+        :param colors: list of colors in hex format e.g. #FFAA00
+        :param u: membership matrix
+        :param marker: to be used for drawing the points
+        :param lw: line width
+        :return: return the drawn plot or sub
+        """
+        for idx, xx in enumerate(X):
+            x, y = xx
+            c = []
+            # for clus, m in enumerate(self.u[idx]):
+            #     c.append(compute_single_color(m, colors[clus]))
+            # ax.scatter([x], [y], c=colors_mean(c), marker="o", alpha=1.0)
+            for clus, m in enumerate(u[idx]):
+                #ax.scatter([x], [y], c=compute_single_color(m, colors[clus]), marker=marker, alpha=m, lw=lw, s=s)
+                ax.plot([x], [y], c=compute_single_color(m, colors[clus]), marker=marker, alpha=m, lw=lw,
+                        markeredgewidth=0, markersize=s)
+        return ax
+
+
+def inv_color(s):
+    if '#' not in s:
+        return 'grey'
+    inv = ''
+    for ss in s.replace('#','').strip():
+        inv += hex(15 - int(('0x'+ss), 0)).replace('0x','')
+    return "#"+inv

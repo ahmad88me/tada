@@ -29,5 +29,5 @@ c2 = Line2D([0], [0], color="blue", marker="s", linestyle='None')
 c3 = Line2D([0], [0], color="green", marker="d", linestyle='None')
 
 
-ax.legend([c1,c2,c3], ['c111', 'c2', 'cIII'], numpoints=1)
+ax.legend([c1, c2, c3], ['c111', 'c2', 'cIII'], numpoints=1)
 plt.show()

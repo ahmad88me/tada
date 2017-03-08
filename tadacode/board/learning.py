@@ -70,6 +70,18 @@ def measure_representativeness(model, files):
     return repr
 
 
+def get_data_from_files(files):
+    n_features = 2
+    cols = np.array([])
+    cols.shape = (0, n_features)
+    for idx, fname in enumerate(files):
+        col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
+                          dtype=np.float64).as_matrix()
+        col = get_features(col)
+        cols = np.append(cols, col, axis=0)
+    return cols
+
+
 def train(training_files):
     """
     This function is responsible for training the model and compute the representative of each file
