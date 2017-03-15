@@ -1,13 +1,18 @@
-from learning import train, measure_representativeness, test
+from learning import train_from_files, train_from_class_uris, measure_representativeness
 import learning
+
+import numpy as np
 
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
+#import vispy.mpl_plot as plt
 
-
+import matplotlib
+print matplotlib.get_backend()
 
 # The below two function are copied from http://stackoverflow.com/questions/5478351/python-time-measure-function
 import functools, time
+
 
 def timeit(func):
     @functools.wraps(func)
@@ -25,6 +30,15 @@ def timeit(func):
 #     mike.think(30)
 
 
+def onclick(event):
+    print 'event.ind'
+    print event.ind
+    ind = event.ind
+    print 'onpick3 scatter:', ind, np.take(x, ind), np.take(y, ind)
+    print('button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+          (event.button, event.x, event.y, event.xdata, event.ydata))
+
+
 def get_legend(names, markers):
     from matplotlib import colors as matplot_colors
     import six
@@ -37,8 +51,11 @@ def get_legend(names, markers):
 
 #@timeit
 def main():
+    fig = plt.figure()
+    #ax = fig.add_subplot(111)
+    ax = fig.add_subplot(111)
     training_files = ["code_postal.csv", "entrada.csv", "mayHighC.csv"]
-    model = train(training_files)
+    model = train_from_files(training_files)
     repr = measure_representativeness(model, training_files)
     print "\nrepresentativeness of the training files is: \n"
     for i in xrange(len(repr)):
@@ -46,18 +63,81 @@ def main():
     testing_files = ["novHighC.csv", "nodeid.csv"]
     # m = test(model, testing_files)
     data = learning.get_data_from_files(training_files)
-    # model.fit(data)
-    model.draw_membership_area_balanced(data, num_of_areas=10)
-    # model.draw_membership(data, show=False)
-    #
+    model.fit(data)
+    #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
+    #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
+    ax = model.draw_membership(data, ax, show=False)
     legend_item = get_legend(training_files, "x" * len(training_files))
     legend_item += get_legend(training_files, "o" * len(training_files))
     plt.legend(legend_item, training_files+training_files, numpoints=1)
+    print "preparing to show"
+
+    #cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    cid = fig.canvas.mpl_connect('pick_event', onclick)
     plt.show()
-
-
-
 
 if __name__ == "__main__":
     main()
 
+
+# import sys
+# #sys.path.append('/Users/aalobaid/workspaces/Pyworkspace/tada/tadacode')
+# sys.path.append('/Users/aalobaid/workspaces/Pyworkspace/tada/tadacode/board')
+# from learning import train, measure_representativeness
+# import learning
+#
+# import numpy as np
+#
+# from matplotlib.lines import Line2D
+# import matplotlib.pyplot as plt
+# #import vispy.mpl_plot as plt
+#
+# import matplotlib
+# print matplotlib.get_backend()
+
+from board.test import AnnoteFinder
+
+
+# x = range(10)
+# y = range(10)
+# annotes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+# fig, ax = plt.subplots()
+# ax.scatter(x[:5],y[:5])
+# ax.scatter(x[5:],y[5:])
+# af = AnnoteFinder(x,y, annotes, ax=ax)
+# fig.canvas.mpl_connect('button_press_event', af)
+# plt.show()
+#
+#
+
+
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# fig, ax = plt.subplots()
+# if ax is None:
+#     print 'ax is none in main'
+# training_files = ["code_postal.csv", "entrada.csv", "mayHighC.csv"]
+# model = train(training_files)
+# repr = measure_representativeness(model, training_files)
+# print "\nrepresentativeness of the training files is: \n"
+# testing_files = ["novHighC.csv", "nodeid.csv"]
+# # m = test(model, testing_files)
+# data = learning.get_data_from_files(training_files)
+# model.fit(data)
+# #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
+# # model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
+# model.draw_membership(data, ax, show=False)
+# print "preparing to show"
+#
+#
+#
+# x = data[:,0]
+# y = data[:,1]
+# # annotes =  model.u
+# annotes = ['aslkdjf'] * data.shape[0]
+# print 'len annotes'
+# print len(annotes)
+# af = AnnoteFinder(x,y, annotes, ax=ax)
+# fig.canvas.mpl_connect('button_press_event', af)
+# plt.show()

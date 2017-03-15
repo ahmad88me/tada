@@ -6,3 +6,5 @@ parent_dir = '/'.join(cur.split('/')[:-1])
 sys.path.append(parent_dir)
 
 
+RAW_ENDPOINT = "http://4v.dia.fi.upm.es:10043/sparql"
+META_ENDPOINT = "http://patents.linkeddata.es/sparql"

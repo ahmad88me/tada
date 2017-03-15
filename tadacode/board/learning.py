@@ -1,9 +1,13 @@
 import __init__
 
+from __init__ import RAW_ENDPOINT, META_ENDPOINT
+
 import numpy as np
 import pandas as pd
 
 from clustering.fuzzy_clustering import FCM
+
+from easysparql import get_properties_as_list, get_objects_as_list
 
 np.set_printoptions(precision=2)
 np.set_printoptions(suppress=True)
@@ -34,6 +38,10 @@ def get_features(col):
 
 
 def get_centroids_for_files(files):
+    """
+    :param files: files each with a single columns
+    :return: a list of centroids
+    """
     n_features = 2
     centroids = np.array([])
     centroids.shape = (0, n_features)
@@ -41,6 +49,21 @@ def get_centroids_for_files(files):
         col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
                           dtype=np.float64).as_matrix()
         col = get_features(col)
+        centroid = compute_centroid_single_cluster(col)
+        centroids = np.append(centroids, [centroid], axis=0)
+    return centroids
+
+
+def get_centroids_for_lists(cols):
+    """
+    :param cols:  a list of numpy lists (vectors)
+    :return:  a list of centroids
+    """
+    n_features = 2
+    centroids = np.array([])
+    centroids.shape = (0, n_features)
+    for c in cols:
+        col = get_features(c)
         centroid = compute_centroid_single_cluster(col)
         centroids = np.append(centroids, [centroid], axis=0)
     return centroids
@@ -82,7 +105,7 @@ def get_data_from_files(files):
     return cols
 
 
-def train(training_files):
+def train_from_files(training_files):
     """
     This function is responsible for training the model and compute the representative of each file
     :return: FCM model
@@ -91,7 +114,21 @@ def train(training_files):
     # print "centroids: "
     # print centroids
     # max_iter =1 because the centers are precomputed
-    model = FCM(n_clusters=len(training_files), max_iter=1)
+    model = FCM(n_clusters=len(training_files), max_iter=1, m=2)
+    model.cluster_centers_ = centroids
+    return model
+
+
+def train_from_class_uris(class_uris=[], top_k_properties_per_class=5, min_objects_per_property=20):
+    cols = []
+    for class_uri in class_uris:
+        col = []
+        for property in get_properties_as_list(endpoint=META_ENDPOINT, class_uri=class_uri,
+                                               min_count=min_objects_per_property)[: top_k_properties_per_class]:
+                col = get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=property)
+        cols.append(col.as_matrix())
+    centroids = get_centroids_for_lists(cols)
+    model = FCM(n_clusters=len(cols), max_iter=1, m=2)
     model.cluster_centers_ = centroids
     return model
 
