@@ -1,10 +1,18 @@
 
+
+
+
+## Questions to answer
+* is using rdfs:RANGE for a concept is enough to get numerical data?
+
+
+
 ## To Do
 
 - [x] compute the centers for each cluster
 - [x] use Fuzzy clustering fit and get the membership (it works fine)
 - [x] predict the new resources and see how the membership is performing
-- [ ] Produce the average membership of each cluster
+- [x] Produce the average membership of each cluster
 - [ ] computer the error in each predicted cluster
 
 
@@ -22,4 +30,4 @@ the cluster centers).
 *
 
 # Debug
-* SPARQLWrapper returns 10000 by max
+* SPARQLWrapper returns 10000 by max (it turns out that this limitation is from DBpedia)

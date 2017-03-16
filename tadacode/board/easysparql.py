@@ -1,7 +1,9 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-import pandas as pd
+from __init__ import QUERY_LIMIT
 
+import pandas as pd
+import numpy as np
 
 def run_query_with_datatype(query=None, endpoint=None, datatype=None):
     """
@@ -35,6 +37,9 @@ def run_query(query=None, endpoint=None):
     :param endpoint: endpoint source that hosts the data
     :return: query result as a dict
     """
+    if endpoint is None:
+        print "endpoints cannot be None"
+        return []
     sparql = SPARQLWrapper(endpoint=endpoint)
     sparql.setQuery(query=query)
     sparql.setReturnFormat(JSON)
@@ -44,6 +49,8 @@ def run_query(query=None, endpoint=None):
             return results["results"]["bindings"]
         else:
             print "returns 0 rows"
+            print "endpoint: "+endpoint
+            print "query: $$<%s>$$" % str(query)
             return []
     except Exception as e:
         print "sparql error: $$<%s>$$" % str(e)
@@ -95,13 +102,14 @@ def get_properties(endpoint=None, class_uri=None, min_count=20):
          }
         }
         ORDER BY desc(?count)
-    """ % (class_uri_stripped, min_count)
+        %s
+    """ % (class_uri_stripped, min_count, QUERY_LIMIT)
     properties = run_query(query=query, endpoint=endpoint)
     return properties
 
 
 def get_properties_as_list(endpoint=None, class_uri=None, min_count=20):
-    properties = get_properties(class_uri=class_uri, min_count=min_count)
+    properties = get_properties(endpoint=endpoint, class_uri=class_uri, min_count=min_count)
     clean_properties = [p['property'] for p in properties]
     return pd.DataFrame(clean_properties)['value']
 
@@ -114,8 +122,8 @@ def get_objects(endpoint=None, class_uri=None, property_uri= None):
     if property_uri_stripped[0] == "<" and property_uri_stripped[-1] == ">":
         property_uri_stripped = property_uri_stripped[1:-1]
     query = """
-        select ?o where{ <%s> <%s> ?o}
-    """ % (class_uri_stripped, property_uri_stripped)
+        select ?o where{ ?s  a <%s>. ?s <%s> ?o FILTER(isNumeric(?o))} %s
+    """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
     objects = run_query(query=query, endpoint=endpoint)
     return objects
 
@@ -123,4 +131,15 @@ def get_objects(endpoint=None, class_uri=None, property_uri= None):
 def get_objects_as_list(endpoint=None, class_uri=None, property_uri= None):
     objects = get_objects(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
     clean_objects = [o['o'] for o in objects]
-    return pd.DataFrame(clean_objects)['value']
+    if len(clean_objects) == 0:
+        print "no objects found for class %s property %s in endpoint %s" % (class_uri, property_uri, endpoint)
+        col_mat = pd.DataFrame([]).as_matrix()
+        col_mat.shape = (0, 0)
+        #return pd.DataFrame([])
+        return col_mat
+
+    col_mat = pd.DataFrame(clean_objects)['value'].as_matrix()
+    col_mat.shape = (col_mat.shape[0], 1)
+    col_mat = col_mat.astype(np.float)
+    #return pd.DataFrame(clean_objects)['value']
+    return col_mat

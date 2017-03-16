@@ -9,6 +9,8 @@ from clustering.fuzzy_clustering import FCM
 
 from easysparql import get_properties_as_list, get_objects_as_list
 
+import easysparql
+
 np.set_printoptions(precision=2)
 np.set_printoptions(suppress=True)
 
@@ -34,6 +36,9 @@ def get_features(col):
     # Since we are using only have one feature which is the number it self, we append the same column
     # It will results in two identical features, which would help us in the visualization
     # col = np.append(col, col, 1)
+    # print "get_features> type of col is: %s"+str(type(col))
+    # print "get_features> col shape %s" % str(col.shape)
+    # print col
     return np.append(col, col, 1)
 
 
@@ -105,6 +110,35 @@ def get_data_from_files(files):
     return cols
 
 
+def get_data_from_uris(meta_endpoint=None, raw_endpoint=None, class_uris=[], property_min_count=20,
+                       top_k_properties_per_class=5):
+    n_features = 2
+    cols = np.array([])
+    cols.shape = (0, n_features)
+
+    for class_uri in class_uris:
+        properties = easysparql.get_properties_as_list(endpoint=META_ENDPOINT, class_uri=class_uri,
+                                                       min_count=property_min_count)[:top_k_properties_per_class]
+        for aproperty in properties:
+            col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=aproperty)
+            col = get_features(col)
+            cols = np.append(cols, col, axis=0)
+    return cols
+
+
+def train(centroids=[], n_clusters=None, max_iter=1, m=2):
+    """
+    :param centroids: list of cluster centers
+    :param n_clusters:
+    :param max_iter: by default 1 because centroids are given
+    :param m: fuzziness
+    :return: FCM model
+    """
+    model = FCM(n_clusters=n_clusters, max_iter=max_iter, m=m)
+    model.cluster_centers_ = centroids
+    return model
+
+
 def train_from_files(training_files):
     """
     This function is responsible for training the model and compute the representative of each file
@@ -113,24 +147,48 @@ def train_from_files(training_files):
     centroids = get_centroids_for_files(training_files)
     # print "centroids: "
     # print centroids
-    # max_iter =1 because the centers are precomputed
-    model = FCM(n_clusters=len(training_files), max_iter=1, m=2)
-    model.cluster_centers_ = centroids
-    return model
+    return train(centroids=centroids, n_clusters=len(training_files), max_iter=1, m=2)
 
 
 def train_from_class_uris(class_uris=[], top_k_properties_per_class=5, min_objects_per_property=20):
     cols = []
     for class_uri in class_uris:
-        col = []
         for property in get_properties_as_list(endpoint=META_ENDPOINT, class_uri=class_uri,
                                                min_count=min_objects_per_property)[: top_k_properties_per_class]:
                 col = get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=property)
-        cols.append(col.as_matrix())
+                if col.shape != (0, 0):
+                    # col_mat = col.as_matrix()
+                    # col_mat.shape = (col_mat.shape[0], 1)
+                    # cols.append(col_mat.astype(np.float))
+                    cols.append(col)
+    # print "will computer centroids for lists"
+    # print "%d centers" % len(cols)
+    # print "train from class uris> cols:"
+    print cols
     centroids = get_centroids_for_lists(cols)
-    model = FCM(n_clusters=len(cols), max_iter=1, m=2)
-    model.cluster_centers_ = centroids
-    return model
+    return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
+
+
+def train_from_class_property_uris(class_property_uris=[], get_data=False):
+    cols = []
+    for class_uri, propert_uri in class_property_uris:
+        col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
+        if col.shape != (0, 0):
+            cols.append(col)
+    centroids = get_centroids_for_lists(cols)
+    if get_data is False:
+        return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
+
+    if len(cols) > 0:
+        print "train_from_class_property_uris> num of clusters: %d" % len(cols)
+        data = np.array([])
+        data.shape = (0, cols[0].shape[1])
+        for col in cols[1:]:
+            data = np.append(data, col, axis=0)
+        return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2), get_features(np.array(data))
+    else:
+        print "train_from_class_property_uris> nothing to cluster"
+        return None, None
 
 
 def test(model, files):
