@@ -396,6 +396,58 @@ class FCM:
             #plt.show()
             ax.show()
 
+    def draw_membership_area_balanced_opengl(self, X, num_of_areas=20):
+        print "draw membership area balanced"
+        reduced_data = X
+        model = self
+        # Plot the decision boundary. For that, we will assign a color to each
+        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
+        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
+        h_x = (x_max - x_min) / num_of_areas
+        h_y = (y_max - y_min) / num_of_areas
+        if h_x > h_y:
+            h = h_x
+        else:
+            h = h_y
+
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+        print "will predict now"
+        u = model.predict(np.c_[xx.ravel(), yy.ravel()])
+        print "predicted"
+        from matplotlib import colors as matplot_colors
+        import six
+        colors = list(six.iteritems(matplot_colors.cnames))
+        colors = zip(*colors)[1]
+        print "xx: "
+        print xx
+        print "yy: "
+        print yy
+        # I will try to flatten xx, yy and Z to see what would happen
+        xx = xx.flatten()
+        yy = yy.flatten()
+        # print "xx: flatten "
+        # print xx
+        # print "yy: flatten"
+        # print yy
+        print "will draw points"
+        print "h is: "+str(h)
+
+        f = open("local_points.in", "w")
+        #The below loops are correct, it writes the x and y for every cluster, but what we need is
+        # for idx, xxyy in enumerate(zip(xx,yy)):
+        #     for clus, m in enumerate(u[idx]):
+        #         f.write("%f,%f,%s,%f\n" % (xxyy[0], xxyy[1], compute_single_color(m, colors[clus]), m))
+
+        for clus in range(u.shape[1]):
+            for idx, xxyy in enumerate(zip(xx,yy)):
+                m = u[idx][clus]
+                f.write("%f,%f,%s,%f\n" % (xxyy[0], xxyy[1], compute_single_color(m, colors[clus]), m))
+        f.close()
+        print "max x: %f min x: %f" % (x_max, x_min)
+        print "max y: %f min y: %f" % (y_max, y_min)
+        return x_max, x_min, y_max, y_min
+
+
     def draw_membership_area_balanced(self, X, ax, num_of_areas=20):
         # point_scale using this magical number 6155.81
         point_scale = 4155/20.0

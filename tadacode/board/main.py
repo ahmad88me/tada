@@ -3,6 +3,7 @@ import learning
 import easysparql
 from __init__ import META_ENDPOINT, RAW_ENDPOINT
 
+import subprocess
 
 import numpy as np
 
@@ -67,9 +68,10 @@ def main():
     # m = test(model, testing_files)
     data = learning.get_data_from_files(training_files)
     model.fit(data)
-    model.draw_membership_area_balanced(data, ax, num_of_areas=20)
+    model.draw_membership_area_balanced_opengl(data, num_of_areas=20)
+    #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
-    ax = model.draw_membership(data, ax, show=False)
+    #ax = model.draw_membership(data, ax, show=False)
     legend_item = get_legend(training_files, "x" * len(training_files))
     legend_item += get_legend(training_files, "o" * len(training_files))
     plt.legend(legend_item, training_files+training_files, numpoints=1)
@@ -77,7 +79,7 @@ def main():
 
     #cid = fig.canvas.mpl_connect('button_press_event', onclick)
     cid = fig.canvas.mpl_connect('pick_event', onclick)
-    plt.show()
+    #plt.show()
 
 
 def main_sparql():
@@ -134,23 +136,28 @@ def main_manual_sparql():
 
     model.fit(data)
 
-    model.draw_membership_area_balanced(data, ax, num_of_areas=20)
+    max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
+    #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
 
-    ax = model.draw_membership(data, ax, show=False)
+
+    # ax = model.draw_membership(data, ax, show=False)
     # legend_item = get_legend(training_files, "x" * len(training_files))
     # legend_item += get_legend(training_files, "o" * len(training_files))
     # plt.legend(legend_item, training_files+training_files, numpoints=1)
     print "preparing to show"
+    subprocess.call("python board/scatter.py local_points.in %f %f %f %f %d %d %f"
+                    % (max_x, min_x, max_y, min_y, 600, 600, 600/100.0), shell=True)
     #cid = fig.canvas.mpl_connect('button_press_event', onclick)
-    cid = fig.canvas.mpl_connect('pick_event', onclick)
-    plt.show()
+    #cid = fig.canvas.mpl_connect('pick_event', onclick)
+    #plt.show()
 
 
 if __name__ == "__main__":
     #main()
     #main_sparql()
     main_manual_sparql()
+
 
 # import sys
 # #sys.path.append('/Users/aalobaid/workspaces/Pyworkspace/tada/tadacode')
