@@ -169,12 +169,38 @@ def train_from_class_uris(class_uris=[], top_k_properties_per_class=5, min_objec
     return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
 
 
-def train_from_class_property_uris(class_property_uris=[], get_data=False):
+def inspect_membership(meta_data, membership):
+    """
+    :param meta_data: a list of meta objects, each meta object contains the following: class, property, from_index and
+    to_index
+    :param membership: it is the membership matrix
+    :return: nothing
+    """
+    print "meta data"
+    print meta_data
+    for clus, md in enumerate(meta_data):
+        membership_for_cluster = membership[md["from_index"]: md["to_index"]]
+        print "================\n%s - %s:" % (md["class"], md["property"])
+        print " MEAN:  "+str(np.average(membership_for_cluster, axis=0))
+        print "MEDIAN: "+str(np.median(membership_for_cluster, axis=0))
+
+
+
+def train_from_class_property_uris(class_property_uris=[], get_data=False, get_meta_data=False):
     cols = []
+    meta_data_about_cols = []
+    meta_start_idx = 0
     for class_uri, propert_uri in class_property_uris:
         col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
         if col.shape != (0, 0):
             cols.append(col)
+            single_meta = {}
+            single_meta["class"] = class_uri
+            single_meta["property"] = propert_uri
+            single_meta["from_index"] = meta_start_idx
+            meta_start_idx += col.shape[0]
+            single_meta["to_index"] = meta_start_idx-1
+            meta_data_about_cols.append(single_meta)
     centroids = get_centroids_for_lists(cols)
     if get_data is False:
         return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
@@ -185,10 +211,18 @@ def train_from_class_property_uris(class_property_uris=[], get_data=False):
         data.shape = (0, cols[0].shape[1])
         for col in cols[1:]:
             data = np.append(data, col, axis=0)
-        return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2), get_features(np.array(data))
+        #return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2), get_features(np.array(data))
+        model = train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
+        if get_meta_data:
+            return model, get_features(np.array(data)), meta_data_about_cols
+        else:
+            return model, get_features(np.array(data))
     else:
         print "train_from_class_property_uris> nothing to cluster"
-        return None, None
+        if get_meta_data:
+            return None, None, None
+        else:
+            return None, None
 
 
 def test(model, files):

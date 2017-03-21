@@ -4,7 +4,9 @@
 
 ## Questions to answer
 * is using rdfs:RANGE for a concept is enough to get numerical data?
-
+* explore the idea of cluster radius; instead of storing only cluster centers, maybe we can use the quarentile for this.
+* mean of mean and median.
+* how to merge close clusters (if the membership is less than a given threshold).
 
 
 ## To Do

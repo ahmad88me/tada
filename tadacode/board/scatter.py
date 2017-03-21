@@ -35,6 +35,22 @@ def scenemodel():
     draw_graph()
 
 
+def export_to_image():
+    global g_Width, g_Height
+    from PIL import Image
+    #glPopMatrix()
+    glPixelStorei(GL_PACK_ALIGNMENT, 1)
+    data = glReadPixels(0, 0, g_Width, g_Height, GL_RGBA, GL_UNSIGNED_BYTE)
+    # image = Image.fromstring("RGBA", (g_Width, g_Height), data)
+    image = Image.frombytes("RGBA", (g_Width, g_Height), data)
+    image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    #image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    #image = image.transpose(Image.TRANSPOSE)
+    #image.show()
+    image.save('local_out.png', 'PNG')
+    #image.save('/Users/aalobaid/workspaces/Pyworkspace/tada/tadacode/local_out.png', 'PNG')
+
+
 def draw_graph():
 
     glPointSize(50.0)
@@ -55,25 +71,11 @@ def draw_point(min_x=0.0, max_x=1.0, min_y=0.0, max_y=1.0, x=0, y=0, color="#FF9
     color_string = color.replace("#", "")
     for i in range(len(color_string) / 2):
         c.append(int(color_string[i * 2:i * 2 + 1], 16) / 15.0)
-    glPointSize(1.0)
-    glBegin(GL_POINTS)
-    glColor4f(c[0], c[1], c[2], alpha)
-    new_x = ((min_x*-1.0) + x) / (max_x - min_x)
-    new_y = ((min_y * -1.0) + y) / (max_y - min_y)
-    glVertex3f(new_x, new_y, 1.0)
-    glEnd()
-
-
-def draw_point_cont(min_x=0.0, max_x=1.0, min_y=0.0, max_y=1.0, x=0, y=0, color="#FF9900", alpha=0.5):
-    c = []
-    color_string = color.replace("#", "")
-    for i in range(len(color_string) / 2):
-        c.append(int(color_string[i * 2:i * 2 + 1], 16) / 15.0)
     glColor4f(c[0], c[1], c[2], alpha)
     # new_x = ((min_x*-1.0) + x) / (max_x - min_x)
     # new_y = ((min_y * -1.0) + y) / (max_y - min_y)
     new_x = (x - min_x)/ (max_x - min_x)  # get the percentage
-    new_y = (y - min_y)/ (max_y - min_y)  # get teh percentage
+    new_y = (y - min_y)/ (max_y - min_y)  # get the percentage
     new_x = new_x * 2 - 1
     new_y = new_y * 2 - 1
     glVertex3f(new_x, new_y, 1.0)
@@ -118,8 +120,8 @@ def draw_points():
     #glBegin(GL_QUADS)
     prev_x, prev_y, prev_color, prev_alpha = 0,0,"#FFFFFF","#FFFFFF"
     for line_num, line in enumerate(f.readlines()):
-        if True:
-        #try:
+        #if True:
+        try:
             #print "line: %s" % line
             x, y, color, alpha = line.split(',')
             x = float(x)
@@ -138,22 +140,13 @@ def draw_points():
             #     draw_point_cont(max_x=max_x, max_y=max_y, min_x=min_x, min_y=min_y, x=prev_x, y=prev_y, color=prev_color, alpha=prev_alpha)
             #     draw_point_cont(max_x=max_x, max_y=max_y, min_x=min_x, min_y=min_y, x=x, y=y, color=color, alpha=alpha)
             #     glEnd()
-            draw_point_cont(max_x=max_x, max_y=max_y, min_x=min_x, min_y=min_y, x=x, y=y, color=color, alpha=alpha)
-        else:
-        #except:
+            draw_point(max_x=max_x, max_y=max_y, min_x=min_x, min_y=min_y, x=x, y=y, color=color, alpha=alpha)
+        #else:
+        except:
             print("line %d has invalid values" % line_num)
     glEnd()
+    export_to_image()
 
-
-def test():
-    glBegin(GL_LINES)
-    draw_point_cont(max_x=1.0, max_y=1.0, min_x=0.0, min_y=0.0, x=0.25, y=0.25, color="#66ff66", alpha=0.5)
-    draw_point_cont(max_x=1.0, max_y=1.0, min_x=0.0, min_y=0.0, x=0.75, y=0.75, color="#ffff00", alpha=0.5)
-    # glColor4f(0.5, 1.0, 0.5, 0.5)
-    # glVertex3f(0.25, 0.25, 1.0)
-    # glColor4f(1.0, 1.0, 0.5, 0.5)
-    # glVertex3f(0.75, 0.75, 1.0)
-    glEnd()
 
 
 def display():

@@ -126,8 +126,8 @@ def main_manual_sparql():
     ]
     # for class_uri, propert_uri in class_property_combinations:
     #     easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
-    model, data = learning.train_from_class_property_uris(class_property_uris=class_property_combinations,
-                                                          get_data=True)
+    model, data, meta_data = learning.train_from_class_property_uris(class_property_uris=class_property_combinations,
+                                                          get_data=True, get_meta_data=True)
     # testing_files = ["novHighC.csv", "nodeid.csv"]
 
     # m = test(model, testing_files)
@@ -135,8 +135,8 @@ def main_manual_sparql():
     # data = learning.get_data_from_files(training_files)
 
     model.fit(data)
-
-    max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
+    learning.inspect_membership(meta_data, model.u)
+    #max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
     #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
 
@@ -146,8 +146,10 @@ def main_manual_sparql():
     # legend_item += get_legend(training_files, "o" * len(training_files))
     # plt.legend(legend_item, training_files+training_files, numpoints=1)
     print "preparing to show"
-    subprocess.call("python board/scatter.py local_points.in %f %f %f %f %d %d %f"
-                    % (max_x, min_x, max_y, min_y, 600, 600, 600/100.0), shell=True)
+    # subprocess.call("python board/scatter.py local_points.in %f %f %f %f %d %d %f"
+    #                 % (max_x, min_x, max_y, min_y, 600, 600, 600/100.0), shell=True)
+
+
     #cid = fig.canvas.mpl_connect('button_press_event', onclick)
     #cid = fig.canvas.mpl_connect('pick_event', onclick)
     #plt.show()
