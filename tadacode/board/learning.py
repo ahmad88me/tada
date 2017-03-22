@@ -180,10 +180,32 @@ def inspect_membership(meta_data, membership):
     print meta_data
     for clus, md in enumerate(meta_data):
         membership_for_cluster = membership[md["from_index"]: md["to_index"]]
-        print "================\n%s - %s:" % (md["class"], md["property"])
+        print "================\n%s - %s: (%d)" % (md["class"], md["property"], clus)
         print " MEAN:  "+str(np.average(membership_for_cluster, axis=0))
         print "MEDIAN: "+str(np.median(membership_for_cluster, axis=0))
 
+
+def compute_representativeness_from_meta(meta_data, membership):
+    """
+    compute the representativeness for each class/property triple
+    :param meta_data: a list of meta objects, each meta object contains the following: class, property, from_index and
+    to_index
+    :param membership: it is the membership matrix
+    :return: nothing
+    """
+    for clus, md in enumerate(meta_data):
+        membership_for_cluster = membership[md["from_index"]: md["to_index"]]
+        avg = np.average(membership_for_cluster, axis=0)
+        max_mem_id = np.argmax(avg)
+        print "================\n%s - %s: (%d)" % (md["class"], md["property"], clus)
+        print "representativeness: %f" % avg[clus]
+        if max_mem_id != clus and avg[max_mem_id] > avg[clus]:  #  the second condition in case there are two clusters
+                                                                # with  the same membership
+            print "alternative %s - %s with membership score: %f" % (meta_data[max_mem_id]["class"],
+                                                                     meta_data[max_mem_id]["property"],
+                                                                     avg[max_mem_id])
+        print " MEAN:  "+str(avg)
+        print "MEDIAN: "+str(np.median(membership_for_cluster, axis=0))
 
 
 def train_from_class_property_uris(class_property_uris=[], get_data=False, get_meta_data=False):

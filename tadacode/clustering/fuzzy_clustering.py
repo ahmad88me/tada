@@ -430,18 +430,17 @@ class FCM:
         # print "yy: flatten"
         # print yy
         print "will draw points"
-        print "h is: "+str(h)
 
         f = open("local_points.in", "w")
         #The below loops are correct, it writes the x and y for every cluster, but what we need is
-        # for idx, xxyy in enumerate(zip(xx,yy)):
-        #     for clus, m in enumerate(u[idx]):
-        #         f.write("%f,%f,%s,%f\n" % (xxyy[0], xxyy[1], compute_single_color(m, colors[clus]), m))
-
-        for clus in range(u.shape[1]):
-            for idx, xxyy in enumerate(zip(xx,yy)):
-                m = u[idx][clus]
+        for idx, xxyy in enumerate(zip(xx,yy)):
+            for clus, m in enumerate(u[idx]):
                 f.write("%f,%f,%s,%f\n" % (xxyy[0], xxyy[1], compute_single_color(m, colors[clus]), m))
+        #The belos is correct, but the previous one seems better for batching
+        # for clus in range(u.shape[1]):
+        #     for idx, xxyy in enumerate(zip(xx,yy)):
+        #         m = u[idx][clus]
+        #         f.write("%f,%f,%s,%f\n" % (xxyy[0], xxyy[1], compute_single_color(m, colors[clus]), m))
         f.close()
         print "max x: %f min x: %f" % (x_max, x_min)
         print "max y: %f min y: %f" % (y_max, y_min)

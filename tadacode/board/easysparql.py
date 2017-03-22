@@ -50,7 +50,7 @@ def run_query(query=None, endpoint=None):
         else:
             print "returns 0 rows"
             print "endpoint: "+endpoint
-            print "query: $$<%s>$$" % str(query)
+            print "query: <%s>" % str(query).strip()
             return []
     except Exception as e:
         print "sparql error: $$<%s>$$" % str(e)

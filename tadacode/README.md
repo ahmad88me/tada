@@ -5,8 +5,13 @@
 ## Questions to answer
 * is using rdfs:RANGE for a concept is enough to get numerical data?
 * explore the idea of cluster radius; instead of storing only cluster centers, maybe we can use the quarentile for this.
-* mean of mean and median.
 * how to merge close clusters (if the membership is less than a given threshold).
+
+
+
+
+Will only use average because all the points matters, and all the data points are actually weighted equally.
+
 
 
 ## To Do
@@ -27,9 +32,13 @@ the cluster centers).
 * Automatic classification of numerical data using fuzzy clustering
 
 
+## Other use cases
+* Cleaning up synonym properties in knowledge bases like DBpedia
+
+
 # Hypotheses:
 * Can classify any bag of numbers if their values is distinguishable enough in the given domain.
-*
+* Without computing any features, only the numerical data them selves
 
 # Debug
 * SPARQLWrapper returns 10000 by max (it turns out that this limitation is from DBpedia)
