@@ -136,7 +136,8 @@ def main_manual_sparql():
 
     model.fit(data)
     # learning.inspect_membership(meta_data, model.u)
-    learning.compute_representativeness_from_meta(meta_data, model.u)
+    meta_data = learning.compute_representativeness_from_meta(meta_data, model.u)
+
     max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
     #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)

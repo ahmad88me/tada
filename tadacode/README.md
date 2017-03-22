@@ -1,12 +1,24 @@
 
 
 
+## progress
+* working on the function merge_clusters_from_meta in learning.py
+
 
 ## Questions to answer
 * is using rdfs:RANGE for a concept is enough to get numerical data?
 * explore the idea of cluster radius; instead of storing only cluster centers, maybe we can use the quarentile for this.
-* how to merge close clusters (if the membership is less than a given threshold).
-
+* how to merge close clusters (if the membership is less than a given threshold) (what I'm doing now is merge them if
+ the membership of one of them has higherscore for being in the other).
+* Problem with the merging or clusters: what is there is a circular merging thing that arise, e.g. if cluster a is
+closer to cluster b and cluster b is closer to cluster c. For now, if a is closer to b and b is closer to another
+cluster, then don't merge a and b (maybe I can also examine should I ignore merge a and b while allowing b and c? or
+would it be better to merge a and b while not merging b and c. maybe I can examine the membership of both and then pick
+[right now, I'm doing in a naive way depending on the order (which comes first)]). Also I'm not checking what is the
+impact of multiple clusters is getting merged (and what if all of them merged into one big cluster?).
+* I need to further study the theory see if having data points that initially belong to a cluster (from the initial data
+) actually belong more (higher membership) to another cluster is possible to occur from a theoretical point of view.
+* I should compute the centers of the clusters in the fuzzy way, not like k-means.
 
 
 

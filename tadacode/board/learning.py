@@ -185,6 +185,42 @@ def inspect_membership(meta_data, membership):
         print "MEDIAN: "+str(np.median(membership_for_cluster, axis=0))
 
 
+def merge_clusters_from_meta(data, meta_data):
+    """
+    :param data: data points
+    :param meta_data: a list of meta objects, each meta object contains the following: class, property,
+            alternative(optional), from_index and to_index
+    :return: ordered_data, model, new_meta
+    """
+    new_meta = []
+    new_data = np.array([])
+    new_data.shape = (0, data.shape[1])
+    data_per_cluster = {}
+    for clus, md in enumerate(meta_data):
+        if "alternative" in md:
+            # now check if the alternative cluster does not have an alternative as well
+            if "alternative" not in meta_data[md["alternative"]]:
+                if md["alternative"] in data_per_cluster:
+                    data_per_cluster[md["alternative"]] = np.append(data_per_cluster[md["alternative"]],
+                                                                    data[md["from_index"]:md["to_index"]], axis=0)
+                else:
+                    data_per_cluster[md["alternative"]] = data[md["from_index"]:md["to_index"]]
+        else:
+            if clus is data_per_cluster:
+                data_per_cluster[clus] = np.append(data_per_cluster[clus], data[md["from_index"]:md["to_index"]])
+            else:
+                data_per_cluster[clus] = data[md["from_index"]:md["to_index"]]
+    idx = 0
+    for clus in data_per_cluster.keys():
+        new_data = np.append(new_data, data_per_cluster[clus], axis=0)
+        meta = {}
+        meta["from_idx"] = idx
+        idx += data_per_cluster[clus].shape[0]
+        meta["to_idx"] = idx-1
+        meta["class"] = meta_data[clus]["class"]
+        meta["property"] = meta_data[clus]["property"]
+
+
 def compute_representativeness_from_meta(meta_data, membership):
     """
     compute the representativeness for each class/property triple
@@ -193,6 +229,7 @@ def compute_representativeness_from_meta(meta_data, membership):
     :param membership: it is the membership matrix
     :return: nothing
     """
+    avg_membership_score = 0.0
     for clus, md in enumerate(meta_data):
         membership_for_cluster = membership[md["from_index"]: md["to_index"]]
         avg = np.average(membership_for_cluster, axis=0)
@@ -201,11 +238,16 @@ def compute_representativeness_from_meta(meta_data, membership):
         print "representativeness: %f" % avg[clus]
         if max_mem_id != clus and avg[max_mem_id] > avg[clus]:  #  the second condition in case there are two clusters
                                                                 # with  the same membership
-            print "alternative %s - %s with membership score: %f" % (meta_data[max_mem_id]["class"],
+            print "alternative (%d) %s - %s with membership score: %f" % (max_mem_id, meta_data[max_mem_id]["class"],
                                                                      meta_data[max_mem_id]["property"],
                                                                      avg[max_mem_id])
-        print " MEAN:  "+str(avg)
-        print "MEDIAN: "+str(np.median(membership_for_cluster, axis=0))
+            print " MEAN:  " + str(avg)
+            # This is to return the alternative cluster with the meta data
+            meta_data[clus]["alternative_cluster"] = max_mem_id
+        # the is just to computer the average score totally
+        avg_membership_score += avg[clus]
+    print "================\n\nMEAN membership score is: %f\n" % (avg_membership_score/len(meta_data))
+    return meta_data
 
 
 def train_from_class_property_uris(class_property_uris=[], get_data=False, get_meta_data=False):
