@@ -66,10 +66,26 @@ def main():
         print "%s: %f" % (training_files[i], repr[i])
     testing_files = ["novHighC.csv", "nodeid.csv"]
     # m = test(model, testing_files)
-    data = learning.get_data_from_files(training_files)
-    model.fit(data)
-    model.draw_membership_area_balanced_opengl(data, num_of_areas=20)
-    #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
+    data, meta_data = learning.get_data_from_files(training_files)
+
+    #This is a new block to test if computing the centers of cluster is better computer from the model in a fuzzy way
+    u = np.zeros((data.shape[0], len(meta_data)))
+    print "shape of u is: %s" % str(u.shape)
+    print "data len %d and meta_data len %d" % (data.shape[1], len(meta_data))
+    for clus, md in enumerate(meta_data):
+        print "%d from index %d to index %d" % (clus, md["from_index"], md["to_index"])
+        for i in range(md["from_index"], md["to_index"] + 1):
+            # print "[%d][%d]" % (i, clus)
+            u[i][clus] = 1.0
+    model.u = u
+    model.cluster_centers_ = []
+    print "will compute cluster centers: "
+    print model.compute_cluster_centers(data)
+
+
+    # model.fit(data)
+    # model.draw_membership_area_balanced_opengl(data, num_of_areas=20)
+    model.draw_membership_area_balanced(data, ax, num_of_areas=30)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
     #ax = model.draw_membership(data, ax, show=False)
     legend_item = get_legend(training_files, "x" * len(training_files))
@@ -79,7 +95,7 @@ def main():
 
     #cid = fig.canvas.mpl_connect('button_press_event', onclick)
     cid = fig.canvas.mpl_connect('pick_event', onclick)
-    #plt.show()
+    # plt.show()
 
 
 def main_sparql():
@@ -133,25 +149,27 @@ def main_manual_sparql():
     # m = test(model, testing_files)
 
     # data = learning.get_data_from_files(training_files)
+    if model is None:
+        return
 
-    model.fit(data)
+    # model.fit(data)
     # learning.inspect_membership(meta_data, model.u)
-    meta_data = learning.compute_representativeness_from_meta(meta_data, model.u)
-
-    max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
+    # meta_data = learning.compute_representativeness_from_meta(meta_data, model.u)
+    # learning.merge_clusters_from_meta(data, meta_data)
+    # max_x, min_x, max_y, min_y = model.draw_membership_area_balanced_opengl(data, num_of_areas=100)
     #model.draw_membership_area_balanced(data, ax, num_of_areas=20)
     #model.draw_membership_area_balanced_vispy(data, num_of_areas=10)
 
 
-    # ax = model.draw_membership(data, ax, show=False)
+    #ax = model.draw_membership(data, ax, show=False)
     # legend_item = get_legend(training_files, "x" * len(training_files))
     # legend_item += get_legend(training_files, "o" * len(training_files))
     # plt.legend(legend_item, training_files+training_files, numpoints=1)
     print "preparing to show"
-    comm = "python board/scatter.py local_points.in '' %f %f %f %f %d %d %f" % (max_x, min_x, max_y, min_y, 600, 600,
-                                                                                600/100.0)
-    print comm
-    subprocess.call(comm, shell=True)
+    # comm = "python board/scatter.py local_points.in '' %f %f %f %f %d %d %f" % (max_x, min_x, max_y, min_y, 600, 600,
+    #                                                                             600/100.0)
+    # print comm
+    #subprocess.call(comm, shell=True)
     # subprocess.call("python board/scatter.py local_points.in %f %f %f %f %d %d %f"
     #                 % (max_x, min_x, max_y, min_y, 600, 600, 600/100.0), shell=True)
 
@@ -162,9 +180,9 @@ def main_manual_sparql():
 
 
 if __name__ == "__main__":
-    #main()
+    main()
     #main_sparql()
-    main_manual_sparql()
+    #main_manual_sparql()
 
 
 # import sys

@@ -213,6 +213,10 @@ class FCM:
                 self.u[i][c] = self.compute_membership_single(X, i, c)
 
     def fit(self, X):
+        # I didn't use the below commented code, but it might be a good thing to do so
+        # if X.shape[0] == 0:
+        #     print "provided empty matrix to fit function, nothing will happen"
+        #     return self
         if self.cluster_centers_ is None:
             do_compute_cluster_centers = True
         else:
@@ -242,6 +246,7 @@ class FCM:
             print self.u
         # self.draw_animation(list_of_centers, init_centers, X, membership_history)
         # self.draw_membership_area(X, 10000)
+        return self
 
     def predict(self, X):
         # print "will copy the membership"
@@ -385,9 +390,14 @@ class FCM:
         colors = zip(*colors)[1]
         #ax = plt
         print "will draw points"
+        # just temp
         self.draw_points(ax, X, colors, self.u, marker="o")
         print "will draw centers"
+        print "cluster centers: "
+        print self.cluster_centers_
+        #self.cluster_centers_ = np.array(self.cluster_centers_) # this is just temp
         for clus in range(self.n_clusters):
+            print self.cluster_centers_[clus]
             ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="x",
                        s=560, linewidths=5)
             # ax.scatter([self.cluster_centers_[clus][0]], [self.cluster_centers_[clus][1]], c=colors[clus], marker="X",
@@ -499,7 +509,8 @@ class FCM:
         ax = plt
         print "will draw points"
         print "h is: "+str(h)
-        ax = self.draw_points_a(ax, zip(xx,yy), colors, u, marker="s", lw=0, s=h*point_scale)
+        #ax = self.draw_points_a(ax, zip(xx,yy), colors, u, marker="s", lw=0, s=h*point_scale)
+        ax = self.draw_points_a(ax, zip(xx, yy), colors, u, marker="s", lw=0, s=h)
         ax.xlim(x_min-h, x_max+h)
         ax.ylim(y_min-h, y_max+h)
         #plt.xlim(x_min-h, x_max+h)

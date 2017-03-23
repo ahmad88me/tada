@@ -102,12 +102,20 @@ def get_data_from_files(files):
     n_features = 2
     cols = np.array([])
     cols.shape = (0, n_features)
+    meta_data = []
+    meta_idx = 0
     for idx, fname in enumerate(files):
         col = pd.read_csv("data/"+fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
                           dtype=np.float64).as_matrix()
         col = get_features(col)
         cols = np.append(cols, col, axis=0)
-    return cols
+        meta = {}
+        meta["type"] = fname
+        meta["from_index"] = meta_idx
+        meta["to_index"] = meta_idx + col.shape[0] - 1
+        meta_idx += col.shape[0]
+        meta_data.append(meta)
+    return cols, meta_data
 
 
 def get_data_from_uris(meta_endpoint=None, raw_endpoint=None, class_uris=[], property_min_count=20,
@@ -126,7 +134,7 @@ def get_data_from_uris(meta_endpoint=None, raw_endpoint=None, class_uris=[], pro
     return cols
 
 
-def train(centroids=[], n_clusters=None, max_iter=1, m=2):
+def train(centroids=[], n_clusters=None, max_iter=1, m=2, data=None, meta_data=None):
     """
     :param centroids: list of cluster centers
     :param n_clusters:
@@ -134,9 +142,37 @@ def train(centroids=[], n_clusters=None, max_iter=1, m=2):
     :param m: fuzziness
     :return: FCM model
     """
-    model = FCM(n_clusters=n_clusters, max_iter=max_iter, m=m)
-    model.cluster_centers_ = centroids
-    return model
+    # it was only the below three lines without the data argument as well
+    # model = FCM(n_clusters=n_clusters, max_iter=max_iter, m=m)
+    # model.cluster_centers_ = centroids
+    # return model
+
+    if data is None:
+        model = FCM(n_clusters=n_clusters, max_iter=max_iter, m=m)
+        model.cluster_centers_ = centroids
+        return model
+    else: # just for testing
+        model = FCM(n_clusters=n_clusters, max_iter=max_iter, m=m)
+        u = np.zeros((data.shape[0], len(meta_data)))
+        print "shape of u is: %s" % str(u.shape)
+        print "data len %d and meta_data len %d" % (data.shape[1], len(meta_data))
+        for clus, md in enumerate(meta_data):
+            print "%d from index %d to index %d" % (clus, md["from_index"], md["to_index"])
+            for i in range(md["from_index"], md["to_index"]+1):
+                #print "[%d][%d]" % (i, clus)
+                u[i][clus] = 1.0
+        model.u = u
+        print "will compute cluster centers: "
+        # model.compute_cluster_centers(data)
+        model.compute_cluster_centers(get_features(data))
+        print "will draw membership area balanced: "
+        import matplotlib.pyplot as plt
+        print "data shape %s" % str(data.shape)
+        print "get features: %s" % str(get_features(data).shape)
+        # model.fit(data)
+        # model.draw_(get_features(data), plt, show=True)
+        #model.cluster_centers_ = centroids
+        return model
 
 
 def train_from_files(training_files):
@@ -145,8 +181,8 @@ def train_from_files(training_files):
     :return: FCM model
     """
     centroids = get_centroids_for_files(training_files)
-    # print "centroids: "
-    # print centroids
+    print "centroids: "
+    print centroids
     return train(centroids=centroids, n_clusters=len(training_files), max_iter=1, m=2)
 
 
@@ -155,12 +191,12 @@ def train_from_class_uris(class_uris=[], top_k_properties_per_class=5, min_objec
     for class_uri in class_uris:
         for property in get_properties_as_list(endpoint=META_ENDPOINT, class_uri=class_uri,
                                                min_count=min_objects_per_property)[: top_k_properties_per_class]:
-                col = get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=property)
-                if col.shape != (0, 0):
-                    # col_mat = col.as_matrix()
-                    # col_mat.shape = (col_mat.shape[0], 1)
-                    # cols.append(col_mat.astype(np.float))
-                    cols.append(col)
+            col = get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=property)
+            if col.shape != (0, 0):
+                # col_mat = col.as_matrix()
+                # col_mat.shape = (col_mat.shape[0], 1)
+                # cols.append(col_mat.astype(np.float))
+                cols.append(col)
     # print "will computer centroids for lists"
     # print "%d centers" % len(cols)
     # print "train from class uris> cols:"
@@ -192,26 +228,59 @@ def merge_clusters_from_meta(data, meta_data):
             alternative(optional), from_index and to_index
     :return: ordered_data, model, new_meta
     """
-    new_meta = []
+    new_metas = []
     new_data = np.array([])
     new_data.shape = (0, data.shape[1])
     data_per_cluster = {}
+    print "data shape: %s" % str(data.shape)
     for clus, md in enumerate(meta_data):
-        if "alternative" in md:
+        if "alternative_cluster" in md:
             # now check if the alternative cluster does not have an alternative as well
-            if "alternative" not in meta_data[md["alternative"]]:
-                if md["alternative"] in data_per_cluster:
-                    data_per_cluster[md["alternative"]] = np.append(data_per_cluster[md["alternative"]],
+            if "alternative_cluster" not in meta_data[md["alternative_cluster"]]:
+                guest_name = md["class"] + " - " + md["property"]
+                print "moving target: %s" % (guest_name)
+                if md["alternative_cluster"] in data_per_cluster:
+                    data_per_cluster[md["alternative_cluster"]] = np.append(data_per_cluster[md["alternative_cluster"]],
                                                                     data[md["from_index"]:md["to_index"]], axis=0)
+                    print "aa %s" % str(data_per_cluster[md["alternative_cluster"]].shape)
+                    # this is to store the guests (what clusters is merged)
+                    if "guest" in meta_data[md["alternative_cluster"]]:
+                        meta_data[md["alternative_cluster"]]["guests"].append(guest_name)
+                    else:
+                        meta_data[md["alternative_cluster"]]["guests"] = [guest_name]
                 else:
-                    data_per_cluster[md["alternative"]] = data[md["from_index"]:md["to_index"]]
+                    data_per_cluster[md["alternative_cluster"]] = {}
+                    # this is to store the guests (what clusters is merged)
+                    if "guest" in meta_data[md["alternative_cluster"]]:
+                        meta_data[md["alternative_cluster"]]["guests"].append(guest_name)
+                    else:
+                        meta_data[md["alternative_cluster"]]["guests"] = [guest_name]
+                    data_per_cluster[md["alternative_cluster"]] = data[md["from_index"]:md["to_index"]]
+                    print "bb %s" % str(data_per_cluster[md["alternative_cluster"]].shape)
+            #else:
+                #print "skipped: %s alternative: %d" % (md["class"] + " - " + md["property"], meta_data[md["alternative_cluster"]])
+            # else:
+            #     if clus in data_per_cluster:
+            #         data_per_cluster[clus] = np.append(data_per_cluster[clus], data[md["from_index"]:md["to_index"]])
+            #     else:
+            #         data_per_cluster[clus] = data[md["from_index"]:md["to_index"]]
         else:
-            if clus is data_per_cluster:
-                data_per_cluster[clus] = np.append(data_per_cluster[clus], data[md["from_index"]:md["to_index"]])
+            if clus in data_per_cluster:
+                print "ee %s" % str(data_per_cluster[clus].shape)
+                print "ff %s" % str(data[md["from_index"]:md["to_index"]].shape)
+                data_per_cluster[clus] = np.append(data_per_cluster[clus], data[md["from_index"]:md["to_index"]], axis=0)
+                print "cc %s" % str(data_per_cluster[clus].shape)
             else:
                 data_per_cluster[clus] = data[md["from_index"]:md["to_index"]]
+                print "dd %s" % str(data_per_cluster[clus].shape)
     idx = 0
+    print "keys: "
+    print data_per_cluster.keys()
     for clus in data_per_cluster.keys():
+        print "new data shape: %s" % str(new_data.shape)
+        print "data per cluster shape: %s" % str(data_per_cluster[clus].shape)
+        print data_per_cluster[clus]
+        # data_per_cluster[clus].shape = (data_per_cluster[clus].shape[0], new_data.shape[1])
         new_data = np.append(new_data, data_per_cluster[clus], axis=0)
         meta = {}
         meta["from_idx"] = idx
@@ -219,6 +288,14 @@ def merge_clusters_from_meta(data, meta_data):
         meta["to_idx"] = idx-1
         meta["class"] = meta_data[clus]["class"]
         meta["property"] = meta_data[clus]["property"]
+        if "guests" in meta_data[clus]:
+            meta["guests"] = meta_data[clus]["guests"]
+        else:
+            meta["guests"] = []
+        new_metas.append(meta)
+        print "============\n class %s and property %s" % (meta["class"], meta["property"])
+        print "guests: %s" % str(meta["guests"])
+    print "=============\n"
 
 
 def compute_representativeness_from_meta(meta_data, membership):
@@ -262,6 +339,7 @@ def train_from_class_property_uris(class_property_uris=[], get_data=False, get_m
             single_meta["class"] = class_uri
             single_meta["property"] = propert_uri
             single_meta["from_index"] = meta_start_idx
+            # print "from index %d , length %d , to_index %d" % (meta_start_idx, col.shape[0], meta_start_idx+col.shape[0]-1)
             meta_start_idx += col.shape[0]
             single_meta["to_index"] = meta_start_idx-1
             meta_data_about_cols.append(single_meta)
@@ -273,10 +351,12 @@ def train_from_class_property_uris(class_property_uris=[], get_data=False, get_m
         print "train_from_class_property_uris> num of clusters: %d" % len(cols)
         data = np.array([])
         data.shape = (0, cols[0].shape[1])
-        for col in cols[1:]:
+        #for col in cols[1:]:
+        for col in cols:
             data = np.append(data, col, axis=0)
         #return train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2), get_features(np.array(data))
-        model = train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
+        # model = train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2)
+        model = train(centroids=centroids, n_clusters=len(cols), max_iter=1, m=2, data=data, meta_data=meta_data_about_cols) #this is just for testing the new centers approach
         if get_meta_data:
             return model, get_features(np.array(data)), meta_data_about_cols
         else:

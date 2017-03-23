@@ -2,6 +2,8 @@
 
 
 ## progress
+* on main compute center of clusters as average and by the fuzzy way provides exact match, now I wanna test it on
+the function main_manual_sparql
 * working on the function merge_clusters_from_meta in learning.py
 
 
@@ -19,6 +21,7 @@ impact of multiple clusters is getting merged (and what if all of them merged in
 * I need to further study the theory see if having data points that initially belong to a cluster (from the initial data
 ) actually belong more (higher membership) to another cluster is possible to occur from a theoretical point of view.
 * I should compute the centers of the clusters in the fuzzy way, not like k-means.
+* Introducing a new FCM algorithm that supports merging clusters and we call it MerFCM.
 
 
 
