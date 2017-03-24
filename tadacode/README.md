@@ -2,6 +2,11 @@
 
 
 ## progress
+* now preparing to do the testing with the files after learning from the sparql queries, implementing the cleaner
+version of learning.py and main.py
+
+
+## finished [ordered in desc]
 * on main compute center of clusters as average and by the fuzzy way provides exact match, now I wanna test it on
 the function main_manual_sparql
 * working on the function merge_clusters_from_meta in learning.py

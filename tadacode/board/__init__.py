@@ -11,3 +11,5 @@ RAW_ENDPOINT = "http://4v.dia.fi.upm.es:10043/sparql"
 #RAW_ENDPOINT = "http://dbpedia.org/sparql"
 #RAW_ENDPOINT = "http://es.dbpedia.org/sparql"
 META_ENDPOINT = "http://patents.linkeddata.es/sparql"
+
+

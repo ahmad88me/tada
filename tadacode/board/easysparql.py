@@ -128,7 +128,7 @@ def get_objects(endpoint=None, class_uri=None, property_uri= None):
     return objects
 
 
-def get_objects_as_list(endpoint=None, class_uri=None, property_uri= None):
+def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None):
     objects = get_objects(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
     clean_objects = [o['o'] for o in objects]
     if len(clean_objects) == 0:
@@ -143,3 +143,11 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri= None):
     col_mat = col_mat.astype(np.float)
     #return pd.DataFrame(clean_objects)['value']
     return col_mat
+
+
+def objects_to_csv(dest="local_data/output.csv", endpoint=None, class_uri=None, property_uri=None):
+    objects = get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
+    s = ",\n".join(objects)
+    f = open(dest, 'w')
+    f.write(s)
+    f.close()
