@@ -75,3 +75,45 @@ def get_cluster_for_meta(training_meta=None, testing_meta=None):
         print "from-to: %d - %d" % (nm["from_index"], nm["to_index"])
     print "\n==================\n"
     return new_meta
+
+
+def predict(model=None, data=None, meta_data=None):
+    """
+    :param model: FCM model
+    :param data: data to be predicted
+    :param meta_data: meta data of the provided data
+    :return:
+    """
+    if model is None:
+        print "predict> model should not be None"
+        return None
+    if data is None:
+        print "predict> data should not be None"
+        return None
+    if meta_data is None:
+        print "predict> meta data should not be None"
+
+    uu = []
+    for idx, md in enumerate(meta_data):
+        u = model.predict(data[md["from_index"]:md["to_index"]])
+        u_avg = np.average(u, axis=0)
+        print "\n----------"
+        print "type: %s" % md["type"]
+        print "is close to cluster %d with membership %f" % (u_avg.argmax(), u_avg.max())
+        print "score vector: %s" % str(u_avg)
+        uu.append(u_avg)
+    print "\n============"
+    uu = np.array(uu)
+    return uu
+
+
+
+
+
+
+
+
+
+
+
+

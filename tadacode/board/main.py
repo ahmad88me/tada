@@ -22,7 +22,12 @@ def main():
         ('http://schema.org/Place', 'http://dbpedia.org/property/longd'),
     ]
 
-    data, meta_data = data_extraction.data_and_meta_from_class_property_uris(class_property_combinations)
+    data1, meta_data1 = data_extraction.data_and_meta_from_class_property_uris(class_property_combinations)
+    data2, meta_data2 = data_extraction.data_and_meta_from_files(['novHighC.csv'])
+    data, meta_data = data_manipulation.merge_data_and_meta_naive(data1=data1, meta_data1=meta_data1, data2=data2,
+                                                                  meta_data2=meta_data2)
+    for clus, md in enumerate(meta_data):
+        print "cluster %d => type: %s" % (clus, md["type"])
     model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
 
     test_data1, test_meta_data1 = data_extraction.data_and_meta_from_class_property_uris(
@@ -35,6 +40,6 @@ def main():
 
     # test_meta_data_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=test_meta_data)
     # learning.test_with_data_and_meta(model=model, data=test_data, meta_data=test_meta_data_with_clusters)
-
+    learning.predict(model=model, data=test_data, meta_data=test_meta_data)
 
 main()
