@@ -24,6 +24,7 @@ def get_features(col):
 def class_property_string_representation(class_uri, property_uri):
     return class_uri + " - " + property_uri
 
+
 def data_and_meta_from_class_property_uris(class_property_uris=[]):
     cols = []
     meta_data = []

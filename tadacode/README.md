@@ -12,7 +12,7 @@ the function main_manual_sparql
 * working on the function merge_clusters_from_meta in learning.py
 
 
-## Questions to answer
+## Questions to answer/ Ideas to consider
 * is using rdfs:RANGE for a concept is enough to get numerical data?
 * explore the idea of cluster radius; instead of storing only cluster centers, maybe we can use the quarentile for this.
 * how to merge close clusters (if the membership is less than a given threshold) (what I'm doing now is merge them if
@@ -27,6 +27,9 @@ impact of multiple clusters is getting merged (and what if all of them merged in
 ) actually belong more (higher membership) to another cluster is possible to occur from a theoretical point of view.
 * I should compute the centers of the clusters in the fuzzy way, not like k-means.
 * Introducing a new FCM algorithm that supports merging clusters and we call it MerFCM.
+* **New FCM** algorithm that takes into account the average memebership for each cluster (because now even with manually
+computed membership, it does not provide the best membership for the whole cluster, giving that we are averaging
+the membership).
 
 
 
