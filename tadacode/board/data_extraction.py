@@ -6,6 +6,7 @@ from __init__ import RAW_ENDPOINT
 import numpy as np
 import pandas as pd
 
+
 def get_features(col):
     """
     :param col:
@@ -26,6 +27,12 @@ def class_property_string_representation(class_uri, property_uri):
 
 
 def data_and_meta_from_class_property_uris(class_property_uris=[]):
+    """
+    get data and meta data from given classes and properties
+    a single meta data contains the following: type, from_index and to_index
+    :param class_property_uris: a list or triples, each triple is composed of two values, class and property
+    :return: data, meta data
+    """
     cols = []
     meta_data = []
     meta_start_idx = 0
@@ -78,8 +85,19 @@ def data_and_meta_from_files(files):
         single_meta["to_index"] = meta_start_idx - 1
         meta_data.append(single_meta)
         data = np.append(data, col, axis=0)
-
+    data = get_features(data)
     return data, meta_data
+
+
+###############################################################
+#               Save Class/Property to a CSV file             #
+###############################################################
+
+
+# to be implemented
+def save_data_and_meta_to_files(data=None, meta_data=None):
+    pass
+
 
 
 
