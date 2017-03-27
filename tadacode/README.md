@@ -3,6 +3,7 @@
 
 ## progress
 * Looking for data sources, will use the the one from Karma (Smithsonian American Art Museum)
+* Also explore http://smartcity.linkeddata.es/sparql as provided by Maria
 * **New FCM** algorithm that takes into account the average memebership for each cluster.
 
 
