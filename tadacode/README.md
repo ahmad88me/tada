@@ -2,7 +2,7 @@
 
 
 ## progress
-* Looking for data sources
+* Looking for data sources, will use the the one from Karma (Smithsonian American Art Museum)
 * **New FCM** algorithm that takes into account the average memebership for each cluster.
 
 
