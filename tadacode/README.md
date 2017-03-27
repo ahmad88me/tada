@@ -2,11 +2,13 @@
 
 
 ## progress
-* now preparing to do the testing with the files after learning from the sparql queries, implementing the cleaner
-version of learning.py and main.py
+* Looking for data sources
+* **New FCM** algorithm that takes into account the average memebership for each cluster.
 
 
 ## finished [ordered in desc]
+* now preparing to do the testing with the files after learning from the sparql queries, implementing the cleaner
+version of learning.py and main.py
 * on main compute center of clusters as average and by the fuzzy way provides exact match, now I wanna test it on
 the function main_manual_sparql
 * working on the function merge_clusters_from_meta in learning.py
