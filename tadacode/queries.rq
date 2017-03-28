@@ -25,4 +25,83 @@ select ?s ?o where{?s a <http://dbpedia.org/ontology/Person>. ?s <http://dbpedia
 select ?s ?o where{?s a <http://xmlns.com/foaf/0.1/Person>. ?s <http://dbpedia.org/ontology/Person/height> ?o}
 
 
+/*This is to show each property/class combination and how many numerical values they have*/
+select ?p count(distinct ?s) as ?num where {
+?s a <http://dbpedia.org/ontology/Person>.
+?s ?p ?o
+FILTER(isNumeric(?o))
+}
+group by ?p
+
+
+/*This is to select the most common properties*/
+select ?p count(distinct ?s) as ?num where {
+?s a  <http://dbpedia.org/ontology/Person>.
+?s ?p ?o
+}
+group by ?p
+
+
+
+/* Below are all the numerical types. reference: https://www.w3.org/TR/xmlschema11-2 */
+
+http://www.w3.org/2001/XMLSchema#float
+http://www.w3.org/2001/XMLSchema#double
+http://www.w3.org/2001/XMLSchema#decimal
+http://www.w3.org/2001/XMLSchema#integer
+http://www.w3.org/2001/XMLSchema#nonPositiveInteger
+http://www.w3.org/2001/XMLSchema#negativeInteger
+http://www.w3.org/2001/XMLSchema#long
+http://www.w3.org/2001/XMLSchema#int
+http://www.w3.org/2001/XMLSchema#short
+http://www.w3.org/2001/XMLSchema#byte
+http://www.w3.org/2001/XMLSchema#nonNegativeInteger
+http://www.w3.org/2001/XMLSchema#unsignedLong
+http://www.w3.org/2001/XMLSchema#unsignedInt
+http://www.w3.org/2001/XMLSchema#unsignedShort
+http://www.w3.org/2001/XMLSchema#unsignedByte
+http://www.w3.org/2001/XMLSchema#positiveInteger
+
+
+<http://www.w3.org/2001/XMLSchema#float>
+<http://www.w3.org/2001/XMLSchema#double>
+<http://www.w3.org/2001/XMLSchema#decimal>
+<http://www.w3.org/2001/XMLSchema#integer>
+<http://www.w3.org/2001/XMLSchema#nonPositiveInteger>
+<http://www.w3.org/2001/XMLSchema#negativeInteger>
+<http://www.w3.org/2001/XMLSchema#long>
+<http://www.w3.org/2001/XMLSchema#int>
+<http://www.w3.org/2001/XMLSchema#short>
+<http://www.w3.org/2001/XMLSchema#byte>
+<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>
+<http://www.w3.org/2001/XMLSchema#unsignedLong>
+<http://www.w3.org/2001/XMLSchema#unsignedInt>
+<http://www.w3.org/2001/XMLSchema#unsignedShort>
+<http://www.w3.org/2001/XMLSchema#unsignedByte>
+<http://www.w3.org/2001/XMLSchema#positiveInteger>
+
+
+/* The below is to show all numerical properties (in definition) using the rdfs:domain and rdfs:range */
+
+select distinct ?pt where{
+?pt rdfs:domain <http://dbpedia.org/ontology/Person>.
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#float>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#double>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#integer>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonPositiveInteger>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#negativeInteger>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#long>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#int>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#short>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#byte>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonNegativeInteger>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedLong>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedInt>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedShort>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedByte>} UNION
+{?pt rdfs:range <http://www.w3.org/2001/XMLSchema#positiveInteger>}
+}
+
+
 
