@@ -5,6 +5,7 @@ from __init__ import QUERY_LIMIT
 import pandas as pd
 import numpy as np
 
+
 def run_query_with_datatype(query=None, endpoint=None, datatype=None):
     """
     :param query: raw SPARQL query
@@ -65,9 +66,11 @@ def get_properties(endpoint=None, class_uri=None, min_count=20):
     :param min_count:
     :return: returns the properties and can be accessed as follows: properties[idx]['property']['value']
     """
-    class_uri_stripped = class_uri.strip()
-    if class_uri_stripped[0] == "<" and class_uri_stripped[-1] == ">":
-        class_uri_stripped = class_uri_stripped[1:-1]
+    # The below three lines are replaced with the function get_url_stripped
+    # class_uri_stripped = class_uri.strip()
+    # if class_uri_stripped[0] == "<" and class_uri_stripped[-1] == ">":
+    #     class_uri_stripped = class_uri_stripped[1:-1]
+    class_uri_stripped = get_url_stripped(class_uri)
     # query = """
     #     prefix loupe: <http://ont-loupe.linkeddata.es/def/core/>
     #     prefix xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -145,9 +148,106 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None):
     return col_mat
 
 
+# not tested yet
 def objects_to_csv(dest="local_data/output.csv", endpoint=None, class_uri=None, property_uri=None):
     objects = get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
     s = ",\n".join(objects)
     f = open(dest, 'w')
     f.write(s)
     f.close()
+
+
+def get_numerical_properties_for_class(endpoint=None, class_uri=None):
+    """
+    get all numerical properties for a given class
+    :param endpoint: endpoint
+    :param class_uri: class uri for the class
+    :return:
+    """
+    if class_uri is None:
+        print "get_numerical_properties_for_class> class_uri should not be None"
+        return []
+    class_uri_stripped = get_url_stripped(class_uri)
+    query = """
+    select distinct ?pt where{
+    ?pt rdfs:domain <%s>.
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#float>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#double>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#integer>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonPositiveInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#negativeInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#long>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#int>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#short>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#byte>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonNegativeInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedLong>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedInt>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedShort>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedByte>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#positiveInteger>}
+    }
+    """ % class_uri_stripped
+    results = run_query(query=query, endpoint=endpoint)
+    properties = [r['pt']['value'] for r in results]
+    return properties
+
+
+def get_all_classes_properties_numerical(endpoint=None):
+    """
+    search for all class/property combinations with numerical objects. here we are relying on the defined
+    structure using rdfs:range and rdfs:domain and not on the data level
+    :param endpoint:
+    :return:
+    """
+    if endpoint is None:
+        print "get_all_classes_properties_numerical> endpoint should not be None"
+        return []
+    query = """
+    select distinct ?pt ?c where{
+    ?pt rdfs:domain ?c.
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#float>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#double>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#integer>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonPositiveInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#negativeInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#long>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#int>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#short>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#byte>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#nonNegativeInteger>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedLong>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedInt>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedShort>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#unsignedByte>} UNION
+    {?pt rdfs:range <http://www.w3.org/2001/XMLSchema#positiveInteger>}
+    }
+    """
+    results = run_query(query=query, endpoint=endpoint)
+    class_property_uris = [(r['c']['value'], r['pt']['value']) for r in results]
+    return class_property_uris
+
+
+def get_url_stripped(uri):
+    """
+    :param uri:  <myuri> or uri
+    :return: myuri
+    """
+    uri_stripped = uri.strip()
+    if uri_stripped[0] == "<":
+        uri_stripped = uri_stripped[1:]
+    if uri_stripped[-1] == ">":
+        uri_stripped = uri_stripped[:-1]
+    return uri_stripped
+
+
+
+
+
+
+
+
+
+

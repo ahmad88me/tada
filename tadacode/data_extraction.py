@@ -1,4 +1,5 @@
-import numpy as np
+import os
+import re
 
 import easysparql
 from __init__ import RAW_ENDPOINT
@@ -33,10 +34,19 @@ def data_and_meta_from_class_property_uris(class_property_uris=[]):
     :param class_property_uris: a list or triples, each triple is composed of two values, class and property
     :return: data, meta data
     """
+    print "\n*********************************************"
+    print "*   data_and_meta_from_class_property_uris  *"
+    print "*********************************************\n"
     cols = []
     meta_data = []
     meta_start_idx = 0
-    for class_uri, propert_uri in class_property_uris:
+    #for class_uri, propert_uri in class_property_uris:
+    for idx, c_p_uri in enumerate(class_property_uris):
+        class_uri, propert_uri = c_p_uri
+        print "--------------- extraction ------------------------"
+        print "combination: %d" % idx
+        print "class: %s" % class_uri
+        print "property: %s" % propert_uri
         col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
         if col.shape != (0, 0):
             cols.append(col)
@@ -93,10 +103,51 @@ def data_and_meta_from_files(files):
 #               Save Class/Property to a CSV file             #
 ###############################################################
 
-
 # to be implemented
-def save_data_and_meta_to_files(data=None, meta_data=None):
-    pass
+def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="local_data"):
+    if data is None:
+        print "save_data_and_meta_to_files> data should not be None"
+        return
+    if meta_data is None:
+        print "save_data_and_meta_to_files> meta_data should not be None"
+        return
+    for md in meta_data:
+        data_sub = data[md["from_index"]:md["to_index"]]
+        file_name = md["type"]
+        # if file_name[0:5] == "https":
+        #     file_name = file_name[5:]
+        # elif file_name[0:4] == "http":
+        #     file_name = file_name[4:]
+        # source: http://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
+        file_name = re.sub('[^A-Za-z0-9]+', '_', file_name).strip()
+        np.savetxt(os.path.join(destination_folder, file_name), data_sub[:,0], delimiter=",", fmt='%1.5f')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

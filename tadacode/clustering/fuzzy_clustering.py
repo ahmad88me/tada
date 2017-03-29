@@ -134,19 +134,32 @@ class FCM:
         vi = (sum of membership for cluster i ^ m  * x ) / sum of membership for cluster i ^ m  : for each cluster i
 
         """
+        print "compute_cluster_centers> X shape: %s" % str(X.shape)
         num_of_points = X.shape[0]
         num_of_features = X.shape[1]
         centers = []
-        for c in xrange(self.n_clusters):
+        print self.u
+        for c in range(self.n_clusters):
             sum1_vec = np.zeros(num_of_features)
             sum2_vec = 0.0
             for i in xrange(num_of_points):
                 interm1 = (self.u[i][c] ** self.m)
                 interm2 = interm1 * X[i]
                 sum1_vec += interm2
-                sum2_vec += (self.u[i][c] ** self.m)
+                sum2_vec += interm1
+                #if i==0:
+                # sum2_vec += (self.u[i][c] ** self.m)
+                if np.array([np.NaN, np.NaN]) == sum1_vec:
+                    print "compute_cluster_centers> interm1 %s" % str(interm1)
+                    print "compute_cluster_centers> interm2 %s" % str(interm2)
+                    print "compute_cluster_centers> X[%d] %s" % (i, str(X[i]))
+                    print "compute_cluster_centers> loop sum1_vec %s" % str(sum1_vec)
+                    print "compute_cluster_centers> loop sum2_vec %s" % str(sum2_vec)
             if sum2_vec == 0:
                 sum2_vec = 0.000001
+            print "compute_cluster_centers> append sum1_vec %s" % str(sum1_vec)
+            print "compute_cluster_centers> append sum2_vec %s" % str(sum2_vec)
+            print "compute_cluster_centers> append sum1_vec/sum2_vec %s" % str(sum1_vec/sum2_vec)
             centers.append(sum1_vec/sum2_vec)
         self.cluster_centers_ = centers
         return centers

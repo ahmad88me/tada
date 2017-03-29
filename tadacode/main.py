@@ -1,7 +1,8 @@
-
+from __init__ import RAW_ENDPOINT
 import data_manipulation
 import data_extraction
 import learning
+import easysparql
 
 
 def main():
@@ -42,4 +43,54 @@ def main():
     # learning.test_with_data_and_meta(model=model, data=test_data, meta_data=test_meta_data_with_clusters)
     learning.predict(model=model, data=test_data, meta_data=test_meta_data)
 
-main()
+
+def main_with_class_explore():
+    class_uri = 'http://dbpedia.org/ontology/Person'
+    properties = easysparql.get_numerical_properties_for_class(endpoint=RAW_ENDPOINT, class_uri=class_uri)
+    if properties is None:
+        return
+    class_property_combinations = zip((len(properties) * [class_uri]), properties)
+    print class_property_combinations
+    data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
+        class_property_uris=class_property_combinations)
+    # data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
+    model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
+    meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data)
+    learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
+
+
+def main_with_explore():
+    classes_properties_uris = easysparql.get_all_classes_properties_numerical(RAW_ENDPOINT)
+    data, meta_data = data_extraction.data_and_meta_from_class_property_uris(class_property_uris=classes_properties_uris)
+    #data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
+    model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
+    meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data)
+    print "model num_of_clusters: %d" % model.n_clusters
+    print "cluster centers: %s" % str(model.cluster_centers_)
+    # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# main()
+# main_with_class_explore()
+main_with_explore()
+
+
+
+
+
+
+

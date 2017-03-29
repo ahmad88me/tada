@@ -34,6 +34,9 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
     :param meta_data: a list of test meta data each with the cluster they belong to
     :return:
     """
+    print "\n****************************"
+    print "*  test_with_data_and_meta *"
+    print "****************************\n"
     if model is None:
         print "test_with_data_and_meta> model should not be None"
     if data is None:
@@ -50,6 +53,9 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
         uu["type"] = md["type"]
         meta_u.append(uu)
         print "\n---------------"
+        print "data: "
+        print data[md["from_index"]:md["to_index"]]
+        print "from-to: %d - %d" % (md["from_index"], md["to_index"])
         print "type: %s" % uu["type"]
         print "score: %f " % uu["score_vector"][uu["cluster"]]
         print "score vector: %s" % str(uu["score_vector"])
@@ -57,17 +63,19 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
 
 
 def get_cluster_for_meta(training_meta=None, testing_meta=None):
+    print "\n*************************"
+    print "*  get_cluster_for_meta *"
+    print "*************************\n"
     if training_meta is None:
-        print "get_cluter_for_meta> training meta should not be None"
+        print "get_cluster_for_meta> training meta should not be None"
     if testing_meta is None:
-        print "get_cluter_for_meta> testing meta should not be None"
+        print "get_cluster_for_meta> testing meta should not be None"
     new_meta = testing_meta
     for clus, tr_meta in enumerate(training_meta):
         for idx, te_meta in enumerate(testing_meta):
             if tr_meta["type"] == te_meta["type"]:
                 new_meta[idx]["cluster"] = clus
                 break
-    print "\nget_cluter_for_meta: "
     for nm in new_meta:
         print "\n------------"
         print "type: %s" % nm["type"]
