@@ -2,6 +2,12 @@
 
 ## new plan January, 2017
 
+### Mind Storming
+* Dealing with nested clusters, maybe add an extra dimension (Maybe similar to SVM?).
+* Merge close clusters (e.g. mayHighC and novHighC), maybe we should also take into accound nested clusters.
+* Maybe we can use the average of the membership of each cluster. We can also use the same training sample and predict it with the clustering to see if two clusters is close to eachother. 
+
+
 ### Assumptions
 * We are dealing with numerical numbers only
 

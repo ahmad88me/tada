@@ -5,7 +5,7 @@
 * Looking for data sources, will use the the one from Karma (Smithsonian American Art Museum)
 * Also explore http://smartcity.linkeddata.es/sparql as provided by Maria
 * **New FCM** algorithm that takes into account the average memebership for each cluster.
-
+* Extract the ontology schema as in the paper "Extraction and Visualization of TBox Information from SPARQL Endpoints"
 
 ## finished [ordered in desc]
 * now preparing to do the testing with the files after learning from the sparql queries, implementing the cleaner
