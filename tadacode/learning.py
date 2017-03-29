@@ -44,7 +44,7 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
     if meta_data is None:
         print "test_with_data_and_meta> meta_data should not be None"
     meta_u = []
-    for md in meta_data:
+    for clus, md in enumerate(meta_data):
         u = model.predict(data[md["from_index"]:md["to_index"]])
         uu = {}
         uu["score_vector"] = np.average(u, axis=0)
@@ -53,12 +53,13 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
         uu["type"] = md["type"]
         meta_u.append(uu)
         print "\n---------------"
-        print "data: "
-        print data[md["from_index"]:md["to_index"]]
+        #print "data: "
+        #print data[md["from_index"]:md["to_index"]]
         print "from-to: %d - %d" % (md["from_index"], md["to_index"])
         print "type: %s" % uu["type"]
+        print "classified as: %s" % meta_data[clus]["type"]
         print "score: %f " % uu["score_vector"][uu["cluster"]]
-        print "score vector: %s" % str(uu["score_vector"])
+        #print "score vector: %s" % str(uu["score_vector"])
     print "\n=============\n"
 
 

@@ -145,16 +145,22 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None):
     col_mat.shape = (col_mat.shape[0], 1)
     col_mat = col_mat.astype(np.float)
     #return pd.DataFrame(clean_objects)['value']
+    # remove nan is any source: http://stackoverflow.com/questions/11620914/removing-nan-values-from-an-array
+    #print "get_objects_as_list> old shape: %s" % str(col_mat.shape)
+    col_mat = col_mat[~np.isnan(col_mat)]
+    #print "get_objects_as_list> new shape: %s" % str(col_mat.shape)
+    col_mat.shape = (col_mat.shape[0], 1)
+    #print "get_objects_as_list> new shape after fix: %s" % str(col_mat.shape)
     return col_mat
 
 
-# not tested yet
-def objects_to_csv(dest="local_data/output.csv", endpoint=None, class_uri=None, property_uri=None):
-    objects = get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
-    s = ",\n".join(objects)
-    f = open(dest, 'w')
-    f.write(s)
-    f.close()
+# # not tested yet
+# def objects_to_csv(dest="local_data/output.csv", endpoint=None, class_uri=None, property_uri=None):
+#     objects = get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
+#     s = ",\n".join(objects)
+#     f = open(dest, 'w')
+#     f.write(s)
+#     f.close()
 
 
 def get_numerical_properties_for_class(endpoint=None, class_uri=None):

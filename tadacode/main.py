@@ -3,7 +3,9 @@ import data_manipulation
 import data_extraction
 import learning
 import easysparql
-
+import numpy as np
+# To print np array without the e (scientific notation)
+np.set_printoptions(suppress=True)
 
 def main():
     class_property_combinations = [
@@ -65,9 +67,9 @@ def main_with_explore():
     #data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
     model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
     meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data)
-    print "model num_of_clusters: %d" % model.n_clusters
-    print "cluster centers: %s" % str(model.cluster_centers_)
-    # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
+    #print "model num_of_clusters: %d" % model.n_clusters
+    #print "cluster centers: %s" % str(model.cluster_centers_)
+    learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
 
 
 
