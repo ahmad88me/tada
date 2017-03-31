@@ -6,6 +6,8 @@ from __init__ import RAW_ENDPOINT
 
 import numpy as np
 import pandas as pd
+import random
+import string
 
 
 def get_features(col):
@@ -17,6 +19,9 @@ def get_features(col):
     # It will results in two identical features, which would help us in the visualization
     return np.append(col, col, 1)
 
+
+def random_string(length=4):
+    return ''.join(random.choice(string.lowercase) for i in range(length))
 
 ###############################################################
 #                   Class/Property Related                    #
@@ -48,13 +53,15 @@ def data_and_meta_from_class_property_uris(class_property_uris=[]):
         print "class: %s" % class_uri
         print "property: %s" % propert_uri
         col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
-        if col.shape != (0, 0):
+        if col.shape[0] != 0:
+        #if col.shape != (0, 0):
             cols.append(col)
             single_meta = {}
             single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
             single_meta["from_index"] = meta_start_idx
             meta_start_idx += col.shape[0]
-            single_meta["to_index"] = meta_start_idx-1
+            # single_meta["to_index"] = meta_start_idx-1
+            single_meta["to_index"] = meta_start_idx
             meta_data.append(single_meta)
 
     if len(cols) > 0:
@@ -92,7 +99,8 @@ def data_and_meta_from_files(files):
         single_meta["type"] = fname
         single_meta["from_index"] = meta_start_idx
         meta_start_idx += col.shape[0]
-        single_meta["to_index"] = meta_start_idx - 1
+        #single_meta["to_index"] = meta_start_idx - 1
+        single_meta["to_index"] = meta_start_idx
         meta_data.append(single_meta)
         data = np.append(data, col, axis=0)
     data = get_features(data)
@@ -103,7 +111,6 @@ def data_and_meta_from_files(files):
 #               Save Class/Property to a CSV file             #
 ###############################################################
 
-# to be implemented
 def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="local_data"):
     if data is None:
         print "save_data_and_meta_to_files> data should not be None"
@@ -121,6 +128,33 @@ def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="l
         # source: http://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
         file_name = re.sub('[^A-Za-z0-9]+', '_', file_name).strip()
         np.savetxt(os.path.join(destination_folder, file_name), data_sub[:,0], delimiter=",", fmt='%1.5f')
+
+
+##################################################
+#            Extracting Data models              #
+##################################################
+
+#Not completed yet
+def save_model(model=None, meta_data=None, file_name=None):
+    a = 1/0
+    if model is None:
+        print "save_model> model should not be empty"
+        return None
+    if meta_data is None:
+        print "save_model> meta_data should not be empty"
+        return None
+    # just in case it was not np array
+    centers = np.array(model.cluster_centers_)
+    fname = random_string()+'.csv'
+    if file_name is not None:
+        fname = file_name + fname
+    f = open(os.path.join('local_models', fname), 'w')
+    for c in centers:
+        f.write(",".join([cc for cc in c]))
+        f.write("\n")
+    f.close()
+    return fname
+
 
 
 

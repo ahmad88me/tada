@@ -20,7 +20,7 @@ def train_with_data_and_meta(data=None, meta_data=None):
     u = np.zeros((data.shape[0], len(meta_data)))
     for clus, md in enumerate(meta_data):
         print "%d from index %d to index %d" % (clus, md["from_index"], md["to_index"])
-        for i in range(md["from_index"], md["to_index"]+1):
+        for i in range(md["from_index"], md["to_index"]):
             u[i][clus] = 1.0
     model.u = u
     model.compute_cluster_centers(data)
@@ -44,6 +44,7 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
     if meta_data is None:
         print "test_with_data_and_meta> meta_data should not be None"
     meta_u = []
+    num_of_correct = 0
     for clus, md in enumerate(meta_data):
         u = model.predict(data[md["from_index"]:md["to_index"]])
         uu = {}
@@ -56,9 +57,21 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
         #print "data: "
         #print data[md["from_index"]:md["to_index"]]
         print "from-to: %d - %d" % (md["from_index"], md["to_index"])
-        print "type: %s" % uu["type"]
-        print "classified as: %s" % meta_data[clus]["type"]
+        print "type:          %s" % uu["type"]
         print "score: %f " % uu["score_vector"][uu["cluster"]]
+        print "classified as: %s" % meta_data[uu["score_vector"].argmax()]["type"]
+        print "classification score: %f " % uu["score_vector"].max()
+        if np.any(np.isnan(uu["score_vector"])):
+            print "clus %d has nan" % clus
+            print uu["score_vector"]
+            print "and u:"
+            print u
+            kkk = 1/0
+        #print "classified as: %s" % meta_data[md["cluster"]]["type"]
+
+        if meta_data[uu["score_vector"].argmax()]["type"] == md["type"]: #md["type"] == meta_data[md["cluster"]]["type"]:
+            num_of_correct += 1
+    print "number of correctly classified is: %d out of %d" % (num_of_correct, len(meta_data))
         #print "score vector: %s" % str(uu["score_vector"])
     print "\n=============\n"
 
@@ -69,8 +82,10 @@ def get_cluster_for_meta(training_meta=None, testing_meta=None):
     print "*************************\n"
     if training_meta is None:
         print "get_cluster_for_meta> training meta should not be None"
+        return []
     if testing_meta is None:
         print "get_cluster_for_meta> testing meta should not be None"
+        return []
     new_meta = testing_meta
     for clus, tr_meta in enumerate(training_meta):
         for idx, te_meta in enumerate(testing_meta):

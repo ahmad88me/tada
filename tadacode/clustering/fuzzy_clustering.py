@@ -18,6 +18,7 @@ import random
 #import matplotlib
 #matplotlib.use("Agg")# the below line is needed for pygame to be used int moviepy preview
 
+from __init__ import SMALL_VALUE
 
 def compute_single_color(p, color):
     import textwrap
@@ -166,6 +167,8 @@ class FCM:
             #print "compute_cluster_centers> append sum2_vec %s" % str(sum2_vec)
             #print "compute_cluster_centers> append sum1_vec/sum2_vec %s" % str(sum1_vec/sum2_vec)
             centers.append(sum1_vec/sum2_vec)
+        # newly added
+        # centers = np.array(centers)
         self.cluster_centers_ = centers
         return centers
 
@@ -211,9 +214,30 @@ class FCM:
         sum1 = 0.0
         for c in self.cluster_centers_:  # this is to compute the sigma
             d2 = self.distance_squared(c, X[datapoint_idx])
+            if d2 == 0.0:
+                d2 = SMALL_VALUE
             sum1 += (d1/d2) ** (1.0/(self.m-1))
+            if np.any(np.isnan(sum1)):
+                print "nan is found in compute_membership_single"
+                print "d1: %s" % str(d1)
+                print "sum1: %s" % str(sum1)
+                print "d2: %s" % str(d2)
+                print "c: %s" % str(c)
+                print "X[%d] %s" % (datapoint_idx, str(X[datapoint_idx]))
+                print "centers: %s" % str(self.cluster_centers_)
+                kkk = 1/0
+
         # print "sum1: "
         # print sum1
+        if sum1 == 0:  # because otherwise it will return inf
+            return 1.0 - SMALL_VALUE
+        if np.any(np.isnan(sum1 ** -1)):
+            print "nan is found in compute_membership_single"
+            print "d1: %s" % str(d1)
+            print "sum1: %s" % str(sum1)
+            print "X[%d] %s" % (datapoint_idx, str(X[datapoint_idx]))
+            print "centers: %s" % str(self.cluster_centers_)
+            kkk = 1/0
         return sum1 ** -1
 
     def update_membership(self, X):
@@ -278,6 +302,11 @@ class FCM:
         self.update_membership(X)
         # print "will copy the predicted membership"
         predicted_u = self.u.copy()
+        if np.any(np.isnan(predicted_u)):
+            print "predict> has a nan"
+            print "u:"
+            print u
+            kkk = 1/0
         # print "will revert back to the old membership"
         self.u = u
         return predicted_u
