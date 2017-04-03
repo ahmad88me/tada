@@ -219,12 +219,8 @@ def get_local_dbpedia_files():
 
 
 # main()
-#main_with_class_explore()
-main_with_explore()
-#main_with_local_files()
-
-
-
-
+# main_with_class_explore()
+# main_with_explore()
+# main_with_local_files()
 
 
