@@ -7,6 +7,7 @@ import numpy as np
 # To print np array without the e (scientific notation)
 np.set_printoptions(suppress=True)
 
+
 def main():
     class_property_combinations = [
         ('http://xmlns.com/foaf/0.1/Person', 'http://dbpedia.org/ontology/numberOfMatches'),
@@ -220,7 +221,7 @@ def get_local_dbpedia_files():
 
 # main()
 # main_with_class_explore()
-# main_with_explore()
+main_with_explore()
 # main_with_local_files()
 
 

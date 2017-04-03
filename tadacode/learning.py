@@ -32,7 +32,10 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
     :param model: FCM model
     :param data: test data
     :param meta_data: a list of test meta data each with the cluster they belong to
-    :return:
+    :return: a list of dict, each has the following info:
+        score_vector: np.array of membership
+        cluster: integer
+        type: class/property string
     """
     print "\n****************************"
     print "*  test_with_data_and_meta *"
@@ -71,9 +74,12 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None):
 
         if meta_data[uu["score_vector"].argmax()]["type"] == md["type"]: #md["type"] == meta_data[md["cluster"]]["type"]:
             num_of_correct += 1
+
+        meta_u.append(uu)
     print "number of correctly classified is: %d out of %d" % (num_of_correct, len(meta_data))
         #print "score vector: %s" % str(uu["score_vector"])
     print "\n=============\n"
+    return meta_u
 
 
 def get_cluster_for_meta(training_meta=None, testing_meta=None):
