@@ -1,7 +1,24 @@
 
 
+## About the web app
+* Test update_func for train_with_data_and_meta and test_with_data_and_meta
+* There was an error (below), I actually applied the solution, but I need to check if it is solved ```
+in explore_and_train
+    else:
+AttributeError: 'QuerySet' object has no attribute 'save'
+```
+* Add update_func to the rest of the function calls in `core.py`
+* Implement the prediction interface
+* Top k candidates
+* Implement the testing mode (to verify the score of the classifications with a given k (top k candidates))
+* Add stats and diagrams.
+* Accept multiple csv files.
+* Filter out non-numerical columns from the csv files
+* Generate R2RML.
+
 
 ## progress
+* Building the web app
 * Looking for data sources, will use the the one from Karma (Smithsonian American Art Museum)
 * Also explore http://smartcity.linkeddata.es/sparql as provided by Maria
 * **New FCM** algorithm that takes into account the average memebership for each cluster.
