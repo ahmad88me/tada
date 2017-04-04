@@ -3,6 +3,8 @@
 
 <h3>Adding a new Training Model</h3>
 <p>This model will be used to train a model that can be used later on to automatically classify csv files</p><br>
+{{error_msg}}
+{{message}}
 <form action="add_model" method="POST"> {% csrf_token %}
     <div class="form-group ">
         <label for="modelname">Model Name</label>

@@ -25,10 +25,17 @@
         <td>{{model.state}}</td>
         <td>
             <div class="progress">
+                {% if model.progress == 100%}
+                <div class="progress-bar bg-dark-solid"
+                     role="progressbar" style="width: {{model.progress}}%" aria-valuenow="{{model.progress}}"
+                     aria-valuemin="0" aria-valuemax="100">{{model.progress}}%
+                </div>
+                {% else %}
                 <div class="progress-bar bg-dark progress-bar-striped progress-bar-animated active"
                      role="progressbar" style="width: {{model.progress}}%" aria-valuenow="{{model.progress}}"
                      aria-valuemin="0" aria-valuemax="100">{{model.progress}}%
                 </div>
+                {%endif%}
                 <!--<div class="progress-bar progress-bar-success progress-bar-striped progress-bar-animated active"-->
                      <!--role="progressbar" style="width: {{model.progress}}%" aria-valuenow="{{model.progress}}"-->
                      <!--aria-valuemin="0" aria-valuemax="100">{{model.progress}}%-->

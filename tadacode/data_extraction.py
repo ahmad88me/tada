@@ -134,14 +134,14 @@ def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="l
 #            Extracting Data models              #
 ##################################################
 
-#Not completed yet
-def save_model(model=None, meta_data=None, file_name=None):
-    a = 1/0
+def save_model(model=None, file_name=None):
+    """
+    :param model: FCM model
+    :param file_name: string to be a prefix for the actual name
+    :return: new_file_name or None if failed to save the model
+    """
     if model is None:
         print "save_model> model should not be empty"
-        return None
-    if meta_data is None:
-        print "save_model> meta_data should not be empty"
         return None
     # just in case it was not np array
     centers = np.array(model.cluster_centers_)

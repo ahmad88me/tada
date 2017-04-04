@@ -1,8 +1,9 @@
 
 import os
+import string
+import random
 
-
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from models import MLModel
 import core
 
@@ -32,17 +33,34 @@ def add_model(request):
         if error_msg != '':
             return render(request, 'add_model.html', {'error_msg': error_msg})
         pid = os.fork()
-        if pid == 0:
-           return render(request, 'add_model.html', {'message': 'model is under processing'})
-        else:
+        # pid = 1
+        if pid == 0:  # child process
+            print "child is returning"
+            return redirect('list_models')
+            #return render(request, 'add_model.html', {'message': 'model is under processing'})
+        else:  # parent process
+            print "in parent"
             mlmodel = MLModel()
-            mlmodel.name = request.POST['name']
+            mlmodel.name = clean_string(request.POST['name'])
+            if mlmodel.name.strip() == '':
+                mlmodel.name = random_string(length=6)
             mlmodel.url = request.POST['url']
             mlmodel.save()
-            core.explore(endpoint=mlmodel.url, model_id=mlmodel.id)
-            os._exit(0) # to close the thread after finishing
+            core.explore_and_train(endpoint=mlmodel.url, model_id=mlmodel.id)
+            # os._exit(0)  # to close the thread after finishing
 
 
 def list_models(request):
     models = MLModel.objects.all()
     return render(request, 'list_models.html', {'models': models})
+
+
+# Helper Functions
+
+
+def random_string(length=4):
+    return ''.join(random.choice(string.lowercase) for i in range(length))
+
+
+def clean_string(s):
+    return ''.join(e for e in s if e.isalnum() or e == ' ' or e=='_' or e=='-')

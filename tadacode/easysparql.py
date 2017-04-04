@@ -205,7 +205,7 @@ def get_all_classes_properties_numerical(endpoint=None):
     search for all class/property combinations with numerical objects. here we are relying on the defined
     structure using rdfs:range and rdfs:domain and not on the data level
     :param endpoint:
-    :return:
+    :return: a list of class/property combinations. in case of no results or error, it will return []
     """
     if endpoint is None:
         print "get_all_classes_properties_numerical> endpoint should not be None"
