@@ -32,8 +32,8 @@ def add_model(request):
             error_msg = 'name is not passed'
         if error_msg != '':
             return render(request, 'add_model.html', {'error_msg': error_msg})
-        #pid = os.fork()
-        pid = 1
+        pid = os.fork()
+        #pid = 1
         if pid == 0:  # child process
             print "child is returning"
             #core.test_progress()

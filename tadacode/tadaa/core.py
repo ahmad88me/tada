@@ -1,7 +1,7 @@
-
+import sys
 from functools import partial
 import numpy as np
-
+import traceback
 
 import easysparql
 import data_extraction
@@ -83,13 +83,13 @@ def explore_and_train(endpoint=None, model_id=None):
         else:
             print "explore_and_train> no nans in the data"
         # data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
-        model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
+        model = learning.train_with_data_and_meta(data=data, meta_data=meta_data, update_func=update_progress_func)
         update_model_state(model_id=model_id,  new_notes="organizing the clusters")
-        meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data)
+        meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data, update_func=update_progress_func)
         update_model_state(model_id=model_id,  new_notes="computing the score of the trained model")
         # print "model num_of_clusters: %d" % model.n_clusters
         # print "cluster centers: %s" % str(model.cluster_centers_)
-        learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
+        learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters, update_func=update_progress_func)
         update_model_state(model_id=model_id, new_notes="Saving the model data")
         model_file_name = data_extraction.save_model(model=model, file_name=str(model_id)+" - ")
         if model_file_name is not None:
@@ -97,13 +97,15 @@ def explore_and_train(endpoint=None, model_id=None):
             if len(m) == 1:
                 m.file_name = model_file_name
                 m.save()
-                update_model_state(model_id=model_id, new_notes="Completed")
+                update_model_state(model_id=model_id, new_state=MLModel.COMPLETE, new_notes="Completed")
             else:
                 update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="model is deleted")
         else:
             update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Error Saving the model")
     except Exception as e:
         print "explore_and_train> Exception %s" % str(e)
+        traceback.print_exc()
+        # print sys.exc_traceback.tb_lineno
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
 
 

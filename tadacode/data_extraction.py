@@ -175,7 +175,7 @@ def save_model(model=None, file_name=None):
         fname = file_name + fname
     f = open(os.path.join('local_models', fname), 'w')
     for c in centers:
-        f.write(",".join([cc for cc in c]))
+        f.write(",".join([str(cc) for cc in c]))
         f.write("\n")
     f.close()
     return fname

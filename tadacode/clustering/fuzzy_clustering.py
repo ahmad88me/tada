@@ -127,7 +127,7 @@ class FCM:
                         self.u[i][rand_clus] = rand_num
                         row_sum += self.u[i][rand_clus]
 
-    def compute_cluster_centers(self, X):
+    def compute_cluster_centers(self, X, update_func=None):
         """
         :param X:
         :return:
@@ -135,38 +135,67 @@ class FCM:
         vi = (sum of membership for cluster i ^ m  * x ) / sum of membership for cluster i ^ m  : for each cluster i
 
         """
-        print "compute_cluster_centers> X shape: %s" % str(X.shape)
+        # print "compute_cluster_centers> X shape: %s" % str(X.shape)
         num_of_points = X.shape[0]
         num_of_features = X.shape[1]
         centers = []
-        print self.u
-        for c in xrange(self.n_clusters):
-            sum1_vec = np.zeros(num_of_features)
-            sum2_vec = 0.0
-            for i in xrange(num_of_points):
-                interm1 = (self.u[i][c] ** self.m)
-                interm2 = interm1 * X[i]
-                sum1_vec += interm2
-                sum2_vec += interm1
-                #if i==0:
-                # sum2_vec += (self.u[i][c] ** self.m)
-                if np.any(np.isnan(sum1_vec)):
-                    print "compute_cluster_centers> interm1 %s" % str(interm1)
-                    print "compute_cluster_centers> interm2 %s" % str(interm2)
-                    print "compute_cluster_centers> X[%d] %s" % (i, str(X[i]))
-                    print "compute_cluster_centers> loop sum1_vec %s" % str(sum1_vec)
-                    print "compute_cluster_centers> loop sum2_vec %s" % str(sum2_vec)
-                    print "X: [%d] %s" % (i-1, X[i-1])
-                    print "X: [%d] %s" % (i+1, X[i+1])
-                    print "X: "
-                    print X
-                    abc = 1/0.0
-            if sum2_vec == 0:
-                sum2_vec = 0.000001
-            #print "compute_cluster_centers> append sum1_vec %s" % str(sum1_vec)
-            #print "compute_cluster_centers> append sum2_vec %s" % str(sum2_vec)
-            #print "compute_cluster_centers> append sum1_vec/sum2_vec %s" % str(sum1_vec/sum2_vec)
-            centers.append(sum1_vec/sum2_vec)
+        # print self.u
+        if update_func is None:
+            for c in xrange(self.n_clusters):
+                sum1_vec = np.zeros(num_of_features)
+                sum2_vec = 0.0
+                for i in xrange(num_of_points):
+                    interm1 = (self.u[i][c] ** self.m)
+                    interm2 = interm1 * X[i]
+                    sum1_vec += interm2
+                    sum2_vec += interm1
+                    #if i==0:
+                    # sum2_vec += (self.u[i][c] ** self.m)
+                    if np.any(np.isnan(sum1_vec)):
+                        print "compute_cluster_centers> interm1 %s" % str(interm1)
+                        print "compute_cluster_centers> interm2 %s" % str(interm2)
+                        print "compute_cluster_centers> X[%d] %s" % (i, str(X[i]))
+                        print "compute_cluster_centers> loop sum1_vec %s" % str(sum1_vec)
+                        print "compute_cluster_centers> loop sum2_vec %s" % str(sum2_vec)
+                        print "X: [%d] %s" % (i-1, X[i-1])
+                        print "X: [%d] %s" % (i+1, X[i+1])
+                        print "X: "
+                        print X
+                        abc = 1/0.0
+                if sum2_vec == 0:
+                    sum2_vec = 0.000001
+                #print "compute_cluster_centers> append sum1_vec %s" % str(sum1_vec)
+                #print "compute_cluster_centers> append sum2_vec %s" % str(sum2_vec)
+                #print "compute_cluster_centers> append sum1_vec/sum2_vec %s" % str(sum1_vec/sum2_vec)
+                centers.append(sum1_vec/sum2_vec)
+        else:
+            for c in xrange(self.n_clusters):
+                sum1_vec = np.zeros(num_of_features)
+                sum2_vec = 0.0
+                for i in xrange(num_of_points):
+                    interm1 = (self.u[i][c] ** self.m)
+                    interm2 = interm1 * X[i]
+                    sum1_vec += interm2
+                    sum2_vec += interm1
+                    #if i==0:
+                    # sum2_vec += (self.u[i][c] ** self.m)
+                    if np.any(np.isnan(sum1_vec)):
+                        print "compute_cluster_centers> interm1 %s" % str(interm1)
+                        print "compute_cluster_centers> interm2 %s" % str(interm2)
+                        print "compute_cluster_centers> X[%d] %s" % (i, str(X[i]))
+                        print "compute_cluster_centers> loop sum1_vec %s" % str(sum1_vec)
+                        print "compute_cluster_centers> loop sum2_vec %s" % str(sum2_vec)
+                        print "X: [%d] %s" % (i-1, X[i-1])
+                        print "X: [%d] %s" % (i+1, X[i+1])
+                        print "X: "
+                        print X
+                        abc = 1/0.0
+                if sum2_vec == 0:
+                    sum2_vec = 0.000001
+                centers.append(sum1_vec/sum2_vec)
+                update_func(int(c * 1.0 / self.n_clusters * 100))
+            update_func(100)
+
         # newly added
         # centers = np.array(centers)
         self.cluster_centers_ = centers
