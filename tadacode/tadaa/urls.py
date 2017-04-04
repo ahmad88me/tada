@@ -7,7 +7,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^add_model', 'tadaa.views.add_model'),
     url(r'list_models', 'tadaa.views.list_models', name='list_models'),
-    url(r'^home', 'tadaa.views.home'),
-
+    url(r'about', 'tadaa.views.about'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^home', 'tadaa.views.home'),
+    url('', 'tadaa.views.home'),
 )

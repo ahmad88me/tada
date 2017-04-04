@@ -32,10 +32,11 @@ def add_model(request):
             error_msg = 'name is not passed'
         if error_msg != '':
             return render(request, 'add_model.html', {'error_msg': error_msg})
-        pid = os.fork()
-        # pid = 1
+        #pid = os.fork()
+        pid = 1
         if pid == 0:  # child process
             print "child is returning"
+            #core.test_progress()
             return redirect('list_models')
             #return render(request, 'add_model.html', {'message': 'model is under processing'})
         else:  # parent process
@@ -47,13 +48,17 @@ def add_model(request):
             mlmodel.url = request.POST['url']
             mlmodel.save()
             core.explore_and_train(endpoint=mlmodel.url, model_id=mlmodel.id)
-            # os._exit(0)  # to close the thread after finishing
+            os._exit(0)  # to close the thread after finishing
 
 
 def list_models(request):
     models = MLModel.objects.all()
     return render(request, 'list_models.html', {'models': models})
 
+
+def about(request):
+    print "**about**"
+    return render(request, 'about.html')
 
 # Helper Functions
 

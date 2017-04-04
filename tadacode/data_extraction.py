@@ -1,5 +1,6 @@
 import os
 import re
+import math
 
 import easysparql
 from __init__ import RAW_ENDPOINT
@@ -32,7 +33,7 @@ def class_property_string_representation(class_uri, property_uri):
     return class_uri + " - " + property_uri
 
 
-def data_and_meta_from_class_property_uris(class_property_uris=[]):
+def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=None):
     """
     get data and meta data from given classes and properties
     a single meta data contains the following: type, from_index and to_index
@@ -45,24 +46,48 @@ def data_and_meta_from_class_property_uris(class_property_uris=[]):
     cols = []
     meta_data = []
     meta_start_idx = 0
-    #for class_uri, propert_uri in class_property_uris:
-    for idx, c_p_uri in enumerate(class_property_uris):
-        class_uri, propert_uri = c_p_uri
-        print "--------------- extraction ------------------------"
-        print "combination: %d" % idx
-        print "class: %s" % class_uri
-        print "property: %s" % propert_uri
-        col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
-        if col.shape[0] != 0:
-        #if col.shape != (0, 0):
-            cols.append(col)
-            single_meta = {}
-            single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
-            single_meta["from_index"] = meta_start_idx
-            meta_start_idx += col.shape[0]
-            # single_meta["to_index"] = meta_start_idx-1
-            single_meta["to_index"] = meta_start_idx
-            meta_data.append(single_meta)
+    num_of_uris = len(class_property_uris)
+
+    if update_func is None:
+        for idx, c_p_uri in enumerate(class_property_uris):
+            class_uri, propert_uri = c_p_uri
+            print "--------------- extraction ------------------------"
+            print "combination: %d" % idx
+            print "class: %s" % class_uri
+            print "property: %s" % propert_uri
+            col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
+            if col.shape[0] != 0:
+            #if col.shape != (0, 0):
+                cols.append(col)
+                single_meta = {}
+                single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
+                single_meta["from_index"] = meta_start_idx
+                meta_start_idx += col.shape[0]
+                # single_meta["to_index"] = meta_start_idx-1
+                single_meta["to_index"] = meta_start_idx
+                meta_data.append(single_meta)
+    else:
+        for idx, c_p_uri in enumerate(class_property_uris):
+            class_uri, propert_uri = c_p_uri
+            print "--------------- extraction ------------------------"
+            print "combination: %d" % idx
+            print "class: %s" % class_uri
+            print "property: %s" % propert_uri
+            col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
+            if col.shape[0] != 0:
+            #if col.shape != (0, 0):
+                cols.append(col)
+                single_meta = {}
+                single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
+                single_meta["from_index"] = meta_start_idx
+                meta_start_idx += col.shape[0]
+                # single_meta["to_index"] = meta_start_idx-1
+                single_meta["to_index"] = meta_start_idx
+                meta_data.append(single_meta)
+                update_func(int(idx*1.0/num_of_uris * 100))
+
+    if update_func is not None:
+        update_func(100)
 
     if len(cols) > 0:
         data = np.array([])
