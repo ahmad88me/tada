@@ -76,7 +76,7 @@ def explore_and_train(endpoint=None, model_id=None):
                            new_notes="extracting values from gathered class/property")
         data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
             class_property_uris=classes_properties_uris, update_func=update_progress_func)
-        update_model_state(model_id=model_id, new_notes="extracted meta_data")
+        update_model_state(model_id=model_id, new_notes="training the model")
         if np.any(np.isnan(data)):
             print "explore_and_train> there is a nan in the data"
             print "**************************"
@@ -84,9 +84,9 @@ def explore_and_train(endpoint=None, model_id=None):
             print "explore_and_train> no nans in the data"
         # data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
         model = learning.train_with_data_and_meta(data=data, meta_data=meta_data)
-        update_model_state(model_id=model_id,  new_notes="trained the model")
+        update_model_state(model_id=model_id,  new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data)
-        update_model_state(model_id=model_id,  new_notes="extract clusters from meta")
+        update_model_state(model_id=model_id,  new_notes="computing the score of the trained model")
         # print "model num_of_clusters: %d" % model.n_clusters
         # print "cluster centers: %s" % str(model.cluster_centers_)
         learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters)
