@@ -9,9 +9,6 @@ import learning
 
 from models import MLModel
 
-QUERY_LIMIT = "LIMIT 100"
-
-
 # def explore_and_train(endpoint=None, model_id=None):
 #     if endpoint is None:
 #         print "explore_and_train> endpoint is None"
@@ -82,16 +79,15 @@ def explore_and_train(endpoint=None, model_id=None):
             print "**************************"
         else:
             print "explore_and_train> no nans in the data"
-        # data_extraction.save_data_and_meta_to_files(data=data, meta_data=meta_data)
         model = learning.train_with_data_and_meta(data=data, meta_data=meta_data, update_func=update_progress_func)
-        update_model_state(model_id=model_id,  new_notes="organizing the clusters")
-        meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data, update_func=update_progress_func)
-        update_model_state(model_id=model_id,  new_notes="computing the score of the trained model")
-        # print "model num_of_clusters: %d" % model.n_clusters
-        # print "cluster centers: %s" % str(model.cluster_centers_)
-        learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters, update_func=update_progress_func)
+        update_model_state(model_id=model_id, new_notes="organizing the clusters")
+        meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
+                                                           update_func=update_progress_func)
+        update_model_state(model_id=model_id, new_notes="computing the score of the trained model")
+        learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
+                                         update_func=update_progress_func)
         update_model_state(model_id=model_id, new_notes="Saving the model data")
-        model_file_name = data_extraction.save_model(model=model, file_name=str(model_id)+" - ")
+        model_file_name = data_extraction.save_model(model=model, file_name=str(model_id) + " - ")
         if model_file_name is not None:
             m = MLModel.objects.filter(id=model_id)
             if len(m) == 1:
@@ -111,6 +107,7 @@ def explore_and_train(endpoint=None, model_id=None):
 
 def update_model_progress_for_partial(model_id, new_prgress):
     return update_model_state(model_id=model_id, new_progress=new_prgress)
+
 
 # def test_progress(model_id=None):
 #     if model_id is None:
