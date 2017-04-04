@@ -1,6 +1,6 @@
 {%extends "base.html"%}
 {%block content%}
-
+<META HTTP-EQUIV="refresh" CONTENT="15">
 <h3>List Models</h3>
 
 <table class="table table-striped">
@@ -8,11 +8,37 @@
     <tr>
         <th>id</th>
         <th>name</th>
+        <th>created on</th>
+        <th>endpoint</th>
         <th>state</th>
         <th>progress</th>
         <th>notes</th>
     </tr>
     </thead>
+    <tbody>
+    {%for model in models %}
+    <tr>
+        <td>{{model.id}}</td>
+        <td>{{model.name}}</td>
+        <td>{{model.created_on}}</td>
+        <td>{{model.url}}</td>
+        <td>{{model.state}}</td>
+        <td>
+            <div class="progress">
+                <div class="progress-bar bg-dark progress-bar-striped progress-bar-animated active"
+                     role="progressbar" style="width: {{model.progress}}%" aria-valuenow="{{model.progress}}"
+                     aria-valuemin="0" aria-valuemax="100">{{model.progress}}%
+                </div>
+                <!--<div class="progress-bar progress-bar-success progress-bar-striped progress-bar-animated active"-->
+                     <!--role="progressbar" style="width: {{model.progress}}%" aria-valuenow="{{model.progress}}"-->
+                     <!--aria-valuemin="0" aria-valuemax="100">{{model.progress}}%-->
+                <!--</div>-->
+            </div>
+        </td>
+        <td>{{model.notes}}</td>
+    </tr>
+    {%endfor%}
+    </tbody>
 </table>
 
 {%endblock%}

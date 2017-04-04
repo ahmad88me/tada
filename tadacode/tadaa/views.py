@@ -3,7 +3,7 @@ import os
 
 
 from django.shortcuts import render
-import models
+from models import MLModel
 import core
 
 
@@ -35,7 +35,7 @@ def add_model(request):
         if pid == 0:
            return render(request, 'add_model.html', {'message': 'model is under processing'})
         else:
-            mlmodel = models.MLModel()
+            mlmodel = MLModel()
             mlmodel.name = request.POST['name']
             mlmodel.url = request.POST['url']
             mlmodel.save()
@@ -43,3 +43,6 @@ def add_model(request):
             os._exit(0) # to close the thread after finishing
 
 
+def list_models(request):
+    models = MLModel.objects.all()
+    return render(request, 'list_models.html', {'models': models})
