@@ -107,7 +107,6 @@ def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=N
 
 def data_and_meta_from_files(files):
     """
-    To be implemented
     :param files: each file should have a single column
     :return:
     """
@@ -125,6 +124,46 @@ def data_and_meta_from_files(files):
         single_meta["from_index"] = meta_start_idx
         meta_start_idx += col.shape[0]
         #single_meta["to_index"] = meta_start_idx - 1
+        single_meta["to_index"] = meta_start_idx
+        meta_data.append(single_meta)
+        data = np.append(data, col, axis=0)
+    data = get_features(data)
+    return data, meta_data
+
+
+def data_and_meta_from_a_mixed_file(file_name):
+    """
+    Currently only used by core.py for the web ui
+    :param file_name: the file can have multiple columns, numerical and non-numericals, but should not have a header
+    :return: data and meta
+
+    """
+
+    df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False).as_matrix()
+    num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
+
+    meta_data = []
+    meta_start_idx = 0
+    data = np.array([])
+    data.shape = (0, 1)
+    for col_idx in xrange(num_cols.shape[1]):
+    # for fname in files:
+    #     col = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
+    #                       dtype=np.float64).as_matrix()
+        col = num_cols[:, col_idx]
+        if col.shape[0] == 0:
+            continue
+
+        # compute the type
+        the_type = file_name.split('/')[-1].strip()
+        if the_type[-4:].lower() == '.csv':
+            the_type = the_type[:-4]
+        the_type = the_type + " , " + str(col_idx)
+
+        single_meta = {}
+        single_meta["type"] = the_type
+        single_meta["from_index"] = meta_start_idx
+        meta_start_idx += col.shape[0]
         single_meta["to_index"] = meta_start_idx
         meta_data.append(single_meta)
         data = np.append(data, col, axis=0)

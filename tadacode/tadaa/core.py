@@ -1,5 +1,6 @@
 from functools import partial
 import numpy as np
+import pandas as pd
 import traceback
 
 import easysparql
@@ -36,9 +37,10 @@ def explore_and_train(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
                                                            update_func=update_progress_func)
-        update_model_state(model_id=model_id, new_progress=0, new_notes="computing the score of the trained model")
-        learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
-                                         update_func=update_progress_func)
+        # Now I'm not using the computed data here
+        # update_model_state(model_id=model_id, new_progress=0, new_notes="computing the score of the trained model")
+        # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
+        #                                  update_func=update_progress_func)
         update_model_state(model_id=model_id, new_progress=0, new_notes="Saving the model data")
         model_file_name = data_extraction.save_model(model=model, meta_data=meta_data, file_name=str(model_id) + " - ")
         if model_file_name is not None:
@@ -60,6 +62,10 @@ def explore_and_train(endpoint=None, model_id=None):
 
 def predict_files(model_id=None, files=[]):
     update_progress_func = partial(update_model_progress_for_partial, model_id)
+    for fname in files:
+        df = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False).as_matrix()
+        num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
+
 
 
 def update_model_progress_for_partial(model_id, new_progress):
