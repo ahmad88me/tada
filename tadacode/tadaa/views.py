@@ -56,9 +56,16 @@ def list_models(request):
     return render(request, 'list_models.html', {'models': models})
 
 
+def predict(request):
+    if request.method == 'GET':
+        return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE)})
+    else:
+        return redirect()
+
+
 def about(request):
-    print "**about**"
     return render(request, 'about.html')
+
 
 # Helper Functions
 

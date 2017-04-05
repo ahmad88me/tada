@@ -1,0 +1,21 @@
+{%extends "base.html"%}
+{%block content%}
+<br>
+<form id="predictform" enctype="multipart/form-data" method="POST" action="/predict"> {%csrf_token%}
+    <div class="form-group">
+        <label for="sel1">Select Model to be used to predict your input:</label>
+        <select class="form-control" id="sel1" name="model_id" form="predictform">
+            {%for m in models%}
+            <option value="{{m.id}}">{{m.name}}</option>
+            {%endfor%}
+        </select>
+    </div>
+    <div class="form-group">
+        <input type="file" name="csvfile" multiple>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn form-control darkl">Predict</button>
+    </div>
+</form>
+{%endblock%}
