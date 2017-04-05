@@ -1,4 +1,3 @@
-import sys
 from functools import partial
 import numpy as np
 import traceback
@@ -41,7 +40,7 @@ def explore_and_train(endpoint=None, model_id=None):
         learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
                                          update_func=update_progress_func)
         update_model_state(model_id=model_id, new_progress=0, new_notes="Saving the model data")
-        model_file_name = data_extraction.save_model(model=model, file_name=str(model_id) + " - ")
+        model_file_name = data_extraction.save_model(model=model, meta_data=meta_data, file_name=str(model_id) + " - ")
         if model_file_name is not None:
             m = MLModel.objects.filter(id=model_id)
             if len(m) == 1:
@@ -56,8 +55,11 @@ def explore_and_train(endpoint=None, model_id=None):
     except Exception as e:
         print "explore_and_train> Exception %s" % str(e)
         traceback.print_exc()
-        # print sys.exc_traceback.tb_lineno
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
+
+
+def predict_files(model_id=None, files=[]):
+    update_progress_func = partial(update_model_progress_for_partial, model_id)
 
 
 def update_model_progress_for_partial(model_id, new_progress):

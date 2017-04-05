@@ -159,7 +159,7 @@ def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="l
 #            Extracting Data models              #
 ##################################################
 
-def save_model(model=None, file_name=None):
+def save_model(model=None, meta_data=None, file_name=None):
     """
     :param model: FCM model
     :param file_name: string to be a prefix for the actual name
@@ -168,14 +168,18 @@ def save_model(model=None, file_name=None):
     if model is None:
         print "save_model> model should not be empty"
         return None
+    if meta_data is None:
+        print "save_model> meta_data should not be empty"
+        return None
     # just in case it was not np array
     centers = np.array(model.cluster_centers_)
     fname = random_string()+'.csv'
     if file_name is not None:
         fname = file_name + fname
     f = open(os.path.join('local_models', fname), 'w')
-    for c in centers:
+    for idx, c in enumerate(centers):
         f.write(",".join([str(cc) for cc in c]))
+        f.write(","+meta_data[idx]["type"])
         f.write("\n")
     f.close()
     return fname
