@@ -34,8 +34,6 @@ class MLModel(models.Model):
 
 class PredictionRun(models.Model):
     name = models.CharField(max_length=120, default='')
-    #files = models.CharField(max_length=500, default='')
-    url = models.URLField()
     public = models.BooleanField(default=True)
     created_on = models.DateTimeField(default=datetime.now())
     owner = models.OneToOneField(User, null=True, blank=True)
@@ -52,13 +50,6 @@ class PredictionRun(models.Model):
         (NOT_STARTED, 'Not Started Yet')
     )
     state = models.CharField(max_length=10, choices=STATE_CHOICES, default=NOT_STARTED)
-
-    # def get_files(self):
-    #     return self.files.split(',')
-    #
-    # def set_files(self, files):
-    #     self.files = ','.join(files)
-    #     return self
 
     def __unicode__(self):
         return self.name

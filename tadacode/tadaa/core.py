@@ -7,7 +7,7 @@ import easysparql
 import data_extraction
 import learning
 
-from models import MLModel
+from models import MLModel, PredictionRun
 
 
 def explore_and_train(endpoint=None, model_id=None):
@@ -60,12 +60,25 @@ def explore_and_train(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
 
 
-def predict_files(model_id=None, files=[]):
-    update_progress_func = partial(update_model_progress_for_partial, model_id)
-    for fname in files:
-        df = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False).as_matrix()
-        num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
+def predict_files(predictionrun_id=None, files=[]):
+    # update_progress_func = partial(update_model_progress_for_partial, model_id)
+    update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=0, new_state=PredictionRun.RUNNING)
+    num_of_files = len(files)
+    for idx, fname in enumerate(files):
+        update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress= int(idx*1.0/num_of_files * 100),
+                                   new_notes='predicting columns in file: '+fname.split('/').strip()[:-4])
+        data, meta_data = data_extraction.data_and_meta_from_a_mixed_file(file_name=fname)
 
+        predictionrun = PredictionRun.objects.filter(id=predictionrun_id)
+        if len(predictionrun) == 1:
+            predictionrun = predictionrun[0]
+            predictionrun.add_memberships()
+    update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=100, new_state=PredictionRun.COMPLETE)
+
+
+####################################################################
+#                State update functions                            #
+####################################################################
 
 
 def update_model_progress_for_partial(model_id, new_progress):
@@ -74,6 +87,21 @@ def update_model_progress_for_partial(model_id, new_progress):
 
 def update_model_state(model_id=None, new_state=None, new_notes=None, new_progress=None):
     m = MLModel.objects.filter(id=model_id)
+    if len(m) == 1:
+        m = m[0]
+        if new_state is not None:
+            m.state = new_state
+        if new_notes is not None:
+            m.notes = new_notes
+        if new_progress is not None:
+            m.progress = new_progress
+        m.save()
+        return m
+    return None
+
+
+def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=None, new_progress=None):
+    m = PredictionRun.objects.filter(id=predictionrun_id)
     if len(m) == 1:
         m = m[0]
         if new_state is not None:

@@ -1,4 +1,5 @@
 
+import traceback
 import numpy as np
 
 from clustering.fuzzy_clustering import FCM
@@ -153,6 +154,37 @@ def get_cluster_for_meta(training_meta=None, testing_meta=None, update_func=None
     return new_meta
 
 
+def load_model(file_name=None):
+    """
+    :param file_name: it is the file name with the abs dir
+    :return: model, list of types
+    """
+    if file_name is None:
+        print "load_model> file_name is None"
+        return None, []
+    try:
+        f = open(file_name, 'r')
+        centers = []
+        cluster_types = []
+        for line in f.readlines():
+            x, y, cluster_type = line.split(',')
+            x = float(x)
+            y = float(y)
+            centers.append((x, y))
+            cluster_types.append(cluster_type)
+        model = FCM(n_clusters=len(centers), max_iter=1)
+        model.cluster_centers_ = centers
+        return model, cluster_types
+
+    except IOError:
+        print "load_model> file <%s> does not exists" % file_name
+        return None, []
+
+    except Exception as e:
+        print "load_model> exception %s" % str(e)
+        traceback.print_exc()
+
+
 def predict(model=None, data=None, meta_data=None):
     """
     :param model: FCM model
@@ -181,6 +213,8 @@ def predict(model=None, data=None, meta_data=None):
     print "\n============"
     uu = np.array(uu)
     return uu
+
+
 
 
 
