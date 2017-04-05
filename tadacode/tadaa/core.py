@@ -64,12 +64,6 @@ def update_model_progress_for_partial(model_id, new_progress):
     return update_model_state(model_id=model_id, new_progress=new_progress)
 
 
-# def test_progress(model_id=None):
-#     if model_id is None:
-#         print "test_progress> model id is None"
-#         return
-
-
 def update_model_state(model_id=None, new_state=None, new_notes=None, new_progress=None):
     m = MLModel.objects.filter(id=model_id)
     if len(m) == 1:
