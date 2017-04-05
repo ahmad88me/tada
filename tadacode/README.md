@@ -16,6 +16,7 @@ AttributeError: 'QuerySet' object has no attribute 'save'
 * Accept multiple csv files.
 * Filter out non-numerical columns from the csv files
 * Generate R2RML.
+* Check Safety of the functionns in core.py e.g. if data is None then update the status and stop.
 
 
 ## progress
