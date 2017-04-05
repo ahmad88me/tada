@@ -178,7 +178,8 @@ def save_model(model=None, meta_data=None, file_name=None):
         fname = file_name + fname
     f = open(os.path.join('local_models', fname), 'w')
     for idx, c in enumerate(centers):
-        f.write(",".join([str(cc) for cc in c]))
+        #f.write(",".join([str(cc) for cc in c]))
+        f.write(",".join(["%1.5f" % cc for cc in c]))
         f.write(","+meta_data[idx]["type"])
         f.write("\n")
     f.close()
