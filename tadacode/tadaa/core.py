@@ -61,7 +61,7 @@ def explore_and_train(endpoint=None, model_id=None):
 
 
 def predict_files(predictionrun_id=None, files=[]):
-    # update_progress_func = partial(update_model_progress_for_partial, model_id)
+    update_progress_func = partial(update_predictionrun_progress_for_partial, predictionrun_id)
     update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=0, new_state=PredictionRun.RUNNING)
     num_of_files = len(files)
     for idx, fname in enumerate(files):
@@ -98,6 +98,10 @@ def update_model_state(model_id=None, new_state=None, new_notes=None, new_progre
         m.save()
         return m
     return None
+
+
+def update_predictionrun_progress_for_partial(predictionrun_id, new_progress):
+    return update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=new_progress)
 
 
 def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=None, new_progress=None):
