@@ -34,6 +34,7 @@ class MLModel(models.Model):
 
 class PredictionRun(models.Model):
     name = models.CharField(max_length=120, default='')
+    types = models.TextField(default='')
     public = models.BooleanField(default=True)
     created_on = models.DateTimeField(default=datetime.now())
     owner = models.OneToOneField(User, null=True, blank=True)
@@ -54,14 +55,26 @@ class PredictionRun(models.Model):
     def __unicode__(self):
         return self.name
 
-    def add_memberships(self, u, meta_data):
+    def add_memberships(self, u, file_column_list):
+        """
+        :param u: membership
+        :param file_column_list:
+        :param types:
+        :return:
+        """
         for idx, r in enumerate(u):
             m = Membership()
             m.prediction_run = self
-            m.column_no = meta_data[idx]["column_no"]
-            m.file_name = meta_data[idx]["file_name"]
+            m.column_no = file_column_list[idx]["column_no"]
+            m.file_name = file_column_list[idx]["file_name"]
             m = m.set_values(r)
             m.save()
+
+    def set_types(self, types):
+        self.types = ','.join(types)
+
+    def get_types(self):
+        return self.types.split(',')
 
 
 class Membership(models.Model):
