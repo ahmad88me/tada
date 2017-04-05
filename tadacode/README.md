@@ -2,7 +2,8 @@
 
 ## About the web app
 * Test update_func for train_with_data_and_meta and test_with_data_and_meta
-* There was an error (below), I actually applied the solution, but I need to check if it is solved ```
+* There was an error (below), I actually applied the solution, but I need to check if it is solved
+```
 in explore_and_train
     else:
 AttributeError: 'QuerySet' object has no attribute 'save'
