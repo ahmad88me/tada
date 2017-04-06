@@ -4,7 +4,8 @@
 <form id="predictform" enctype="multipart/form-data" method="POST" action="/predict"> {%csrf_token%}
     <div class="form-group">
         <label for="prediction_name">Prediction Name</label>
-        <input type="text" id="prediction_name" name="name" class="form-control" placeholder="Enter a name for your prediction"/>
+        <input type="text" id="prediction_name" name="name" class="form-control"
+               placeholder="Enter a name for your prediction"/>
     </div>
     <div class="form-group">
         <label for="sel1">Select Model to be used to predict your input:</label>
@@ -15,7 +16,9 @@
         </select>
     </div>
     <div class="form-group">
-        <input type="file" name="csvfiles" multiple>
+        <!--<input type="file" name="csvfiles" multiple>-->
+        <span class="btn btn-default btn-file">Upload CSV Files <input type="file" name="csvfiles" multiple>
+</span>
     </div>
 
     <div class="form-group">

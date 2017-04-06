@@ -41,6 +41,7 @@
 
     <style>
         .darkl{background-color: #333333; color: #FBFBFB;}
+        .darkl:hover { background-color: #434343; color: #FBFBFB;}
         // dark (orange)
  .progress-dark .bar {
    #gradient > .vertical(lighten(@orange, 15%), @orange);
@@ -69,6 +70,25 @@ a.bg-dark:focus, a.bg-dark:hover {
   background-color: #333333 !important;
 }
 
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
 
 
     </style>
