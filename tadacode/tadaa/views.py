@@ -89,8 +89,8 @@ def predict(request):
                                                                  ' make sure they are text csv files'})
         print "stored files:"
         print stored_files
-        pid = os.fork()
-        # pid = 1
+        #pid = os.fork()
+        pid = 1
         if pid == 0:  # child process
             print "predict> child is returning"
             return redirect('list_predictionruns')

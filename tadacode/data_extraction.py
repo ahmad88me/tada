@@ -140,18 +140,18 @@ def data_and_meta_from_a_mixed_file(file_name):
     """
 
     df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False)
-    num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
-
+    # num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
     meta_data = []
     meta_start_idx = 0
     data = np.array([])
     data.shape = (0, 1)
     data_list = []
-    for col_idx in xrange(num_cols.shape[1]):
-    # for fname in files:
-    #     col = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
-    #                       dtype=np.float64).as_matrix()
-        col = num_cols[:, col_idx]
+    for col_idx, col_name in enumerate(df.columns):
+        if df[col_name].dtype == np.int or df[col_name].dtype == np.float:
+            col = df[col_name].as_matrix()
+            col.shape = (col.shape[0], 1)
+        else:
+            continue
         if col.shape[0] == 0:
             continue
 
