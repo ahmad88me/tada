@@ -131,14 +131,20 @@ def data_and_meta_from_files(files):
     return data, meta_data
 
 
-def data_and_meta_from_a_mixed_file(file_name):
+def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None):
     """
     Currently only used by core.py for the web ui
     :param file_name: the file can have multiple columns, numerical and non-numericals, but should not have a header
+    :param original_file_name: the original file name, it will be used in the type in the meta
     :return: data and meta
 
     """
-
+    if file_name is None:
+        print "data_and_meta_from_a_mixed_file> file_name should not be None"
+        return None, None
+    if original_file_name is None:
+        print "data_and_meta_from_a_mixed_file> original_file_name should not be None"
+        return None, None
     df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False)
     # num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
     meta_data = []
@@ -156,9 +162,10 @@ def data_and_meta_from_a_mixed_file(file_name):
             continue
 
         # compute the type
-        the_type = file_name.split('/')[-1].strip()
-        if the_type[-4:].lower() == '.csv':
-            the_type = the_type[:-4]
+        #the_type = file_name.split('/')[-1].strip()
+        the_type = original_file_name
+        # if the_type[-4:].lower() == '.csv':
+        #     the_type = the_type[:-4]
         the_type = the_type + " , " + str(col_idx)
 
         single_meta = {}

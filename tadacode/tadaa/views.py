@@ -79,10 +79,12 @@ def predict(request):
         print files
         # name = name + ' - ' + random_string(length=4) + '.csv'
         stored_files = []
+        original_uploaded_filenames = []
         for file in files:
             dest_file_name = name + ' - ' + random_string(length=4) + '.csv'
             if handle_uploaded_file(uploaded_file=file, destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
                 stored_files.append(os.path.join(settings.UPLOAD_DIR, dest_file_name))
+                original_uploaded_filenames.append(file.name)
         if len(stored_files) == 0:
             return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
                                                     'error_msg': 'we could not handle any of the files,' +
@@ -108,7 +110,7 @@ def predict(request):
             # print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
             # print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
             core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,pr.mlmodel.file_name),
-                               files=stored_files)
+                               files=stored_files,original_uploaded_filenames=original_uploaded_filenames)
             os._exit(0)
             # return redirect('list_predictionruns')
 
