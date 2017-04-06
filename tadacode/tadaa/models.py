@@ -94,3 +94,5 @@ class Membership(models.Model):
         self.values = ",".join(["%1.5f" % cc for cc in vector])
         return self
 
+    def __unicode__(self):
+        return str(self.id) + ') ' + self.file_name + ', ' + str(self.column_no) + ' - ' + str(self.prediction_run.name)

@@ -73,21 +73,24 @@ def predict(request):
         files = request.FILES.getlist('csvfiles')
         if len(files) == 0:
             return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
-                                                    'error_msg': 'You should update files'})
+                                                    'error_msg': 'You should upload csv files to be predicted'})
         print "name %s num of files %d" % (name, len(files))
         print "files: "
         print files
-        name = name + ' - ' + random_string(length=4) + '.csv'
+        # name = name + ' - ' + random_string(length=4) + '.csv'
         stored_files = []
         for file in files:
-            if handle_uploaded_file(uploaded_file=file, destination_file=os.path.join(settings.UPLOAD_DIR, name)):
-                stored_files.append(os.path.join(settings.UPLOAD_DIR, name))
+            dest_file_name = name + ' - ' + random_string(length=4) + '.csv'
+            if handle_uploaded_file(uploaded_file=file, destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
+                stored_files.append(os.path.join(settings.UPLOAD_DIR, dest_file_name))
         if len(stored_files) == 0:
             return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
                                                     'error_msg': 'we could not handle any of the files,' +
                                                                  ' make sure they are text csv files'})
-        #pid = os.fork()
-        pid = 1
+        print "stored files:"
+        print stored_files
+        pid = os.fork()
+        # pid = 1
         if pid == 0:  # child process
             print "predict> child is returning"
             return redirect('list_predictionruns')
@@ -102,12 +105,12 @@ def predict(request):
                     os.remove(f)
                 return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
                                                         'error_msg': 'The chosen model does not have a model file'})
-            #print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
-            #print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
+            # print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
+            # print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
             core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,pr.mlmodel.file_name),
                                files=stored_files)
-            #os._exit(0)
-            return redirect('list_predictionruns')
+            os._exit(0)
+            # return redirect('list_predictionruns')
 
 
 def list_predictionruns(request):
