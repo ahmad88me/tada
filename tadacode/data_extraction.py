@@ -139,13 +139,14 @@ def data_and_meta_from_a_mixed_file(file_name):
 
     """
 
-    df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False).as_matrix()
+    df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False)
     num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
 
     meta_data = []
     meta_start_idx = 0
     data = np.array([])
     data.shape = (0, 1)
+    data_list = []
     for col_idx in xrange(num_cols.shape[1]):
     # for fname in files:
     #     col = pd.read_csv(fname, header=None, error_bad_lines=False, warn_bad_lines=False, names=[fname],
@@ -166,7 +167,23 @@ def data_and_meta_from_a_mixed_file(file_name):
         meta_start_idx += col.shape[0]
         single_meta["to_index"] = meta_start_idx
         meta_data.append(single_meta)
+        # print "data shape is:"
+        # print data.shape
+        # print "data is: "
+        # print data
+        # print "col shape is:"
+        # print col.shape
+        # print "col is:"
+        # print col
+        # Changing the shape for the col so it can be appended to the data
+        col.shape = (col.shape[0], 1)
+        # print "changed col shape is:"
+        # print col.shape
+        # print "changed col is:"
+        # print col
         data = np.append(data, col, axis=0)
+        #data_list += col
+    #data = np.array(data_list)
     data = get_features(data)
     return data, meta_data
 

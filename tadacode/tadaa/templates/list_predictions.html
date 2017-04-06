@@ -1,0 +1,49 @@
+{%extends "base.html"%}
+{%block content%}
+<META HTTP-EQUIV="refresh" CONTENT="15">
+<h3>List Prediction Runs</h3>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>created on</th>
+        <th>state</th>
+        <th>progress</th>
+        <th>notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%for pr in predictionruns %}
+    <tr>
+        <td>{{pr.id}}</td>
+        <td>{{pr.name}}</td>
+        <td>{{pr.created_on}}</td>
+        <td>{{pr.state}}</td>
+        <td>
+            <div class="progress">
+                {% if pr.progress == 100%}
+                <div class="progress-bar bg-dark-solid"
+                     role="progressbar" style="width: {{pr.progress}}%" aria-valuenow="{{pr.progress}}"
+                     aria-valuemin="0" aria-valuemax="100">{{pr.progress}}%
+                </div>
+                {% else %}
+                <div class="progress-bar bg-dark progress-bar-striped progress-bar-animated active"
+                     role="progressbar" style="width: {{pr.progress}}%" aria-valuenow="{{pr.progress}}"
+                     aria-valuemin="0" aria-valuemax="100">{{pr.progress}}%
+                </div>
+                {%endif%}
+                <!--<div class="progress-bar progress-bar-success progress-bar-striped progress-bar-animated active"-->
+                     <!--role="progressbar" style="width: {{pr.progress}}%" aria-valuenow="{{pr.progress}}"-->
+                     <!--aria-valuemin="0" aria-valuemax="100">{{pr.progress}}%-->
+                <!--</div>-->
+            </div>
+        </td>
+        <td>{{pr.notes}}</td>
+    </tr>
+    {%endfor%}
+    </tbody>
+</table>
+
+{%endblock%}

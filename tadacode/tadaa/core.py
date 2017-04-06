@@ -77,7 +77,7 @@ def predict_files(predictionrun_id=None, model_dir=None, files=[]):
     num_of_files = len(files)
     for idx, fname in enumerate(files):
         update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress= int(idx*1.0/num_of_files * 100),
-                                   new_notes='predicting columns in file: '+fname.split('/').strip()[:-4])
+                                   new_notes='predicting columns in file: '+fname.split('/')[-1].strip()[:-4])
         data, meta_data = data_extraction.data_and_meta_from_a_mixed_file(file_name=fname)
         u = learning.predict(model=model, data=data, meta_data=meta_data)
         predictionrun = PredictionRun.objects.filter(id=predictionrun_id)

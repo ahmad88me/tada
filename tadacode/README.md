@@ -1,24 +1,18 @@
 
 
 ## About the web app
-* Add a page to list Predictions
+
 * Test the prediction function
 * Test update_func for train_with_data_and_meta and test_with_data_and_meta
-* There was an error (below), I actually applied the solution, but I need to check if it is solved
-```
-in explore_and_train
-    else:
-AttributeError: 'QuerySet' object has no attribute 'save'
-```
+
 * Add update_func to the rest of the function calls in `core.py`
-* Implement the prediction interface
+
 * Top k candidates
 * Implement the testing mode (to verify the score of the classifications with a given k (top k candidates))
 * Add stats and diagrams.
 * Accept multiple csv files.
-* Filter out non-numerical columns from the csv files
 * Generate R2RML.
-* Check Safety of the functionns in core.py e.g. if data is None then update the status and stop.
+* Check Safety of the functions in core.py e.g. if data is None then update the status and stop.
 
 
 ## progress
@@ -29,6 +23,15 @@ AttributeError: 'QuerySet' object has no attribute 'save'
 * Extract the ontology schema as in the paper "Extraction and Visualization of TBox Information from SPARQL Endpoints"
 
 ## finished [ordered in desc]
+* Filter out non-numerical columns from the csv files
+* Implement the prediction interface
+* Add a page to list Predictions
+* There was an error (below), I actually applied the solution, but I need to check if it is solved
+```
+in explore_and_train
+    else:
+AttributeError: 'QuerySet' object has no attribute 'save'
+```
 * now preparing to do the testing with the files after learning from the sparql queries, implementing the cleaner
 version of learning.py and main.py
 * on main compute center of clusters as average and by the fuzzy way provides exact match, now I wanna test it on
@@ -56,9 +59,7 @@ computed membership, it does not provide the best membership for the whole clust
 the membership).
 
 
-
 Will only use average because all the points matters, and all the data points are actually weighted equally.
-
 
 
 ## To Do

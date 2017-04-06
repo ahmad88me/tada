@@ -3,8 +3,9 @@ import os
 import string
 import random
 
+import settings
 from django.shortcuts import render, redirect
-from models import MLModel
+from models import MLModel, PredictionRun
 import core
 
 
@@ -60,11 +61,75 @@ def predict(request):
     if request.method == 'GET':
         return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE)})
     else:
-        return redirect()
+        name = request.POST['name']
+        if name.strip() == '':
+            name = random_string(length=4)
+        model_id = request.POST['model_id']
+        model = MLModel.objects.filter(id=model_id)
+        if len(model) != 1:
+            return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
+                                                    'error_msg': 'this model is not longer exists'})
+        model = model[0]
+        files = request.FILES.getlist('csvfiles')
+        if len(files) == 0:
+            return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
+                                                    'error_msg': 'You should update files'})
+        print "name %s num of files %d" % (name, len(files))
+        print "files: "
+        print files
+        name = name + ' - ' + random_string(length=4) + '.csv'
+        stored_files = []
+        for file in files:
+            if handle_uploaded_file(uploaded_file=file, destination_file=os.path.join(settings.UPLOAD_DIR, name)):
+                stored_files.append(os.path.join(settings.UPLOAD_DIR, name))
+        if len(stored_files) == 0:
+            return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
+                                                    'error_msg': 'we could not handle any of the files,' +
+                                                                 ' make sure they are text csv files'})
+        #pid = os.fork()
+        pid = 1
+        if pid == 0:  # child process
+            print "predict> child is returning"
+            return redirect('list_predictionruns')
+        else:  # parent process
+            print "predict> in parent"
+            pr = PredictionRun()
+            pr.mlmodel = model
+            pr.name = name
+            pr.save()
+            if pr.mlmodel.file_name.strip() == '':
+                for f in stored_files:
+                    os.remove(f)
+                return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
+                                                        'error_msg': 'The chosen model does not have a model file'})
+            #print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
+            #print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
+            core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,pr.mlmodel.file_name),
+                               files=stored_files)
+            #os._exit(0)
+            return redirect('list_predictionruns')
+
+
+def list_predictionruns(request):
+    return render(request, 'list_predictions.html', {'predictionruns': PredictionRun.objects.all()})
 
 
 def about(request):
     return render(request, 'about.html')
+
+
+def handle_uploaded_file(uploaded_file=None, destination_file=None):
+    if uploaded_file is None:
+        print "handle_uploaded_file> uploaded_file should not be None"
+        return False
+    if destination_file is None:
+        print "handle_uploaded_file> destinatino_file should not be None"
+        return False
+    f = uploaded_file
+    with open(destination_file, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return True
 
 
 # Helper Functions

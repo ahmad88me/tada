@@ -33,6 +33,7 @@ class MLModel(models.Model):
 
 
 class PredictionRun(models.Model):
+    mlmodel = models.ForeignKey(MLModel)
     name = models.CharField(max_length=120, default='')
     types = models.TextField(default='')
     public = models.BooleanField(default=True)
