@@ -7,7 +7,7 @@ import easysparql
 import data_extraction
 import learning
 
-from models import MLModel, PredictionRun
+from models import MLModel, PredictionRun, Membership
 
 
 def explore_and_train(endpoint=None, model_id=None):
@@ -111,6 +111,35 @@ def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uplo
         return
     update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=100, new_state=PredictionRun.COMPLETE,
                                new_notes='')
+
+
+def get_types_and_membership(predictionrun_id=None, top_k_candidates=5, model_dir=None):
+    if model_dir is None:
+        print 'get_types_and_membership> model_dir should not be None'
+        return []
+    if predictionrun_id is None:
+        print 'get_types_and_membership> predictionrun_id should not be None'
+        return []
+    predictionrun = PredictionRun.objects.filter(id=predictionrun_id)
+    if len(predictionrun) != 1:
+        print 'get_types_and_membership> predictionrun_id is not longer exists'
+        return []
+
+    predictionrun = predictionrun[0]
+    model, types = learning.load_model(model_dir)
+    types = np.array(types)
+    list_of_mem_with_types = []
+    print 'mem with types'
+    for m in Membership.objects.filter(prediction_run=predictionrun):
+        mem_with_types = {}
+        mems = m.get_values_as_numpy()
+        mems_idxs = mems.argsort()[::-1][:5]  # idxs sorted from largest (value not largest index) to smallest
+        mems = mems[mems_idxs]
+        mem_with_types["types"] = types[mems_idxs].tolist()
+        mem_with_types["scores"] = mems.tolist()
+        list_of_mem_with_types.append(mem_with_types)
+        #print mem_with_types
+    return list_of_mem_with_types
 
 
 ####################################################################

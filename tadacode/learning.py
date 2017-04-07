@@ -171,6 +171,7 @@ def load_model(file_name=None):
             x = float(x)
             y = float(y)
             centers.append((x, y))
+            cluster_type = cluster_type.replace('\n', '')
             cluster_types.append(cluster_type)
         model = FCM(n_clusters=len(centers), max_iter=1)
         model.cluster_centers_ = centers

@@ -5,7 +5,7 @@ import random
 
 import settings
 from django.shortcuts import render, redirect
-from models import MLModel, PredictionRun
+from models import MLModel, PredictionRun, Membership
 import core
 
 
@@ -137,8 +137,21 @@ def handle_uploaded_file(uploaded_file=None, destination_file=None):
     return True
 
 
-# Helper Functions
+def list_memberships(request, predictionrun_id):
+    from django.http import Http404
+    predictionrun = PredictionRun.objects.filter(id=predictionrun_id)
+    if len(predictionrun) != 1:
+        raise Http404("Provided prediction run does not exist")
+    predictionrun = predictionrun[0]
+    mems_and_types = core.get_types_and_membership(top_k_candidates=5, predictionrun_id=predictionrun.id,
+                                                   model_dir=os.path.join(settings.MODELS_DIR,
+                                                                          predictionrun.mlmodel.file_name))
+    print 'mems and types is: '
+    print mems_and_types
+    return render(request, 'list_memberships.html', {'mems_and_types': mems_and_types})
 
+
+# Helper Functions
 
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))

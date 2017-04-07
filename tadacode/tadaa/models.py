@@ -54,7 +54,7 @@ class PredictionRun(models.Model):
     state = models.CharField(max_length=10, choices=STATE_CHOICES, default=NOT_STARTED)
 
     def __unicode__(self):
-        return self.name
+        return str(self.id) + ") " + self.name
 
     def add_memberships(self, u, file_column_list):
         """
@@ -85,7 +85,7 @@ class Membership(models.Model):
     values = models.TextField()
 
     def get_values_as_list_of_str(self):
-        return self.split(self.values)
+        return self.values.split(',')
 
     def get_values_as_numpy(self):
         return np.array(self.get_values_as_list_of_str()).astype(np.float64)

@@ -1,0 +1,20 @@
+{%extends "base.html"%}
+{%block content%}
+<h3>List Memberships</h3>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>types</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%for mem_type in mems_and_types %}
+    <tr>
+        <td>something {{mem_type.types}} </td>
+    </tr>
+    {%endfor%}
+    </tbody>
+</table>
+
+{%endblock%}
