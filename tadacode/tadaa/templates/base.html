@@ -95,9 +95,10 @@ a.bg-dark:focus, a.bg-dark:hover {
 
 </head>
 <body>
-<nav class="navbar navbar-inverse">
+<!-- original top dark navigation bar-->
+<nav class="navbar navbar-inverse ">
     <a class="navbar-brand" href="/home">Tadaa</a>
-    <ul class="nav navbar-nav">
+    <ul class="nav navbar-nav ">
         <!--<li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>-->
         <li><a href="/add_model">Add Model</a></li>
         <li><a href="/list_models">Models</a></li>
@@ -105,25 +106,23 @@ a.bg-dark:focus, a.bg-dark:hover {
         <li><a href="/list_predictions">List Predictions</a></li>
         <li><a href="/about">About</a></li>
     </ul>
-
-    <!--<ul class="nav nav-tabs">-->
-  <!--<li role="presentation" class="active"><a href="#">Home</a></li>-->
-  <!--<li role="presentation"><a href="#">Profile</a></li>-->
-  <!--<li role="presentation"><a href="#">Messages</a></li>-->
-    <!--</ul>-->
-    <!---->
-
-
-
-
-    <!--<li role="presentation" class="active"><a href="/home">Home</a></li>-->
-    <!--<li role="presentation"><a href="#">Profile</a></li>-->
-    <!--<li role="presentation"><a href="#">Messages</a></li>-->
 </nav>
+
+
 
 <div class="container-fluid">
 <div class="row">
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-2">
+        <a class="navbar-brand" href="/home">Tadaa</a>
+        <ul class="nav navbar-left nav-stacked">
+        <li><a href="/add_model">Add Model</a></li>
+        <li><a href="/list_models">Models</a></li>
+        <li><a href="/predict">Predict</a></li>
+        <li><a href="/list_predictions">List Predictions</a></li>
+        <li><a href="/about">About</a></li>
+</ul>
+    </div>
+    <div class="col-md-8">
     {%block content%}
 This is base
 {%endblock%}

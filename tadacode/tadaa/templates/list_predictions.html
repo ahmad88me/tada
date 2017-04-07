@@ -7,6 +7,7 @@
     <thead>
     <tr>
         <th>id</th>
+        <th>Go to score</th>
         <th>name</th>
         <th>created on</th>
         <th>state</th>
@@ -18,6 +19,7 @@
     {%for pr in predictionruns %}
     <tr>
         <td>{{pr.id}}</td>
+        <td><a class="glyphicon glyphicon-stats btn btn-warning" href="list_memberships/{{pr.id}}"></a></td>
         <td>{{pr.name}}</td>
         <td>{{pr.created_on}}</td>
         <td>{{pr.state}}</td>
