@@ -135,8 +135,11 @@ def get_types_and_membership(predictionrun_id=None, top_k_candidates=5, model_di
         mems = m.get_values_as_numpy()
         mems_idxs = mems.argsort()[::-1][:5]  # idxs sorted from largest (value not largest index) to smallest
         mems = mems[mems_idxs]
-        mem_with_types["types"] = types[mems_idxs].tolist()
-        mem_with_types["scores"] = mems.tolist()
+        # mem_with_types["types"] = types[mems_idxs].tolist()
+        # mem_with_types["scores"] = mems.tolist()
+        mem_with_types["typesscores"] = zip(mems.tolist(), types[mems_idxs].tolist())
+        mem_with_types["column_no"] = m.column_no
+        mem_with_types["file_name"] = m.file_name
         list_of_mem_with_types.append(mem_with_types)
         #print mem_with_types
     return list_of_mem_with_types

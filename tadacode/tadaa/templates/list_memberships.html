@@ -2,19 +2,44 @@
 {%block content%}
 <h3>List Memberships</h3>
 
+<!--<table class="table table-striped">-->
+    <!--<thead>-->
+    <!--<tr>-->
+        <!--<th>types</th>-->
+    <!--</tr>-->
+    <!--</thead>-->
+    <!--<tbody>-->
+    <!--{%for mem_type in mems_and_types %}-->
+    <!--<tr>-->
+        <!--<td>something {{mem_type.types}} </td>-->
+    <!--</tr>-->
+    <!--{%endfor%}-->
+    <!--</tbody>-->
+<!--</table>-->
+
+{%for mem_type in mems_and_types %}
+
+{{mem_type.file_name}}
+{{mem_type.column_no}}
+
+
+
 <table class="table table-striped">
     <thead>
     <tr>
         <th>types</th>
+        <th>scores</th>
     </tr>
     </thead>
     <tbody>
-    {%for mem_type in mems_and_types %}
+    {% for s,t in mem_type.typesscores%}
     <tr>
-        <td>something {{mem_type.types}} </td>
+        <td>{{t}} </td>
+        <td>{{s}} </td>
     </tr>
     {%endfor%}
     </tbody>
 </table>
+{%endfor%}
 
 {%endblock%}
