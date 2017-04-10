@@ -32,7 +32,7 @@ def run_query_with_datatype(query=None, endpoint=None, datatype=None):
     return [], []
 
 
-def run_query(query=None, endpoint=None):
+def run_query(query=None, endpoint=None, raiseexception=False):
     """
     :param query: raw SPARQL query
     :param endpoint: endpoint source that hosts the data
@@ -56,6 +56,8 @@ def run_query(query=None, endpoint=None):
     except Exception as e:
         print "sparql error: $$<%s>$$" % str(e)
         print "query: $$<%s>$$" % str(query)
+        if raiseexception:
+            raise e
         return []
 
 
@@ -117,7 +119,7 @@ def get_properties_as_list(endpoint=None, class_uri=None, min_count=20):
     return pd.DataFrame(clean_properties)['value']
 
 
-def get_objects(endpoint=None, class_uri=None, property_uri=None, isnumericfilter=True):
+def get_objects(endpoint=None, class_uri=None, property_uri=None, isnumericfilter=True, failbacknofilter=True):
     class_uri_stripped = class_uri.strip()
     if class_uri_stripped[0] == "<" and class_uri_stripped[-1] == ">":
         class_uri_stripped = class_uri_stripped[1:-1]
@@ -125,15 +127,25 @@ def get_objects(endpoint=None, class_uri=None, property_uri=None, isnumericfilte
     if property_uri_stripped[0] == "<" and property_uri_stripped[-1] == ">":
         property_uri_stripped = property_uri_stripped[1:-1]
     if isnumericfilter:
-        query = """
-            select ?o where{ ?s  a <%s>. ?s <%s> ?o FILTER(isNumeric(?o))} %s
-        """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+        try:
+            query = """
+                select ?o where{ ?s  a <%s>. ?s <%s> ?o FILTER(isNumeric(?o))} %s
+            """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+            objects = run_query(query=query, endpoint=endpoint, raiseexception=True)
+        except Exception as e:
+            if failbacknofilter:
+                print "fail back ... "
+                query = """
+                    select ?o where{ ?s  a <%s>. ?s <%s> ?o} %s
+                """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+                objects = run_query(query=query, endpoint=endpoint)
     else:
         query = """
             select ?o where{ ?s  a <%s>. ?s <%s> ?o} %s
         """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+        objects = run_query(query=query, endpoint=endpoint)
 
-    objects = run_query(query=query, endpoint=endpoint)
+    # objects = run_query(query=query, endpoint=endpoint)
     return objects
 
 
