@@ -3,7 +3,6 @@ import re
 import math
 
 import easysparql
-from __init__ import RAW_ENDPOINT
 
 import numpy as np
 import pandas as pd
@@ -33,7 +32,7 @@ def class_property_string_representation(class_uri, property_uri):
     return class_uri + " - " + property_uri
 
 
-def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=None):
+def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[], update_func=None, isnumericfilter=True):
     """
     get data and meta data from given classes and properties
     a single meta data contains the following: type, from_index and to_index
@@ -43,6 +42,9 @@ def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=N
     print "\n*********************************************"
     print "*   data_and_meta_from_class_property_uris  *"
     print "*********************************************\n"
+    if endpoint is None:
+        print "data_and_meta_from_class_property_uris> endpoint should not be None"
+        return None, None
     cols = []
     meta_data = []
     meta_start_idx = 0
@@ -55,7 +57,8 @@ def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=N
             print "combination: %d" % idx
             print "class: %s" % class_uri
             print "property: %s" % propert_uri
-            col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
+            col = easysparql.get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=propert_uri,
+                                                 isnumericfilter=isnumericfilter)
             if col.shape[0] != 0:
             #if col.shape != (0, 0):
                 cols.append(col)
@@ -73,7 +76,10 @@ def data_and_meta_from_class_property_uris(class_property_uris=[], update_func=N
             print "combination: %d" % idx
             print "class: %s" % class_uri
             print "property: %s" % propert_uri
-            col = easysparql.get_objects_as_list(endpoint=RAW_ENDPOINT, class_uri=class_uri, property_uri=propert_uri)
+            col = easysparql.get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=propert_uri,
+                                                 isnumericfilter=isnumericfilter)
+            # print "debug: extraction col"
+            # print 'col.shape %s' % str(col.shape)
             if col.shape[0] != 0:
             #if col.shape != (0, 0):
                 cols.append(col)

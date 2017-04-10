@@ -26,7 +26,8 @@ def explore_and_train(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_progress=0,
                            new_notes="extracting values from gathered class/property")
         data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
-            class_property_uris=classes_properties_uris, update_func=update_progress_func)
+            endpoint=endpoint, class_property_uris=classes_properties_uris, update_func=update_progress_func,
+            isnumericfilter=False)
         update_model_state(model_id=model_id, new_progress=0, new_notes="training the model")
         if data is None:
             update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED,

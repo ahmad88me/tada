@@ -117,22 +117,29 @@ def get_properties_as_list(endpoint=None, class_uri=None, min_count=20):
     return pd.DataFrame(clean_properties)['value']
 
 
-def get_objects(endpoint=None, class_uri=None, property_uri= None):
+def get_objects(endpoint=None, class_uri=None, property_uri=None, isnumericfilter=True):
     class_uri_stripped = class_uri.strip()
     if class_uri_stripped[0] == "<" and class_uri_stripped[-1] == ">":
         class_uri_stripped = class_uri_stripped[1:-1]
     property_uri_stripped = property_uri.strip()
     if property_uri_stripped[0] == "<" and property_uri_stripped[-1] == ">":
         property_uri_stripped = property_uri_stripped[1:-1]
-    query = """
-        select ?o where{ ?s  a <%s>. ?s <%s> ?o FILTER(isNumeric(?o))} %s
-    """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+    if isnumericfilter:
+        query = """
+            select ?o where{ ?s  a <%s>. ?s <%s> ?o FILTER(isNumeric(?o))} %s
+        """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+    else:
+        query = """
+            select ?o where{ ?s  a <%s>. ?s <%s> ?o} %s
+        """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
+
     objects = run_query(query=query, endpoint=endpoint)
     return objects
 
 
-def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None):
-    objects = get_objects(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri)
+def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnumericfilter=True):
+    objects = get_objects(endpoint=endpoint, class_uri=class_uri, property_uri=property_uri,
+                          isnumericfilter=isnumericfilter)
     clean_objects = [o['o'] for o in objects]
     if len(clean_objects) == 0:
         print "no objects found for class %s property %s in endpoint %s" % (class_uri, property_uri, endpoint)
