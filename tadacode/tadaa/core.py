@@ -65,7 +65,7 @@ def explore_and_train(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
 
 
-def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uploaded_filenames=[]):
+def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uploaded_filenames=[], has_header=False):
     """
     :param predictionrun_id:
     :param model_dir: the dir of the FCM model csv file abs dir
@@ -84,16 +84,19 @@ def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uplo
         return
     print "original uploaded files:"
     print original_uploaded_filenames
-    update_progress_func = partial(update_predictionrun_progress_for_partial, predictionrun_id)
+    update_func = partial(update_predictionrun_progress_for_partial, predictionrun_id)
     update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=0, new_state=PredictionRun.RUNNING)
     model, types = learning.load_model(model_dir)
     num_of_files = len(files)
     for idx, fname in enumerate(files):
-        update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=int(idx * 1.0 / num_of_files * 100),
+        # update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=int(idx * 1.0 / num_of_files * 100),
+        #                            new_notes='predicting columns in file: ' + fname.split('/')[-1].strip()[:-4])
+        update_predictionrun_state(predictionrun_id=predictionrun_id,
                                    new_notes='predicting columns in file: ' + fname.split('/')[-1].strip()[:-4])
-        data, meta_data = data_extraction.data_and_meta_from_a_mixed_file(file_name=fname,
+        data, meta_data = data_extraction.data_and_meta_from_a_mixed_file(file_name=fname, has_header=has_header,
                                                         original_file_name=original_uploaded_filenames[idx])
-        u = learning.predict(model=model, data=data, meta_data=meta_data)
+        print "predict_files> extracted data shape is %s " % str(data.shape)
+        u = learning.predict(model=model, data=data, meta_data=meta_data, update_func=update_func)
         predictionrun = PredictionRun.objects.filter(id=predictionrun_id)
         if len(predictionrun) == 1:
             predictionrun = predictionrun[0]
@@ -109,6 +112,8 @@ def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uplo
     if len(predictionrun) == 1:
         predictionrun = predictionrun[0]
         predictionrun.set_types(types)
+        print "setting types"
+        print types
     else:
         update_predictionrun_state(predictionrun_id=predictionrun_id,
                                    new_notes="predictionrun_id is not longer exists",
@@ -177,6 +182,10 @@ def update_model_state(model_id=None, new_state=None, new_notes=None, new_progre
 
 def update_predictionrun_progress_for_partial(predictionrun_id, new_progress):
     return update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=new_progress)
+
+
+# def update_predictionrun_notes_for_partial(predictionrun_id, new_notes):
+#     return update_predictionrun_state(predictionrun_id=predictionrun_id, new_notes=new_notes)
 
 
 def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=None, new_progress=None):

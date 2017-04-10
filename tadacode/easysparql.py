@@ -252,6 +252,8 @@ def get_all_classes_properties_numerical(endpoint=None):
     """
     results = run_query(query=query, endpoint=endpoint)
     class_property_uris = [(r['c']['value'], r['pt']['value']) for r in results]
+    print "get_all_classes_properties_numerical> class_property_uris:"
+    print class_property_uris
     return class_property_uris
 
 

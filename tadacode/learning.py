@@ -186,7 +186,7 @@ def load_model(file_name=None):
         traceback.print_exc()
 
 
-def predict(model=None, data=None, meta_data=None):
+def predict(model=None, data=None, meta_data=None, update_func=None):
     """
     :param model: FCM model
     :param data: data to be predicted
@@ -203,14 +203,27 @@ def predict(model=None, data=None, meta_data=None):
         print "predict> meta data should not be None"
 
     uu = []
-    for idx, md in enumerate(meta_data):
-        u = model.predict(data[md["from_index"]:md["to_index"]])
-        u_avg = np.average(u, axis=0)
-        print "\n----------"
-        print "type: %s" % md["type"]
-        print "is close to cluster %d with membership %f" % (u_avg.argmax(), u_avg.max())
-        print "score vector: %s" % str(u_avg)
-        uu.append(u_avg)
+    if update_func is None:
+        for idx, md in enumerate(meta_data):
+            u = model.predict(data[md["from_index"]:md["to_index"]])
+            u_avg = np.average(u, axis=0)
+            print "\n----------"
+            print "type: %s" % md["type"]
+            print "is close to cluster %d with membership %f" % (u_avg.argmax(), u_avg.max())
+            print "score vector: %s" % str(u_avg)
+            uu.append(u_avg)
+    else:
+        num_of_cols = len(meta_data)
+        for idx, md in enumerate(meta_data):
+            update_func(int(idx * 1.0 / num_of_cols * 100))
+            u = model.predict(data[md["from_index"]:md["to_index"]])
+            u_avg = np.average(u, axis=0)
+            print "\n----------"
+            print "type: %s" % md["type"]
+            print "is close to cluster %d with membership %f" % (u_avg.argmax(), u_avg.max())
+            print "score vector: %s" % str(u_avg)
+            uu.append(u_avg)
+
     print "\n============"
     uu = np.array(uu)
     return uu

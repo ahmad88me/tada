@@ -61,6 +61,9 @@ def predict(request):
     if request.method == 'GET':
         return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE)})
     else:
+        has_header = False
+        if 'hasheader' in request.POST:
+            has_header = True
         name = request.POST['name']
         if name.strip() == '':
             name = random_string(length=4)
@@ -109,8 +112,10 @@ def predict(request):
                                                         'error_msg': 'The chosen model does not have a model file'})
             # print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
             # print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
-            core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,pr.mlmodel.file_name),
-                               files=stored_files,original_uploaded_filenames=original_uploaded_filenames)
+            core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,
+                                                                              pr.mlmodel.file_name),
+                               files=stored_files, has_header=has_header,
+                               original_uploaded_filenames=original_uploaded_filenames)
             os._exit(0)
             # return redirect('list_predictionruns')
 

@@ -237,12 +237,14 @@ class FCM:
         # print self.cluster_centers_
         # print "cluster centers [%d]: " % cluster_idx
         # print self.cluster_centers_[cluster_idx]
-        d1 = self.distance_squared(X[datapoint_idx], self.cluster_centers_[cluster_idx])
+
+        clean_X = X[~np.isnan(X).any(axis=1)]
+        d1 = self.distance_squared(clean_X[datapoint_idx], self.cluster_centers_[cluster_idx])
         # print "d1: "
         # print d1
         sum1 = 0.0
         for c in self.cluster_centers_:  # this is to compute the sigma
-            d2 = self.distance_squared(c, X[datapoint_idx])
+            d2 = self.distance_squared(c, clean_X[datapoint_idx])
             if d2 == 0.0:
                 d2 = SMALL_VALUE
             sum1 += (d1/d2) ** (1.0/(self.m-1))
@@ -252,7 +254,7 @@ class FCM:
                 print "sum1: %s" % str(sum1)
                 print "d2: %s" % str(d2)
                 print "c: %s" % str(c)
-                print "X[%d] %s" % (datapoint_idx, str(X[datapoint_idx]))
+                print "X[%d] %s" % (datapoint_idx, str(clean_X[datapoint_idx]))
                 print "centers: %s" % str(self.cluster_centers_)
                 kkk = 1/0
 
@@ -264,7 +266,7 @@ class FCM:
             print "nan is found in compute_membership_single"
             print "d1: %s" % str(d1)
             print "sum1: %s" % str(sum1)
-            print "X[%d] %s" % (datapoint_idx, str(X[datapoint_idx]))
+            print "X[%d] %s" % (datapoint_idx, str(clean_X[datapoint_idx]))
             print "centers: %s" % str(self.cluster_centers_)
             kkk = 1/0
         return sum1 ** -1

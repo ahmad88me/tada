@@ -137,7 +137,7 @@ def data_and_meta_from_files(files):
     return data, meta_data
 
 
-def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None):
+def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has_header=False):
     """
     Currently only used by core.py for the web ui
     :param file_name: the file can have multiple columns, numerical and non-numericals, but should not have a header
@@ -151,7 +151,10 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None):
     if original_file_name is None:
         print "data_and_meta_from_a_mixed_file> original_file_name should not be None"
         return None, None
-    df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False)
+    if has_header:
+        df = pd.read_csv(file_name, error_bad_lines=False, warn_bad_lines=False, skip_blank_lines=True)
+    else:
+        df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False, skip_blank_lines=True)
     # num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
     meta_data = []
     meta_start_idx = 0
@@ -198,6 +201,7 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None):
         #data_list += col
     #data = np.array(data_list)
     data = get_features(data)
+    print "data_and_meta_from_a_mixed_file> data shape %s" % str(data.shape)
     return data, meta_data
 
 

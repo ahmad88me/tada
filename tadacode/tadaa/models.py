@@ -63,7 +63,9 @@ class PredictionRun(models.Model):
         :param types:
         :return:
         """
+        print "add_memberships> len of u is %d" % len(u)
         for idx, r in enumerate(u):
+            print "membership %d" % idx
             m = Membership()
             m.prediction_run = self
             m.column_no = file_column_list[idx]["column_no"]
@@ -73,6 +75,7 @@ class PredictionRun(models.Model):
 
     def set_types(self, types):
         self.types = ','.join(types)
+        # self.save()
 
     def get_types(self):
         return self.types.split(',')
