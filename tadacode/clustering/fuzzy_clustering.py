@@ -238,7 +238,8 @@ class FCM:
         # print "cluster centers [%d]: " % cluster_idx
         # print self.cluster_centers_[cluster_idx]
 
-        clean_X = X[~np.isnan(X).any(axis=1)]
+        #clean_X = X[~np.isnan(X).any(axis=1)]
+        clean_X = X
         d1 = self.distance_squared(clean_X[datapoint_idx], self.cluster_centers_[cluster_idx])
         # print "d1: "
         # print d1

@@ -164,6 +164,7 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has
     for col_idx, col_name in enumerate(df.columns):
         if df[col_name].dtype == np.int or df[col_name].dtype == np.float:
             col = df[col_name].as_matrix()
+            col = col[~np.isnan(col).any(axis=1)] # cleaning up from nans
             col.shape = (col.shape[0], 1)
         else:
             continue
