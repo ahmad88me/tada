@@ -9,6 +9,7 @@
         <th>id</th>
         <th>Go to score</th>
         <th>name</th>
+        <th>used model</th>
         <th>created on</th>
         <th>state</th>
         <th>progress</th>
@@ -21,6 +22,7 @@
         <td>{{pr.id}}</td>
         <td><a class="glyphicon glyphicon-stats btn btn-warning" href="list_memberships/{{pr.id}}"></a></td>
         <td>{{pr.name}}</td>
+        <td>{{pr.mlmodel.name}}</td>
         <td>{{pr.created_on}}</td>
         <td>{{pr.state}}</td>
         <td>
