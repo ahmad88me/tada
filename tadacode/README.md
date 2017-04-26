@@ -1,4 +1,6 @@
 
+See the progress list below:
+
 ## Experiment data
 1. Carbon Emissions Car fuel consumptions.csv: but tested on the 100 file "Carbon Emissions Car fuel consumptions 100
 .csv", I need to run it on the original large file. The url is
@@ -6,7 +8,7 @@
 
 
 ## About the web app
-
+* Now, need to test the split abox method
 * Test the prediction function
 * Test update_func for train_with_data_and_meta and test_with_data_and_meta
 
