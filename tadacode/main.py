@@ -49,7 +49,7 @@ def main():
 
 def main_with_class_explore():
     class_uri = 'http://dbpedia.org/ontology/Person'
-    properties = easysparql.get_numerical_properties_for_class(endpoint=RAW_ENDPOINT, class_uri=class_uri)
+    properties = easysparql.get_numerical_properties_for_class_tbox(endpoint=RAW_ENDPOINT, class_uri=class_uri)
     if properties is None:
         return
     class_property_combinations = zip((len(properties) * [class_uri]), properties)

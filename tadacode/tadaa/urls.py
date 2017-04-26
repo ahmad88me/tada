@@ -5,6 +5,8 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'tadaa.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
+    url(r'^testauto', 'tadaa.views.testauto'),
+    url(r'^add_model_abox', 'tadaa.views.add_model_abox'),
     url(r'^add_model', 'tadaa.views.add_model'),
     url(r'list_models', 'tadaa.views.list_models', name='list_models'),
     url(r'about', 'tadaa.views.about'),

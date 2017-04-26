@@ -23,6 +23,7 @@ def get_features(col):
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
+
 ###############################################################
 #                   Class/Property Related                    #
 ###############################################################
@@ -233,6 +234,7 @@ def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="l
 ##################################################
 #            Extracting Data models              #
 ##################################################
+
 
 def save_model(model=None, meta_data=None, file_name=None):
     """

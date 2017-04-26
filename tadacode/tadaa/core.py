@@ -10,12 +10,12 @@ import learning
 from models import MLModel, PredictionRun, Membership
 
 
-def explore_and_train(endpoint=None, model_id=None):
+def explore_and_train_tbox(endpoint=None, model_id=None):
     if endpoint is None:
-        print "explore_and_train> endpoint is None"
+        print "explore_and_train_tbox> endpoint is None"
         return
     if model_id is None:
-        print "explore_and_train> model_id should not be None"
+        print "explore_and_train_tbox> model_id should not be None"
         return
     try:
         update_progress_func = partial(update_model_progress_for_partial, model_id)
@@ -34,10 +34,10 @@ def explore_and_train(endpoint=None, model_id=None):
                                new_notes="No data is extracted from the endpoint")
             return
         if np.any(np.isnan(data)):
-            print "explore_and_train> there is a nan in the data"
+            print "explore_and_train_tbox> there is a nan in the data"
             print "**************************"
         else:
-            print "explore_and_train> no nans in the data"
+            print "explore_and_train_tbox> no nans in the data"
         model = learning.train_with_data_and_meta(data=data, meta_data=meta_data, update_func=update_progress_func)
         update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
@@ -60,9 +60,83 @@ def explore_and_train(endpoint=None, model_id=None):
         else:
             update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED, new_notes="Error Saving the model")
     except Exception as e:
-        print "explore_and_train> Exception %s" % str(e)
+        print "explore_and_train_tbox> Exception %s" % str(e)
         traceback.print_exc()
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
+
+
+def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
+    if endpoint is None:
+        print "explore_and_train_abox> endpoint is None"
+        return
+    if model_id is None:
+        print "explore_and_train_abox> model_id should not be None"
+        return
+    try:
+        update_progress_func = partial(update_model_progress_for_partial, model_id)
+        update_model_state(model_id=model_id, new_state=MLModel.RUNNING, new_progress=0,
+                           new_notes="Extracting numerical class/property combinations")
+        classes_properties_uris = []
+        for idx, class_uri in enumerate(classes_uris):
+            update_progress_func(int(idx * 1.0 / len(classes_uris) * 100))
+            # properties = easysparql.get_numerical_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
+            #                                                                 raiseexception=True)
+
+            properties = easysparql.get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
+                                                                                             class_uri=class_uri,
+                                                                                             raiseexception=True,
+                                                                                             lower_bound=1,
+                                                                                             upper_bound=100000,
+                                                                                             first_time=True)
+            print "explore and train abox> printing properties"
+            print properties
+            print "type: "
+            print properties(type)
+
+
+            for prop in properties:
+                classes_properties_uris.append((class_uri, prop))
+        update_progress_func(100)
+        update_model_state(model_id=model_id, new_progress=0,
+                           new_notes="extracting values from gathered class/property")
+        data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
+            endpoint=endpoint, class_property_uris=classes_properties_uris, update_func=update_progress_func,
+            isnumericfilter=True)
+        update_model_state(model_id=model_id, new_progress=0, new_notes="training the model")
+        if data is None:
+            update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED,
+                               new_notes="No data is extracted from the endpoint")
+            return
+        if np.any(np.isnan(data)):
+            print "explore_and_train_abox> there is a nan in the data"
+            print "**************************"
+        else:
+            print "explore_and_train_abox> no nans in the data"
+        model = learning.train_with_data_and_meta(data=data, meta_data=meta_data, update_func=update_progress_func)
+        update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
+        meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
+                                                           update_func=update_progress_func)
+        # Now I'm not using the computed data here
+        # update_model_state(model_id=model_id, new_progress=0, new_notes="computing the score of the trained model")
+        # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
+        #                                  update_func=update_progress_func)
+        update_model_state(model_id=model_id, new_progress=0, new_notes="Saving the model data")
+        model_file_name = data_extraction.save_model(model=model, meta_data=meta_data, file_name=str(model_id) + " - ")
+        if model_file_name is not None:
+            m = MLModel.objects.filter(id=model_id)
+            if len(m) == 1:
+                m = m[0]
+                m.file_name = model_file_name
+                m.save()
+                update_model_state(model_id=model_id, new_progress=100, new_state=MLModel.COMPLETE, new_notes="Completed")
+            else:
+                update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED, new_notes="model is deleted")
+        else:
+            update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED, new_notes="Error Saving the model")
+    except Exception as e:
+        print "explore_and_train_abox> Exception %s" % str(e)
+        traceback.print_exc()
+        update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Raised error: " + str(e))
 
 
 def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uploaded_filenames=[], has_header=False):
@@ -201,3 +275,6 @@ def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=
         m.save()
         return m
     return None
+
+
+

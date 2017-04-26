@@ -1,0 +1,104 @@
+{%extends "base.html"%}
+{%block content%}
+
+
+
+
+
+<h3>Adding a new Training Model using A-Box (the data itself)</h3>
+<p>This model will be used to train a model that can be used later on to automatically classify csv files</p><br>
+
+{%if error_msg%}
+<div class="alert alert-warning" role="alert">
+{{error_msg}}
+</div>
+{%endif%}
+{{message}}
+
+<form action="add_model_abox" method="POST"> {% csrf_token %}
+    <div class="form-group ">
+        <label for="modelname">Model Name</label>
+        <input type="text" class="form-control " name="name" id="modelname" placeholder="Enter a name for the model" required/>
+    </div>
+    <div class="form-group ">
+        <label for="modelurl">SPARQL Endpoint</label>
+        <input type="text" class="form-control" name="url" id="modelurl"
+               placeholder="Enter the url for the SPARQL Endpoint" required/>
+    </div>
+    <label >Classes to include in the model:</label>
+        <span class="btn-group pull-right" role="group" >
+        <span class="btn btn-success" id="addclassuri-btn"> + </span>
+        <span id="removeclassuri-btn" class="btn btn-danger"> - </span>
+        </span>
+    <div class="form-group" id="classruris-div">
+        <input type="text" class="form-control classuri_textfield " name="class_uri"
+               placeholder="e.g. http://dbpedia.org/ontology/Person" required/>
+    </div>
+
+     <div class="form-group">
+    <button type="submit" class="btn form-control darkl">Add</button>
+     </div>
+
+</form>
+
+
+
+<script>
+    $("#addclassuri-btn").click(function() {
+        var curr_html = $("#classruris-div").html();
+        //alert('current_html: '+curr_html);
+        var single_textfield = '<input type="text" class="form-control classuri_textfield" name="class_uri" placeholder="e.g. http://dbpedia.org/ontology/Person" required/>';
+        $("#classruris-div").html(curr_html + single_textfield);
+
+        //To activate auto complete for all newly added classes
+        //activate_autocomplete()
+
+    });//click
+
+    $("#removeclassuri-btn").click(function() {
+        if ($(".classuri_textfield").length > 1) {
+            $(".classuri_textfield").last().remove();
+        }
+    });//click
+
+
+    function activate_autocomplete() {
+        $(function() {
+            $(".classuri_textfield").autocomplete({
+                minLength: 3,
+                source: function(request, response) {
+                    console.log('term: ' + request.term);
+                    //return ["aaa", "bbb", "ccc"];
+                    //response(["aaa", "bbb", "ccc"]);
+                    var query_url = "http://lookup.dbpedia.org/api/search/PrefixSearch?QueryClass=&MaxHits=5&QueryString=" + request.term;
+                    console.log('query: ' + query_url);
+
+                    $.ajax({
+                        method: "GET",
+                        url: query_url,
+                        dataType: "json",
+                    }).done(function(data) {
+                        if (console && console.log) {
+                            console.log("Sample of data:", data);
+                            var i,data_list=[];
+                            for(i=0;i<data.results.length;i++){
+                                console.log('single: '+data.results[i].uri)
+                            }
+                            response(data.results);
+                        }
+                    });
+
+                } //source
+            });
+        });
+    } //activate_autocomplete
+
+    //To activate autocomplete for the current textfield (the first one)
+    //activate_autocomplete()
+
+
+</script>
+
+
+
+{%endblock%}

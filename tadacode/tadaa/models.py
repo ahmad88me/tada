@@ -16,6 +16,14 @@ class MLModel(models.Model):
     progress = models.PositiveIntegerField(default=0)
     notes = models.CharField(max_length=120)
 
+    TBOX = 'tbox'
+    ABOX = 'abox'
+    EXTRACTION_CHOICES = (
+        (TBOX, 'T-Box'),
+        (ABOX, 'A-Box')
+    )
+    extraction_method = models.CharField(max_length=10, choices=EXTRACTION_CHOICES)
+
     NOT_STARTED = 'notstarted'
     RUNNING = 'running'
     STOPPED = 'stopped'
@@ -29,7 +37,7 @@ class MLModel(models.Model):
     state = models.CharField(max_length=10, choices=STATE_CHOICES, default=NOT_STARTED)
 
     def __unicode__(self):
-        return self.name
+        return str(self.id) + ") " + self.name
 
 
 class PredictionRun(models.Model):

@@ -10,9 +10,21 @@
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
+    <!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>-->
+<!--<script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery.min.js"><\/script>')</script>-->
 
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery.min.js"><\/script>')</script>
+
+    <!-- jQuery UI which is needed for the autocomplete in model addition -->
+    <!--<script-->
+  <!--src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"-->
+  <!--integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="-->
+  <!--crossorigin="anonymous"></script>-->
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+
+
 
     <!-- Bootstrap -->
     <!-- Latest compiled and minified CSS -->
@@ -100,7 +112,8 @@ a.bg-dark:focus, a.bg-dark:hover {
     <a class="navbar-brand" href="/home">Tadaa</a>
     <ul class="nav navbar-nav ">
         <!--<li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>-->
-        <li><a href="/add_model">Add Model</a></li>
+        <li><a href="/add_model">Add Model (T-Box)</a></li>
+        <li><a href="/add_model_abox">Add Model (A-Box)</a></li>
         <li><a href="/list_models">Models</a></li>
         <li><a href="/predict">Predict</a></li>
         <li><a href="/list_predictions">List Predictions</a></li>
@@ -115,7 +128,8 @@ a.bg-dark:focus, a.bg-dark:hover {
     <div class="col-md-2">
         <a class="navbar-brand" href="/home">Tadaa</a>
         <ul class="nav navbar-left nav-stacked">
-        <li><a href="/add_model">Add Model</a></li>
+        <li><a href="/add_model">Add Model (T-Box)</a></li>
+        <li><a href="/add_model_abox">Add Model (A-Box)</a></li>
         <li><a href="/list_models">Models</a></li>
         <li><a href="/predict">Predict</a></li>
         <li><a href="/list_predictions">List Predictions</a></li>
@@ -127,7 +141,7 @@ a.bg-dark:focus, a.bg-dark:hover {
 This is base
 {%endblock%}
     </div>
-    <div class="col-md-2"> right</div>
+    <div class="col-md-2"> </div>
 </div>
 </div>
 

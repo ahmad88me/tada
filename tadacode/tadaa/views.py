@@ -22,6 +22,50 @@ def home(request):
     return render(request, 'home.html')
 
 
+def testauto(request):
+    pass
+    # import json
+    # from django import
+    # print "in test auto"
+    # results = {"a": "aaa", "b": "bbb"}
+    # data = json.dumps(results)
+    # mimetype = 'application/json'
+    # return HttpResponse(data, mimetype)
+
+
+def add_model_abox(request):
+    if request.method == 'GET':
+        return render(request, 'add_model_abox.html')
+    elif request.method == 'POST':
+        error_msg = ''
+        if 'url' not in request.POST:
+            error_msg = 'url is not passed'
+        if 'name' not in request.POST:
+            error_msg = 'name is not passed'
+        if len(request.POST.getlist('class_uri')) == 0:
+            error_msg = 'There should be at least one class uri'
+        if error_msg != '':
+            return render(request, 'add_model_abox.html', {'error_msg': error_msg})
+        #pid = os.fork()
+        pid = 1
+        if pid == 0:  # child process
+            print "child is returning"
+            #core.test_progress()
+            return redirect('list_models')
+            #return render(request, 'add_model.html', {'message': 'model is under processing'})
+        else:  # parent process
+            print "in parent"
+            mlmodel = MLModel()
+            mlmodel.name = clean_string(request.POST['name'])
+            if mlmodel.name.strip() == '':
+                mlmodel.name = random_string(length=6)
+            mlmodel.url = request.POST['url']
+            mlmodel.extraction_method = MLModel.ABOX
+            mlmodel.save()
+            core.explore_and_train_abox(endpoint=mlmodel.url, model_id=mlmodel.id, classes_uris=request.POST.getlist('class_uri'))
+            os._exit(0)  # to close the thread after finishing
+
+
 def add_model(request):
     if request.method == 'GET':
         return render(request, 'add_model.html')
@@ -47,8 +91,9 @@ def add_model(request):
             if mlmodel.name.strip() == '':
                 mlmodel.name = random_string(length=6)
             mlmodel.url = request.POST['url']
+            mlmodel.extraction_method = MLModel.TBOX
             mlmodel.save()
-            core.explore_and_train(endpoint=mlmodel.url, model_id=mlmodel.id)
+            core.explore_and_train_tbox(endpoint=mlmodel.url, model_id=mlmodel.id)
             os._exit(0)  # to close the thread after finishing
 
 

@@ -127,4 +127,34 @@ select distinct ?pt ?c ?t where{
 }
 
 
+SELECT (COUNT(?val) AS ?valCount) ?valType WHERE {
+?instance a <http://dbpedia.org/ontology/Agent> .
+?instance ?prop ?val .
+BIND(DATATYPE(?val) AS ?valType) . }
+GROUP BY ?valType
+ORDER BY DESC(?valCount )
+LIMIT 10
 
+
+
+/*The best query against timeouts*/
+SELECT ?p ?num
+WHERE{
+	FILTER (?num > 100 && ?num < 200)
+	{
+		SELECT ?p (count(distinct ?s) as ?num)
+		WHERE {
+	        ?s a <http://xmlns.com/foaf/0.1/Person>.
+	        ?s ?p []
+	        }
+	        group by ?p
+	}
+	{
+		SELECT distinct (?p)
+		WHERE{
+			?s ?p ?o
+			FILTER( isNumeric(?o))
+		}
+	}
+}
+order by desc(?num)
