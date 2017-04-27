@@ -8,7 +8,9 @@ import numpy as np
 import pandas as pd
 import random
 import string
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def get_features(col):
     """

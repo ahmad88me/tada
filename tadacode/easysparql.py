@@ -161,14 +161,16 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnume
         #return pd.DataFrame([])
         return col_mat
 
-    col_mat = pd.DataFrame(clean_objects)['value'].as_matrix()
+    # col_mat = pd.DataFrame(clean_objects)['value'].as_matrix()
+    # to get rid of the strings that can not be transformed into numbers
+    col_mat = pd.DataFrame(clean_objects)['value'].apply(pd.to_numeric, errors='coerce').dropna(how='any').as_matrix()
     col_mat.shape = (col_mat.shape[0], 1)
     col_mat = col_mat.astype(np.float)
-    #return pd.DataFrame(clean_objects)['value']
+    # return pd.DataFrame(clean_objects)['value']
     # remove nan is any source: http://stackoverflow.com/questions/11620914/removing-nan-values-from-an-array
-    #print "get_objects_as_list> old shape: %s" % str(col_mat.shape)
+    # print "get_objects_as_list> old shape: %s" % str(col_mat.shape)
     col_mat = col_mat[~np.isnan(col_mat)]
-    #print "get_objects_as_list> new shape: %s" % str(col_mat.shape)
+    # print "get_objects_as_list> new shape: %s" % str(col_mat.shape)
     col_mat.shape = (col_mat.shape[0], 1)
     # print "get_objects_as_list> new shape after fix: %s" % str(col_mat.shape)
     return col_mat

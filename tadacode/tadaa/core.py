@@ -90,10 +90,6 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
                                                                                              first_time=True)
             print "explore and train abox> printing properties"
             print properties
-            print "type: "
-            print properties(type)
-
-
             for prop in properties:
                 classes_properties_uris.append((class_uri, prop))
         update_progress_func(100)
@@ -113,6 +109,10 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
         else:
             print "explore_and_train_abox> no nans in the data"
         model = learning.train_with_data_and_meta(data=data, meta_data=meta_data, update_func=update_progress_func)
+        if model is None:
+            update_model_state(model_id=model_id, new_state=MLModel.STOPPED,
+                               new_notes="leaning failed as model is None")
+            return
         update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
                                                            update_func=update_progress_func)

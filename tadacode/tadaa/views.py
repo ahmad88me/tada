@@ -46,8 +46,8 @@ def add_model_abox(request):
             error_msg = 'There should be at least one class uri'
         if error_msg != '':
             return render(request, 'add_model_abox.html', {'error_msg': error_msg})
-        #pid = os.fork()
-        pid = 1
+        pid = os.fork()
+        #pid = 1
         if pid == 0:  # child process
             print "child is returning"
             #core.test_progress()
