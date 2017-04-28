@@ -81,15 +81,12 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
             update_progress_func(int(idx * 1.0 / len(classes_uris) * 100))
             # properties = easysparql.get_numerical_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
             #                                                                 raiseexception=True)
-
             properties = easysparql.get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
                                                                                              class_uri=class_uri,
                                                                                              raiseexception=True,
                                                                                              lower_bound=1,
                                                                                              upper_bound=100000,
                                                                                              first_time=True)
-            print "explore and train abox> printing properties"
-            print properties
             for prop in properties:
                 classes_properties_uris.append((class_uri, prop))
         update_progress_func(100)
@@ -97,7 +94,7 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
                            new_notes="extracting values from gathered class/property")
         data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
             endpoint=endpoint, class_property_uris=classes_properties_uris, update_func=update_progress_func,
-            isnumericfilter=True)
+            isnumericfilter=True, min_num_of_objects=4)
         update_model_state(model_id=model_id, new_progress=0, new_notes="training the model")
         if data is None:
             update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED,

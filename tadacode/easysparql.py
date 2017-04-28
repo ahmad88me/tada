@@ -180,7 +180,8 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnume
 #                  Property Extraction A-BOX                   #
 ################################################################
 
-def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, endpoint=None, raiseexception=None):
+def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, endpoint=None, raiseexception=None,
+                            isnumericfilter=None):
     if upper_bound is None:
         raise Exception("split_upper_lower_bound> upper_bound should not be None")
     if lower_bound is None:
@@ -191,6 +192,8 @@ def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, 
         raise Exception("split_upper_lower_bound> endpoint should not be None")
     if raiseexception is None:
         raise Exception("split_upper_lower_bound> raiseexception should not be None")
+    if isnumericfilter is None:
+        raise Exception("split_upper_lower_bound> isnumericfilter should not be None")
     print "-----------  split_upper_lower_bound -----------"
     print "upper_bound: %d" % upper_bound
     print "lower_bound: %d" % lower_bound
@@ -202,13 +205,15 @@ def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, 
                                                                                  raiseexception=raiseexception,
                                                                                  lower_bound=lower_bound,
                                                                                  upper_bound=split_point,
-                                                                                 first_time=False)
+                                                                                 first_time=False,
+                                                                                 isnumericfilter=isnumericfilter)
         lower_results = get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
                                                                                  class_uri=class_uri,
                                                                                  raiseexception=raiseexception,
                                                                                  lower_bound=split_point,
                                                                                  upper_bound=upper_bound,
-                                                                                 first_time=False)
+                                                                                 first_time=False,
+                                                                                 isnumericfilter=isnumericfilter)
         return upper_results + lower_results
     else:
         raise Exception("The endpoint is so slow or the timeout period is very short to query")
@@ -216,7 +221,8 @@ def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, 
 
 def get_numerical_properties_for_class_abox_using_half_split(endpoint=None, class_uri=None,
                                                              upper_bound=None, lower_bound=1,
-                                                             raiseexception=False, first_time=None, max_iter=15):
+                                                             raiseexception=False, first_time=None, max_iter=15,
+                                                             isnumericfilter=True):
     """
     :param endpoint:
     :param class_uri:
@@ -243,51 +249,86 @@ def get_numerical_properties_for_class_abox_using_half_split(endpoint=None, clas
 
     class_uri_stripped = get_url_stripped(class_uri)
     if first_time:
-        query = """
-        SELECT ?p ?num
-        WHERE{
-            FILTER (?num > %d)
-            {
-                SELECT ?p (count(distinct ?s) as ?num)
-                WHERE {
-                    ?s a <%s>.
-                    ?s ?p []
+        if isnumericfilter:
+            query = """
+            SELECT ?p ?num
+            WHERE{
+                FILTER (?num > %d)
+                {
+                    SELECT ?p (count(distinct ?s) as ?num)
+                    WHERE {
+                        ?s a <%s>.
+                        ?s ?p []
+                        }
+                        group by ?p
+                }
+                {
+                    SELECT distinct (?p)
+                    WHERE{
+                        ?s ?p ?o
+                        FILTER( isNumeric(?o))
                     }
-                    group by ?p
-            }
-            {
-                SELECT distinct (?p)
-                WHERE{
-                    ?s ?p ?o
-                    FILTER( isNumeric(?o))
                 }
             }
-        }
-        order by desc(?num)
-        """ % (upper_bound, class_uri_stripped)
+            order by desc(?num)
+            """ % (upper_bound, class_uri_stripped)
+        else:
+            query = """
+            SELECT ?p ?num
+            WHERE{
+                FILTER (?num > %d)
+                {
+                    SELECT ?p (count(distinct ?s) as ?num)
+                    WHERE {
+                        ?s a <%s>.
+                        ?s ?p []
+                        }
+                        group by ?p
+                }
+            }
+            order by desc(?num)
+            """ % (upper_bound, class_uri_stripped)
+
     else:
-        query = """
-        SELECT ?p ?num
-        WHERE{
-            FILTER (?num >= %d && ?num <= %d)
-            {
-                SELECT ?p (count(distinct ?s) as ?num)
-                WHERE {
-                    ?s a <%s>.
-                    ?s ?p []
+        if isnumericfilter:
+            query = """
+            SELECT ?p ?num
+            WHERE{
+                FILTER (?num >= %d && ?num <= %d)
+                {
+                    SELECT ?p (count(distinct ?s) as ?num)
+                    WHERE {
+                        ?s a <%s>.
+                        ?s ?p []
+                        }
+                        group by ?p
+                }
+                {
+                    SELECT distinct (?p)
+                    WHERE{
+                        ?s ?p ?o
+                        FILTER( isNumeric(?o))
                     }
-                    group by ?p
-            }
-            {
-                SELECT distinct (?p)
-                WHERE{
-                    ?s ?p ?o
-                    FILTER( isNumeric(?o))
                 }
             }
-        }
-        order by desc(?num)
-        """ % (lower_bound, upper_bound, class_uri_stripped)
+            order by desc(?num)
+            """ % (lower_bound, upper_bound, class_uri_stripped)
+        else:
+            query = """
+            SELECT ?p ?num
+            WHERE{
+                FILTER (?num >= %d && ?num <= %d)
+                {
+                    SELECT ?p (count(distinct ?s) as ?num)
+                    WHERE {
+                        ?s a <%s>.
+                        ?s ?p []
+                        }
+                        group by ?p
+                }
+            }
+            order by desc(?num)
+            """ % (lower_bound, upper_bound, class_uri_stripped)
     try:
         print "will run the query"
         results = run_query(query=query, endpoint=endpoint, raiseexception=True)
@@ -303,12 +344,13 @@ def get_numerical_properties_for_class_abox_using_half_split(endpoint=None, clas
             print "returning firsttime"
             return properties + split_upper_lower_bound(upper_bound=upper_bound, lower_bound=lower_bound,
                                                         class_uri=class_uri_stripped, endpoint=endpoint,
-                                                        raiseexception=raiseexception)
+                                                        raiseexception=raiseexception, isnumericfilter=isnumericfilter)
     except Exception as e:
         if "timed out" in str(e):
             if not first_time:
                 split_upper_lower_bound(upper_bound=upper_bound, lower_bound=lower_bound, class_uri=class_uri_stripped,
-                                        endpoint=endpoint, raiseexception=raiseexception)
+                                        endpoint=endpoint, raiseexception=raiseexception,
+                                        isnumericfilter=isnumericfilter)
             else:  # first time
                 if max_iter == 0:
                     if raiseexception:
@@ -318,12 +360,22 @@ def get_numerical_properties_for_class_abox_using_half_split(endpoint=None, clas
                         return []
 
                 return get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint, class_uri=class_uri_stripped
-                                                                         , upper_bound=upper_bound*2,
-                                                                         lower_bound=lower_bound,
-                                                                         raiseexception=raiseexception, first_time=True,
-                                                                         max_iter=max_iter-1)
+                                                                                , upper_bound=upper_bound*2,
+                                                                                lower_bound=lower_bound,
+                                                                                raiseexception=raiseexception,
+                                                                                first_time=True,
+                                                                                max_iter=max_iter-1,
+                                                                                isnumericfilter=isnumericfilter)
                 # split_upper_lower_bound(upper_bound=upper_bound, lower_bound=lower_bound, class_uri=class_uri_stripped,
                 #                         endpoint=endpoint, raiseexception=raiseexception)
+        elif "'isNumeric'" in str(e) and first_time:
+            print "get_numerical_properties_for_class_abox_using_half_split> isNumeric is not supported, so we gonna ignore it"
+            return get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint, class_uri=class_uri,
+                                                                            upper_bound=upper_bound,
+                                                                            lower_bound=lower_bound,
+                                                                            raiseexception=raiseexception,
+                                                                            first_time=first_time, max_iter=max_iter,
+                                                                            isnumericfilter=False)
         else:
             if raiseexception:
                 print "captured %s" % str(e)

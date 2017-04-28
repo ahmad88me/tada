@@ -35,11 +35,13 @@ def class_property_string_representation(class_uri, property_uri):
     return class_uri + " - " + property_uri
 
 
-def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[], update_func=None, isnumericfilter=True):
+def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[], update_func=None,
+                                           isnumericfilter=True, min_num_of_objects=0):
     """
     get data and meta data from given classes and properties
     a single meta data contains the following: type, from_index and to_index
     :param class_property_uris: a list or triples, each triple is composed of two values, class and property
+    :param isnumericfilter:
     :return: data, meta data
     """
     print "\n*********************************************"
@@ -62,8 +64,7 @@ def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[]
             print "property: %s" % propert_uri
             col = easysparql.get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=propert_uri,
                                                  isnumericfilter=isnumericfilter)
-            if col.shape[0] != 0:
-            #if col.shape != (0, 0):
+            if col.shape[0] != 0 and col.shape[0] >= min_num_of_objects:
                 cols.append(col)
                 single_meta = {}
                 single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
@@ -83,8 +84,7 @@ def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[]
                                                  isnumericfilter=isnumericfilter)
             # print "debug: extraction col"
             # print 'col.shape %s' % str(col.shape)
-            if col.shape[0] != 0:
-            #if col.shape != (0, 0):
+            if col.shape[0] != 0 and col.shape[0] >= min_num_of_objects:
                 cols.append(col)
                 single_meta = {}
                 single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
