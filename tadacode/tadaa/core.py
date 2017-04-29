@@ -10,6 +10,13 @@ import learning
 from models import MLModel, PredictionRun, Membership
 
 
+def get_classes(endpoint=None):
+    if endpoint is None:
+        print "get_classes> endpoint should not be None"
+        return []
+    return easysparql.get_classes(endpoint=endpoint)
+
+
 def explore_and_train_tbox(endpoint=None, model_id=None):
     if endpoint is None:
         print "explore_and_train_tbox> endpoint is None"
@@ -272,6 +279,5 @@ def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=
         m.save()
         return m
     return None
-
 
 

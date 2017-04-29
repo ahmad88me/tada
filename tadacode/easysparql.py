@@ -176,6 +176,16 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnume
     return col_mat
 
 
+def get_classes(endpoint=None):
+    if endpoint is None:
+        raise Exception("get_classes> endpoint should not be None")
+    query = """
+        select distinct ?Concept where { [] a ?Concept}
+    """
+    results = run_query(endpoint=endpoint, query=query, raiseexception=True)
+    classes = [r['Concept']['value'] for r in results]
+    return classes
+
 ################################################################
 #                  Property Extraction A-BOX                   #
 ################################################################

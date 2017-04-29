@@ -5,6 +5,7 @@ import random
 
 import settings
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from models import MLModel, PredictionRun, Membership
 import core
 
@@ -31,6 +32,17 @@ def testauto(request):
     # data = json.dumps(results)
     # mimetype = 'application/json'
     # return HttpResponse(data, mimetype)
+
+
+def get_classes(request):
+    if request.method != 'POST':
+        print "method is not POST"
+        print "method is: %s" % request.method
+        return JsonResponse({'status': False, 'message': 'method should be POST'})
+    else:
+        endpoint = request.POST['endpoint']
+        classes = core.get_classes(endpoint=endpoint)
+        return JsonResponse({'status': True, 'classes': classes})
 
 
 def add_model_abox(request):
