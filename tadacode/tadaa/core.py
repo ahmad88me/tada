@@ -72,7 +72,7 @@ def explore_and_train_tbox(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_state=MLModel.STOPPED, new_notes="Not captured error: " + str(e))
 
 
-def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
+def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[], min_num_of_objects=90):
     if endpoint is None:
         print "explore_and_train_abox> endpoint is None"
         return
@@ -101,7 +101,7 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[]):
                            new_notes="extracting values from gathered class/property")
         data, meta_data = data_extraction.data_and_meta_from_class_property_uris(
             endpoint=endpoint, class_property_uris=classes_properties_uris, update_func=update_progress_func,
-            isnumericfilter=True, min_num_of_objects=4)
+            isnumericfilter=False, min_num_of_objects=min_num_of_objects)
         update_model_state(model_id=model_id, new_progress=0, new_notes="training the model")
         if data is None:
             update_model_state(model_id=model_id, new_progress=0, new_state=MLModel.STOPPED,

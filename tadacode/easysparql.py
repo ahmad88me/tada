@@ -44,7 +44,7 @@ def run_query(query=None, endpoint=None, raiseexception=False):
     sparql = SPARQLWrapper(endpoint=endpoint)
     sparql.setQuery(query=query)
     sparql.setReturnFormat(JSON)
-    sparql.setTimeout(300)
+    #sparql.setTimeout(300)
     try:
         results = sparql.query().convert()
         if len(results["results"]["bindings"]) > 0:
@@ -169,11 +169,16 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnume
     # return pd.DataFrame(clean_objects)['value']
     # remove nan is any source: http://stackoverflow.com/questions/11620914/removing-nan-values-from-an-array
     # print "get_objects_as_list> old shape: %s" % str(col_mat.shape)
-    col_mat = col_mat[~np.isnan(col_mat)]
+    col_mat_num = col_mat[~np.isnan(col_mat)]
     # print "get_objects_as_list> new shape: %s" % str(col_mat.shape)
-    col_mat.shape = (col_mat.shape[0], 1)
+    col_mat_num.shape = (col_mat_num.shape[0], 1)
     # print "get_objects_as_list> new shape after fix: %s" % str(col_mat.shape)
-    return col_mat
+    if (col_mat.shape[0] - col_mat_num.shape[0]) < col_mat_num.shape[0]:  # to check how clean is the data
+        return col_mat_num
+    else:
+        a = np.array([])
+        a.shape = (0, 1)
+        return a
 
 
 def get_classes(endpoint=None):
