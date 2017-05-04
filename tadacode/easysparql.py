@@ -363,9 +363,10 @@ def get_numerical_properties_for_class_abox_using_half_split(endpoint=None, clas
     except Exception as e:
         if "timed out" in str(e):
             if not first_time:
-                split_upper_lower_bound(upper_bound=upper_bound, lower_bound=lower_bound, class_uri=class_uri_stripped,
-                                        endpoint=endpoint, raiseexception=raiseexception,
-                                        isnumericfilter=isnumericfilter)
+                return split_upper_lower_bound(upper_bound=upper_bound, lower_bound=lower_bound,
+                                               class_uri=class_uri_stripped,
+                                               endpoint=endpoint, raiseexception=raiseexception,
+                                               isnumericfilter=isnumericfilter)
             else:  # first time
                 if max_iter == 0:
                     if raiseexception:

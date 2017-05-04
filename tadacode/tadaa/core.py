@@ -221,7 +221,7 @@ def get_types_and_membership(predictionrun_id=None, top_k_candidates=5, model_di
     for m in Membership.objects.filter(prediction_run=predictionrun):
         mem_with_types = {}
         mems = m.get_values_as_numpy()
-        mems_idxs = mems.argsort()[::-1][:5]  # idxs sorted from largest (value not largest index) to smallest
+        mems_idxs = mems.argsort()[::-1][:top_k_candidates]  # idxs sorted from largest (value not largest index) to smallest
         mems = mems[mems_idxs]
         mems *= 100
         # mem_with_types["types"] = types[mems_idxs].tolist()
