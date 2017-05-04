@@ -5,6 +5,12 @@ See the progress list below:
 1. Carbon Emissions Car fuel consumptions.csv: but tested on the 100 file "Carbon Emissions Car fuel consumptions 100
 .csv", I need to run it on the original large file. The url is
 "https://datahub.io/dataset/car-fuel-consumptions-and-emissions/resource/7b540283-a88b-4020-9cea-04e6e5c40574"
+2. After training the mountain, try the below properties: (I also need to find csv files for those)
+* Humidity
+* http://es.dbpedia.org/property/zonasismica
+* http://es.dbpedia.org/property/prefijoTelefónico
+* http://dbpedia.org/property/junRainDays
+* http://dbpedia.org/property/dicProm
 
 
 ## About the web app

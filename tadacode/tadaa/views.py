@@ -205,7 +205,7 @@ def list_memberships(request, predictionrun_id):
     if len(predictionrun) != 1:
         raise Http404("Provided prediction run does not exist")
     predictionrun = predictionrun[0]
-    mems_and_types = core.get_types_and_membership(top_k_candidates=10, predictionrun_id=predictionrun.id,
+    mems_and_types = core.get_types_and_membership(top_k_candidates=20, predictionrun_id=predictionrun.id,
                                                    model_dir=os.path.join(settings.MODELS_DIR,
                                                                           predictionrun.mlmodel.file_name))
     print 'mems and types is: '
