@@ -147,6 +147,7 @@ def get_cluster_for_meta(training_meta=None, testing_meta=None, update_func=None
 
     for nm in new_meta:
         print "\n------------"
+        print nm
         print "type: %s" % nm["type"]
         print "cluster: %d" % nm["cluster"]
         print "from-to: %d - %d" % (nm["from_index"], nm["to_index"])

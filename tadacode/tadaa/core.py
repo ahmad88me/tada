@@ -88,12 +88,14 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[], min_nu
             update_progress_func(int(idx * 1.0 / len(classes_uris) * 100))
             # properties = easysparql.get_numerical_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
             #                                                                 raiseexception=True)
-            properties = easysparql.get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
-                                                                                             class_uri=class_uri,
-                                                                                             raiseexception=True,
-                                                                                             lower_bound=1,
-                                                                                             upper_bound=100000,
-                                                                                             first_time=True)
+            # properties = easysparql.get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
+            #                                                                                  class_uri=class_uri,
+            #                                                                                  raiseexception=True,
+            #                                                                                  lower_bound=1,
+            #                                                                                  upper_bound=100000,
+            #                                                                                  first_time=True)
+            properties = easysparql.get_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
+                                                                  raiseexception=True)
             for prop in properties:
                 classes_properties_uris.append((class_uri, prop))
         update_progress_func(100)

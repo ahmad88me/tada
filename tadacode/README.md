@@ -1,4 +1,46 @@
 
+# to be checked later
+nothing
+
+
+
+# DBpedia does not have enough info about
+http://dbpedia.org/ontology/HandballTeam
+
+
+# not dataset is found
+http://dbpedia.org/ontology/RugbyPlayer
+http://dbpedia.org/ontology/Skater
+http://dbpedia.org/ontology/HockeyTeam
+http://dbpedia.org/ontology/GolfTournament
+http://dbpedia.org/ontology/GolfCourse
+http://dbpedia.org/ontology/RugbyClub
+http://dbpedia.org/ontology/RugbyLeague
+http://dbpedia.org/ontology/VolleyballLeague
+http://dbpedia.org/ontology/VolleyballCoach
+
+
+
+Finished:
+http://dbpedia.org/ontology/Cyclist
+http://dbpedia.org/ontology/Stadium
+http://dbpedia.org/ontology/Olympics
+http://dbpedia.org/ontology/SoccerPlayer
+
+http://dbpedia.org/ontology/OlympicEvent
+http://dbpedia.org/ontology/OlympicResult
+http://umbel.org/umbel/rc/OlympicGames
+
+http://dbpedia.org/ontology/GolfPlayer
+
+
+Not found in the Spanish DBpedia:
+http://dbpedia.org/ontology/TennisPlayer
+http://dbpedia.org/ontology/BaseballTeam
+http://dbpedia.org/ontology/BullFighter
+
+
+
 See the progress list below:
 
 ## Experiment data

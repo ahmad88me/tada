@@ -158,3 +158,17 @@ WHERE{
 	}
 }
 order by desc(?num)
+
+
+
+/*Speeding up the previous query*/
+SELECT ?p (count(distinct ?s) as ?num)
+WHERE {
+    ?s a <http://xmlns.com/foaf/0.1/Person>.
+    ?s ?p []
+    }
+    group by ?p
+order by desc(?num)
+
+
+

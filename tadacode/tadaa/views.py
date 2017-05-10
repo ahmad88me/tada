@@ -74,7 +74,8 @@ def add_model_abox(request):
             mlmodel.url = request.POST['url']
             mlmodel.extraction_method = MLModel.ABOX
             mlmodel.save()
-            core.explore_and_train_abox(endpoint=mlmodel.url, model_id=mlmodel.id, classes_uris=request.POST.getlist('class_uri'))
+            core.explore_and_train_abox(endpoint=mlmodel.url, model_id=mlmodel.id, min_num_of_objects=30,
+                                        classes_uris=request.POST.getlist('class_uri'))
             os._exit(0)  # to close the thread after finishing
 
 
