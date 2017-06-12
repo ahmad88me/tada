@@ -1,4 +1,4 @@
-# TADA: __TA__bular __D__ata __A__nnotation
+# TADA: *TA*bular *D*ata *A*nnotation
 
 ## new plan January, 2017
 
