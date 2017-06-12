@@ -1,4 +1,4 @@
-# TAbular Data Annotation
+# TADA: **TA**bular *D*ata *A*nnotation
 
 ## new plan January, 2017
 
