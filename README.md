@@ -1,4 +1,4 @@
-# TAbular DAta soft clustering
+# TAbular Data Annotation
 
 ## new plan January, 2017
 
