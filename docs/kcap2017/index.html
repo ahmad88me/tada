@@ -31,13 +31,127 @@
 <body>
 
 <div class="container-fluid">
-    <a href="https://docs.google.com/spreadsheets/d/1g8jsqK-2QK-V2PPiBoPLN_FfoO7rqkMbgBR0H0pHIaM/edit?usp=sharing">Go the see the data on google sheets</a>
-	<table>
-		<th>
-			<td></td>
-			<td></td>
-		</th>
-	</table>
+    
+    <ul class="nav nav-stacked nav-pills navbar-fixed-top col-md-2 col-sm-4">
+        <li role="presentation" class=""><a href="#abstract">Abstract</a></li>
+        <li role="presentation"><a href="#perclass">Per-class</a></li>
+        <li role="presentation"><a href="#perendpoint">Per-endpoint</a></li>
+        <li role="presentation" class=""><a href="#rawdata">Raw data</a></li>
+        <li role="presentation" class=""><a href="#results">Results</a></li>
+    </ul>
+
+    <div class=" col-md-10 col-md-offset-2 col-sm-8 col-sm-offset-4 col-lg-8 col-lg-offset-2">
+        <div class="jumbotron">
+            <h3>Fuzzy Semantic Labeling for Semi-structured Numerical Data Sources <br>
+                <span style="color: #BBBBBB"> (Additional Material)</span>
+            </h3>
+            KCAP 2017 (currently under submission)
+
+            <br><br>
+            <span>Authors: Ahmad Alobaid (aalobaid at fi.upm.es), Oscar Corcho (ocorcho at fi.upm.es) </span>
+
+            <br>
+
+
+        </div>
+
+
+        <div id="perclass">
+            <h3>Test1: Per-class Tests</h3>
+            <div class="col-md-12">
+                <div class=" col-md-6">
+                    <canvas id="chart_perclass_spanish" width="400" height="400"></canvas>
+                </div>
+                <div class=" col-md-6">
+                    <canvas id="chart_perclass_english" width="400" height="400"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+        <br><br>
+        
+        <a href="https://docs.google.com/spreadsheets/d/1g8jsqK-2QK-V2PPiBoPLN_FfoO7rqkMbgBR0H0pHIaM/edit?usp=sharing">Go the see the data on google sheets</a>
+    	
+
+        <table>
+    		<th>
+    			<td></td>
+    			<td></td>
+    		</th>
+    	</table>
+
+    </div>
+
+    <script type="text/javascript">
+        var title_position = 'bottom';
+        var ctx_perclass_spanish = document.getElementById("chart_perclass_spanish");
+        new Chart(ctx_perclass_spanish,
+        {  
+           "type":"bar",
+           "data":{  
+              "labels":[  
+                 "k=1",
+                 "k=2",
+                 "k=3",
+                 "k=4",
+                 "k=5"
+              ],
+              "datasets":[  
+                 {  
+                    "label":"Spanish per-class test",
+                    "data":[  
+                       44,
+                       78,
+                       78,
+                       89,
+                       89,
+                    ],
+                    "fill":false,
+                    "backgroundColor":[  
+                       "rgba(255, 99, 132, 0.2)",
+                       "rgba(255, 159, 64, 0.2)",
+                       "rgba(255, 205, 86, 0.2)",
+                       "rgba(75, 192, 192, 0.2)",
+                       "rgba(54, 162, 235, 0.2)",
+                       "rgba(153, 102, 255, 0.2)",
+                       "rgba(201, 203, 207, 0.2)"
+                    ],
+                    "borderColor":[  
+                       "rgb(255, 99, 132)",
+                       "rgb(255, 159, 64)",
+                       "rgb(255, 205, 86)",
+                       "rgb(75, 192, 192)",
+                       "rgb(54, 162, 235)",
+                       "rgb(153, 102, 255)",
+                       "rgb(201, 203, 207)"
+                    ],
+                    "borderWidth":1
+                 }
+              ]
+           },
+           "options":{  
+              "scales":{  
+                 "yAxes":[  
+                    {  
+                       "ticks":{  
+                          "beginAtZero":true
+                       }
+                    }
+                 ]
+              },
+              "legend": {
+                "display": false,
+              },
+              "title": {
+                "display": true,
+                "text": "Spanish Per-class Test",
+              }
+           }
+        });
+
+    </script>
+
 </div>
 </body>
 
