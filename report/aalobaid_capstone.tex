@@ -1,11 +1,16 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{hyperref} % to make citation clickable
 \usepackage{color}
 \usepackage{listings}
 \usepackage{graphicx}
+\usepackage{soul} % for the st
 %\newcommand{\ahmad}[2][inline]{\color{orange} [Ahmad]: #2\color{black}}
-\newcommand{\comm}[2][inline]{\color{red} #2 \color{black}}
-\title{Capstone Project: TADA: a TAbular DAta classification of soft clusters using the Semantic Web}
+\newcommand{\comm}[2][inline]{\color{green} #2 \color{black}}
+\newcommand{\note}[2][inline]{\color{blue} #2 \color{black}}
+\newcommand{\crossout}[2][inline]{\color{red}\st{#2}\color{black}}
+%\title{Capstone Project: TADA: a TAbular DAta classification of soft clusters using the Semantic Web}
+\title{Capstone Project: TADA: TAbular Data Annotation using semantic web}
 \author{Ahmad Alobaid}
 \date{\today}
  
@@ -21,9 +26,20 @@
 \section{Definition (1-2 pages)}
 
 \subsection{Project Overview}
-In this century, people are storing and gather data more than ever in human history. We have massive amount of data scattered in different places. Before computers, information are kept in books and people used to look for information in the library, were a lot of books are kept. Today, we use search engines to look for information. According to \cite{webtables-power-2008} there are 154M tabular data they found in the web. Search Engines are performing quite well in finding textual data kept in webpages. But until today, search engine does not perform well when it comes to tabular data. They treat tabular data as textual data without taking into account the semantics hidden in the tables.
+\note{problem domain:
+project origin: There has been attempts since the 2000's like Google and people working on it until today.
+related datasets and input data: data collected from semi-structured data sources e.g. CSV files, TSV files, web tables about the domain of Olympic Games.
+background information: 
 
-What we want to achieve is learning what does these data represents. Given enough data, we can deduce what a particular set of data represents, in other words, learns the type of this data. For example if you have the temperature for all the European countries, we will be able to tell that it is of the same type as set of temperatures of countries located in the American continent, both are temperatures of countries . Another example would be salaries for employees in Spain, we will be able to know that a set of numbers (e.g. salaries for employees in France) represent the salaries for employees. 
+}
+
+In this century, people are storing and gather data more than ever in human history. We have massive amount of data scattered in different places.\crossout{ Before computers, information are kept in books and people used to look for information in the library, were a lot of books are kept. Today, we use search engines to look for information. Cafarella et al. found 154M tabular data from Google Crawl}\cite{webtables-power-2008}\crossout{. Search engines are performing quite well in finding textual data kept in webpages. But until today, search engine does not perform well when it comes to tabular data. They treat tabular data as textual data without taking into account the semantics hidden in the tables. This is just an example of things that can benefit from contexts.}
+
+To utilize the huge amount of data that is increasing every day, we need to understand the context to each collection of data. 
+With that we can link data from different sources from different domains together. This would enable us to answer complex questions we couldn't answer before\footnote{is it a big claim?}.
+%didn't know their answers.
+%So we can link it together and can ask complex questions that we didn't know the answer of it before. %and make the most out of it.
+We want to lean what a collection of data represent. Given enough data, we can deduce what a particular set of data represents, in other words, learns the type of this data. For example if you have the temperature for all the European countries, we will be able to tell that it is of the same type as set of temperatures of countries located in the American continent, both are temperatures of countries . Another example would be salaries for employees in Spain, we will be able to know that a set of numbers (e.g. salaries for employees in France) represent the salaries for employees. 
 
 To reach this kind of learning that is done by computers, we use \textit{Semantic Web} to get data and their meaning, \textit{Machine Learning} for the learning process and statistical tests to be used by machine learning to distinguish a set of data from another. We will be focusing on numerical data, but this work can be extended to include categorical and textual data. In this work, we will not consider the relation between columns, but that can be an extension to the work. 
 
