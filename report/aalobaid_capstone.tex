@@ -33,17 +33,37 @@ background information:
 
 }
 
-In this century, people are storing and gather data more than ever in human history. We have massive amount of data scattered in different places.\crossout{ Before computers, information are kept in books and people used to look for information in the library, were a lot of books are kept. Today, we use search engines to look for information. Cafarella et al. found 154M tabular data from Google Crawl}\cite{webtables-power-2008}\crossout{. Search engines are performing quite well in finding textual data kept in webpages. But until today, search engine does not perform well when it comes to tabular data. They treat tabular data as textual data without taking into account the semantics hidden in the tables. This is just an example of things that can benefit from contexts.}
+In this century, people are storing and gather data more than ever in human history. We have massive amount of data scattered in different places. Cafarella et al. surveyed web pages in Google Crawl (where pages are inspected) and found around 154M tabular data \cite{webtables-power-2008}.
+
+
+%\crossout{ Before computers, information are kept in books and people used to look for information in the library, were a lot of books are kept. Today, we use search engines to look for information. Cafarella et al. found 154M tabular data from Google Crawl}\cite{webtables-power-2008}\crossout{. Search engines are performing quite well in finding textual data kept in webpages. But until today, search engine does not perform well when it comes to tabular data. They treat tabular data as textual data without taking into account the semantics hidden in the tables. This is just an example of things that can benefit from contexts.}
 
 To utilize the huge amount of data that is increasing every day, we need to understand the context to each collection of data. 
-With that we can link data from different sources from different domains together. This would enable us to answer complex questions we couldn't answer before\footnote{is it a big claim?}.
+With that we can link data from different sources from different domains together. This would enable us to answer complex questions we couldn't answer before.
 %didn't know their answers.
 %So we can link it together and can ask complex questions that we didn't know the answer of it before. %and make the most out of it.
-We want to lean what a collection of data represent. Given enough data, we can deduce what a particular set of data represents, in other words, learns the type of this data. For example if you have the temperature for all the European countries, we will be able to tell that it is of the same type as set of temperatures of countries located in the American continent, both are temperatures of countries . Another example would be salaries for employees in Spain, we will be able to know that a set of numbers (e.g. salaries for employees in France) represent the salaries for employees. 
+We want to learn what a collection of data represent. Given enough data, we can deduce what a particular set of data represents, in other words, learn the semantic types. 
+%\crossout{For example if you have the temperature for all the European countries, we will be able to tell that it is of the same type as set of temperatures of countries located in the American continent, both are temperatures of countries . Another example would be salaries for employees in Spain, we will be able to know that a set of numbers (e.g. salaries for employees in France) represent the salaries for employees.}
 
-To reach this kind of learning that is done by computers, we use \textit{Semantic Web} to get data and their meaning, \textit{Machine Learning} for the learning process and statistical tests to be used by machine learning to distinguish a set of data from another. We will be focusing on numerical data, but this work can be extended to include categorical and textual data. In this work, we will not consider the relation between columns, but that can be an extension to the work. 
+%\crossout{To reach this kind of learning that is done by computers, we use \textit{Semantic Web} to get data and their meaning, \textit{Machine Learning} for the learning process and statistical tests to be used by machine learning to distinguish a set of data from another. We will be focusing on numerical data, but this work can be extended to include categorical and textual data. In this work, we will not consider the relation between columns, but that can be an extension to the work. }
+
+
+
+
+%As we know, machine learning is not a black magic, and needs a good source of (training) data to learn from. 
+The learning process needs data sources (training set) to learn from.
+For that, we rely on the \textit{Semantic Web}, which is an extension of the current Web where information is given a well-defined meaning\cite{sw-easy}. This kind of information is often stored as graphs in SPARQL endpoints. %\crossout{SPARQL is the language used to query the graphs.}
+In this project, we learn the semantic types of a collection of tabular data given a SPARQL endpoint.
+
 
 \comm{I might need to talk about data integration here}
+
+
+
+
+
+
+
 
 \subsection{Problem Statement}
 It is common for tables have missing headers, or headers that can\rq t be used as mentioned in \cite{webtables-power-2008} (e.g. if a column has the header "from", we don\rq t know if it is a time (a bus timetable) or a location (manufacturing countries)). So, we will be relying on the data in the column regardless of the header. 
@@ -264,6 +284,9 @@ Finley, Thomas, and Thorsten Joachims. "Supervised k-means clustering." (2008).
 
 
 
+
+\bibitem{sw-easy}
+https://www.w3.org/RDF/Metalog/docs/sw-easy
 
 
 
