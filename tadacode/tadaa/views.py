@@ -54,7 +54,7 @@ def add_model_abox(request):
             error_msg = 'url is not passed'
         if 'name' not in request.POST:
             error_msg = 'name is not passed'
-        if len(request.POST.getlist('class_uri')) == 0:
+        if len(request.POST.getlist('class_uri')) == 0 and request.POST['class_uris'].strip() == "":
             error_msg = 'There should be at least one class uri'
         if error_msg != '':
             return render(request, 'add_model_abox.html', {'error_msg': error_msg})
@@ -74,8 +74,14 @@ def add_model_abox(request):
             mlmodel.url = request.POST['url']
             mlmodel.extraction_method = MLModel.ABOX
             mlmodel.save()
+            if request.POST['class_uris'].strip() == "":
+                class_uris = request.POST.getlist('class_uri')
+            else:
+                class_uris = []
+                for cu in request.POST['class_uris'].split(','):
+                    class_uris.append(cu.strip())
             core.explore_and_train_abox(endpoint=mlmodel.url, model_id=mlmodel.id, min_num_of_objects=30,
-                                        classes_uris=request.POST.getlist('class_uri'))
+                                        classes_uris=class_uris)
             os._exit(0)  # to close the thread after finishing
 
 

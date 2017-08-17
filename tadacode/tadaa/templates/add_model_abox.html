@@ -25,8 +25,10 @@
         <input type="text" class="form-control" name="url" id="modelurl"
                placeholder="Enter the url for the SPARQL Endpoint" required/>
     </div>
-    <label >Classes to include in the model: <span id="num_of_classes"></span></label>
+    <label >Classes to include in the model: </label><br>
+    <label>You can either choose One by one <span id="num_of_classes"></span></label>
         <span class="btn-group pull-right" role="group" >
+
             <span class="btn btn-warning" id="fetchclasses-btn"> Fetch all </span>
             <span class="btn btn-default" id="clearclasses-btn"> Clear all </span>
             <span class="btn btn-success" id="addclassuri-btn"> + </span>
@@ -34,9 +36,12 @@
         </span>
     <div class="form-group" id="classruris-div">
         <input type="text" class="form-control classuri_textfield " name="class_uri"
-               placeholder="e.g. http://dbpedia.org/ontology/Person" required/>
+               placeholder="e.g. http://dbpedia.org/ontology/Person"/>
     </div>
-
+    <div class="form-group">
+        <label>Or all of them separated by comma</label>
+        <input type="text" class="form-control" name="class_uris" placeholder="enter all classes separated by commas"/>
+    </div>
      <div class="form-group">
     <button type="submit" class="btn form-control darkl">Add</button>
      </div>
