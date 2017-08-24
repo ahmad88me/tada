@@ -2,6 +2,7 @@
 
 
 ## Installing the prerequisites:
+1. You can run the below command to install the libraries.
 ```
 pip install -r requirements.txt
 ```
