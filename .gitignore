@@ -17,7 +17,7 @@ test.gif
 
 # latex
 *.log
-*.pdf
+#*.pdf
 *.gz
 *.toc
 *.aux
