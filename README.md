@@ -30,6 +30,6 @@ Files:`learning.py`
 This model is responsible for extracting the data for a collection of classes from the endpoint using SPARQL query.
 File: `data_extraction.py` and `easysparql.py`
 
-##Step by Step guide
-[step by step guide]()
+## Step by Step guide
+[step by step guide](https://github.com/ahmad88me/tada/tree/master/how%20to/README.md)
 
