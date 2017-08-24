@@ -1,8 +1,8 @@
 # sqlite3 database file
 db.sqlite3
 
-#*local_data*
-#*local_models*
+*local_uploads/*.csv
+*local_models/*.csv
 
 # any file or folder with local 
 #*local*
