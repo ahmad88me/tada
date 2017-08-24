@@ -51,3 +51,6 @@ File: `data_extraction.py` and `easysparql.py`
 ## Step by Step guide
 [step by step guide](https://github.com/ahmad88me/tada/tree/master/step_by_step/README.md)
 
+## Data
+[Olympic Data](https://github.com/ahmad88me/tada/tree/master/tadacode/explore/clean_input)
+
