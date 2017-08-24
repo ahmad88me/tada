@@ -1,13 +1,13 @@
 # TADA: TAbular Data Annotation
 
-##Installing the prerequisites:
+## Installing the prerequisites:
 ```
 pip install -r requirements.txt
 ```
 
 Note: to run the `explore\explore.py` (that show the diagrams, you would need to install the latest matplotlib from github (not in pip yet) [here](https://github.com/matplotlib/matplotlib).
 
-##Running the application:
+## Running the application:
 1. Run the server using the below command:
 
 ```
@@ -15,7 +15,7 @@ Note: to run the `explore\explore.py` (that show the diagrams, you would need to
 ```
 2. Go to `http://127.0.0.1:8000`
 
-##Project Components:
+## Project Components:
 
 #### Fuzzy c-means:
 This includes the FCM class which is an implementation of fuzzy c-means. The implementation is inspired by the code of k-means in scikit-learn. 
