@@ -9,12 +9,28 @@ pip install -r requirements.txt
 Note: to run the `explore\explore.py` (that show the diagrams, you would need to install the latest matplotlib from github (not in pip yet) [here](https://github.com/matplotlib/matplotlib).
 
 ## Running the application:
-1. Run the server using the below command:
+1. Go to the folder tadacode 
+
+```
+cd tadacode
+```
+2. If it is your first time, run the below command:
+
+```
+python manage.py migrate
+```
+3. Run the server using the below command:
 
 ```
 	python manage.py runserver
 ```
-2. Go to `http://127.0.0.1:8000`
+4. Go to `http://127.0.0.1:8000`
+
+Note: Running the application locally, after creating the model or the prediction when the status reaches 100 (even before showing that on the screen) it stop and you would need to restart the server using the below command:
+
+```
+	python manage.py runserver
+```
 
 ## Project Components:
 
