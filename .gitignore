@@ -1,7 +1,11 @@
 # sqlite3 database file
 db.sqlite3
+
+*local_data/*
+*local_models/*
+
 # any file or folder with local 
-*local*
+#*local*
 # Mac temp files
 .DS_Store
 # I don't want to include the generate gifs in the repo
