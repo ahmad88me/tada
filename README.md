@@ -1,5 +1,6 @@
 # TADA: TAbular Data Annotation
 
+
 ## Installing the prerequisites:
 ```
 pip install -r requirements.txt
