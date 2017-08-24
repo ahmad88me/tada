@@ -69,25 +69,8 @@ def get_properties(endpoint=None, class_uri=None, min_count=20):
     :param min_count:
     :return: returns the properties and can be accessed as follows: properties[idx]['property']['value']
     """
-    # The below three lines are replaced with the function get_url_stripped
-    # class_uri_stripped = class_uri.strip()
-    # if class_uri_stripped[0] == "<" and class_uri_stripped[-1] == ">":
-    #     class_uri_stripped = class_uri_stripped[1:-1]
     class_uri_stripped = get_url_stripped(class_uri)
-    # query = """
-    #     prefix loupe: <http://ont-loupe.linkeddata.es/def/core/>
-    #     prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-    #     select ?p ?count where {
-    #       graph <http://data.loupe.linked.es/dbpedia/1> {
-    #         ?pp loupe:aboutClass <%s>;
-    #             loupe:aboutProperty ?p;
-    #             loupe:hasDatatypePartition ?pdp .
-    #         ?pdp loupe:datatype xsd:double;
-    #             loupe:objectCount ?count .
-    #      }
-    #     }
-    #     ORDER BY desc(?count)
-    # """ % class_uri_stripped
+
     query = """
     prefix loupe: <http://ont-loupe.linkeddata.es/def/core/>
         prefix xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -146,7 +129,6 @@ def get_objects(endpoint=None, class_uri=None, property_uri=None, isnumericfilte
         """ % (class_uri_stripped, property_uri_stripped, QUERY_LIMIT)
         objects = run_query(query=query, endpoint=endpoint)
 
-    # objects = run_query(query=query, endpoint=endpoint)
     return objects
 
 
@@ -158,21 +140,15 @@ def get_objects_as_list(endpoint=None, class_uri=None, property_uri=None, isnume
         print "no objects found for class %s property %s in endpoint %s" % (class_uri, property_uri, endpoint)
         col_mat = pd.DataFrame([]).as_matrix()
         col_mat.shape = (0, 0)
-        #return pd.DataFrame([])
         return col_mat
 
-    # col_mat = pd.DataFrame(clean_objects)['value'].as_matrix()
     # to get rid of the strings that can not be transformed into numbers
     col_mat = pd.DataFrame(clean_objects)['value'].apply(pd.to_numeric, errors='coerce').dropna(how='any').as_matrix()
     col_mat.shape = (col_mat.shape[0], 1)
     col_mat = col_mat.astype(np.float)
-    # return pd.DataFrame(clean_objects)['value']
     # remove nan is any source: http://stackoverflow.com/questions/11620914/removing-nan-values-from-an-array
-    # print "get_objects_as_list> old shape: %s" % str(col_mat.shape)
     col_mat_num = col_mat[~np.isnan(col_mat)]
-    # print "get_objects_as_list> new shape: %s" % str(col_mat.shape)
     col_mat_num.shape = (col_mat_num.shape[0], 1)
-    # print "get_objects_as_list> new shape after fix: %s" % str(col_mat.shape)
     if (col_mat.shape[0] - col_mat_num.shape[0]) < col_mat_num.shape[0]:  # to check how clean is the data
         return col_mat_num
     else:
@@ -194,6 +170,7 @@ def get_classes(endpoint=None):
 ################################################################
 #                  Property Extraction A-BOX                   #
 ################################################################
+
 
 def split_upper_lower_bound(upper_bound=None, lower_bound=None, class_uri=None, endpoint=None, raiseexception=None,
                             isnumericfilter=None):

@@ -1,6 +1,10 @@
-# explore component
+# explore
 
-This explore package contain code to visualize the raw input data. It has nothing to do with the actual FCM or TADA
-code.
+This to visualize the raw input data. It has nothing to do with the actual FCM or TADA
+code. You can run it from the command line to see the visualization of the files.
+
+ ```
+ python explore.py
+ ```
 
 

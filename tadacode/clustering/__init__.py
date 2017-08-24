@@ -1,2 +1,1 @@
-
 SMALL_VALUE = 0.00001

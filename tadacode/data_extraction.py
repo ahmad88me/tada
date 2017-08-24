@@ -12,6 +12,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+
 def get_features(col):
     """
     :param col:
@@ -70,7 +71,6 @@ def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[]
                 single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
                 single_meta["from_index"] = meta_start_idx
                 meta_start_idx += col.shape[0]
-                # single_meta["to_index"] = meta_start_idx-1
                 single_meta["to_index"] = meta_start_idx
                 meta_data.append(single_meta)
     else:
@@ -82,15 +82,12 @@ def data_and_meta_from_class_property_uris(endpoint=None, class_property_uris=[]
             print "property: %s" % propert_uri
             col = easysparql.get_objects_as_list(endpoint=endpoint, class_uri=class_uri, property_uri=propert_uri,
                                                  isnumericfilter=isnumericfilter)
-            # print "debug: extraction col"
-            # print 'col.shape %s' % str(col.shape)
             if col.shape[0] != 0 and col.shape[0] >= min_num_of_objects:
                 cols.append(col)
                 single_meta = {}
                 single_meta["type"] = class_property_string_representation(class_uri, propert_uri)
                 single_meta["from_index"] = meta_start_idx
                 meta_start_idx += col.shape[0]
-                # single_meta["to_index"] = meta_start_idx-1
                 single_meta["to_index"] = meta_start_idx
                 meta_data.append(single_meta)
                 update_func(int(idx*1.0/num_of_uris * 100))
@@ -132,7 +129,6 @@ def data_and_meta_from_files(files):
         single_meta["type"] = fname
         single_meta["from_index"] = meta_start_idx
         meta_start_idx += col.shape[0]
-        #single_meta["to_index"] = meta_start_idx - 1
         single_meta["to_index"] = meta_start_idx
         meta_data.append(single_meta)
         data = np.append(data, col, axis=0)
@@ -158,7 +154,6 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has
         df = pd.read_csv(file_name, error_bad_lines=False, warn_bad_lines=False, skip_blank_lines=True)
     else:
         df = pd.read_csv(file_name, header=None, error_bad_lines=False, warn_bad_lines=False, skip_blank_lines=True)
-    # num_cols = df.select_dtypes(include=[np.float, np.int]).as_matrix().astype(np.float64)
     meta_data = []
     meta_start_idx = 0
     data = np.array([])
@@ -176,10 +171,7 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has
             continue
 
         # compute the type
-        #the_type = file_name.split('/')[-1].strip()
         the_type = original_file_name
-        # if the_type[-4:].lower() == '.csv':
-        #     the_type = the_type[:-4]
         the_type = the_type + " , " + str(col_idx)
 
         single_meta = {}
@@ -188,23 +180,9 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has
         meta_start_idx += col.shape[0]
         single_meta["to_index"] = meta_start_idx
         meta_data.append(single_meta)
-        # print "data shape is:"
-        # print data.shape
-        # print "data is: "
-        # print data
-        # print "col shape is:"
-        # print col.shape
-        # print "col is:"
-        # print col
         # Changing the shape for the col so it can be appended to the data
         col.shape = (col.shape[0], 1)
-        # print "changed col shape is:"
-        # print col.shape
-        # print "changed col is:"
-        # print col
         data = np.append(data, col, axis=0)
-        #data_list += col
-    #data = np.array(data_list)
     data = get_features(data)
     print "data_and_meta_from_a_mixed_file> data shape %s" % str(data.shape)
     return data, meta_data
@@ -224,10 +202,6 @@ def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="l
     for md in meta_data:
         data_sub = data[md["from_index"]:md["to_index"]]
         file_name = md["type"]
-        # if file_name[0:5] == "https":
-        #     file_name = file_name[5:]
-        # elif file_name[0:4] == "http":
-        #     file_name = file_name[4:]
         # source: http://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
         file_name = re.sub('[^A-Za-z0-9]+', '_', file_name).strip()
         np.savetxt(os.path.join(destination_folder, file_name), data_sub[:,0], delimiter=",", fmt='%1.5f')
@@ -257,7 +231,6 @@ def save_model(model=None, meta_data=None, file_name=None):
         fname = file_name + fname
     f = open(os.path.join('local_models', fname), 'w')
     for idx, c in enumerate(centers):
-        #f.write(",".join([str(cc) for cc in c]))
         f.write(",".join(["%1.5f" % cc for cc in c]))
         f.write(","+meta_data[idx]["type"])
         f.write("\n")

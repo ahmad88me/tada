@@ -59,8 +59,6 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None, update_func=N
             uu["type"] = md["type"]
             meta_u.append(uu)
             print "\n---------------"
-            #print "data: "
-            #print data[md["from_index"]:md["to_index"]]
             print "from-to: %d - %d" % (md["from_index"], md["to_index"])
             print "type:          %s" % uu["type"]
             print "score: %f " % uu["score_vector"][uu["cluster"]]
@@ -71,10 +69,9 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None, update_func=N
                 print uu["score_vector"]
                 print "and u:"
                 print u
-                kkk = 1/0
-            #print "classified as: %s" % meta_data[md["cluster"]]["type"]
+                raise Exception("There is a nan in the function test_with_data_and_meta if ")
 
-            if meta_data[uu["score_vector"].argmax()]["type"] == md["type"]: #md["type"] == meta_data[md["cluster"]]["type"]:
+            if meta_data[uu["score_vector"].argmax()]["type"] == md["type"]:
                 num_of_correct += 1
 
             meta_u.append(uu)
@@ -89,8 +86,6 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None, update_func=N
             uu["type"] = md["type"]
             meta_u.append(uu)
             print "\n---------------"
-            # print "data: "
-            # print data[md["from_index"]:md["to_index"]]
             print "from-to: %d - %d" % (md["from_index"], md["to_index"])
             print "type:          %s" % uu["type"]
             print "score: %f " % uu["score_vector"][uu["cluster"]]
@@ -101,11 +96,9 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None, update_func=N
                 print uu["score_vector"]
                 print "and u:"
                 print u
-                kkk = 1 / 0
-            # print "classified as: %s" % meta_data[md["cluster"]]["type"]
+                raise Exception("There is a nan in the function test_with_data_and_meta else")
 
-            if meta_data[uu["score_vector"].argmax()]["type"] == md[
-                "type"]:  # md["type"] == meta_data[md["cluster"]]["type"]:
+            if meta_data[uu["score_vector"].argmax()]["type"] == md["type"]:
                 num_of_correct += 1
 
             meta_u.append(uu)
@@ -113,7 +106,6 @@ def test_with_data_and_meta(model=None, data=None, meta_data=None, update_func=N
         update_func(100)
 
     print "number of correctly classified (with k=1) is: %d out of %d" % (num_of_correct, len(meta_data))
-        #print "score vector: %s" % str(uu["score_vector"])
     print "\n=============\n"
     return meta_u
 

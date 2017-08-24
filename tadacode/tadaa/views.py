@@ -11,27 +11,7 @@ import core
 
 
 def home(request):
-    # import time
-    # pid = os.fork()
-    # if pid == 0:
-    #     print "child will sleep"
-    #     time.sleep(5)
-    #     print "child is walking up"
-    #     os._exit(0)
-    # else:
-    #     return render(request, 'home.html')
     return render(request, 'home.html')
-
-
-def testauto(request):
-    pass
-    # import json
-    # from django import
-    # print "in test auto"
-    # results = {"a": "aaa", "b": "bbb"}
-    # data = json.dumps(results)
-    # mimetype = 'application/json'
-    # return HttpResponse(data, mimetype)
 
 
 def get_classes(request):
@@ -62,9 +42,7 @@ def add_model_abox(request):
         #pid = 1
         if pid == 0:  # child process
             print "child is returning"
-            #core.test_progress()
             return redirect('list_models')
-            #return render(request, 'add_model.html', {'message': 'model is under processing'})
         else:  # parent process
             print "in parent"
             mlmodel = MLModel()
@@ -100,9 +78,7 @@ def add_model(request):
         #pid = 1
         if pid == 0:  # child process
             print "child is returning"
-            #core.test_progress()
             return redirect('list_models')
-            #return render(request, 'add_model.html', {'message': 'model is under processing'})
         else:  # parent process
             print "in parent"
             mlmodel = MLModel()
@@ -144,7 +120,6 @@ def predict(request):
         print "name %s num of files %d" % (name, len(files))
         print "files: "
         print files
-        # name = name + ' - ' + random_string(length=4) + '.csv'
         stored_files = []
         original_uploaded_filenames = []
         for file in files:
@@ -158,8 +133,8 @@ def predict(request):
                                                                  ' make sure they are text csv files'})
         print "stored files:"
         print stored_files
-        #pid = os.fork()
-        pid = 1
+        pid = os.fork()
+        #pid = 1
         if pid == 0:  # child process
             print "predict> child is returning"
             return redirect('list_predictionruns')
@@ -174,14 +149,11 @@ def predict(request):
                     os.remove(f)
                 return render(request, 'predict.html', {'models': MLModel.objects.filter(state=MLModel.COMPLETE),
                                                         'error_msg': 'The chosen model does not have a model file'})
-            # print "pr.mlmodel.file_name> "+pr.mlmodel.file_name
-            # print "full> "+os.path.join(settings.MODELS_DIR, pr.mlmodel.file_name)
             core.predict_files(predictionrun_id=pr.id, model_dir=os.path.join(settings.MODELS_DIR,
                                                                               pr.mlmodel.file_name),
                                files=stored_files, has_header=has_header,
                                original_uploaded_filenames=original_uploaded_filenames)
             os._exit(0)
-            # return redirect('list_predictionruns')
 
 
 def list_predictionruns(request):

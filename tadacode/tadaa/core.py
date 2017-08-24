@@ -49,10 +49,7 @@ def explore_and_train_tbox(endpoint=None, model_id=None):
         update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
                                                            update_func=update_progress_func)
-        # Now I'm not using the computed data here
-        # update_model_state(model_id=model_id, new_progress=0, new_notes="computing the score of the trained model")
-        # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
-        #                                  update_func=update_progress_func)
+
         update_model_state(model_id=model_id, new_progress=0, new_notes="Saving the model data")
         model_file_name = data_extraction.save_model(model=model, meta_data=meta_data, file_name=str(model_id) + " - ")
         if model_file_name is not None:
@@ -86,14 +83,6 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[], min_nu
         classes_properties_uris = []
         for idx, class_uri in enumerate(classes_uris):
             update_progress_func(int(idx * 1.0 / len(classes_uris) * 100))
-            # properties = easysparql.get_numerical_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
-            #                                                                 raiseexception=True)
-            # properties = easysparql.get_numerical_properties_for_class_abox_using_half_split(endpoint=endpoint,
-            #                                                                                  class_uri=class_uri,
-            #                                                                                  raiseexception=True,
-            #                                                                                  lower_bound=1,
-            #                                                                                  upper_bound=100000,
-            #                                                                                  first_time=True)
             properties = easysparql.get_properties_for_class_abox(endpoint=endpoint, class_uri=class_uri,
                                                                   raiseexception=True)
             for prop in properties:
@@ -122,10 +111,6 @@ def explore_and_train_abox(endpoint=None, model_id=None, classes_uris=[], min_nu
         update_model_state(model_id=model_id, new_progress=0, new_notes="organizing the clusters")
         meta_with_clusters = learning.get_cluster_for_meta(training_meta=meta_data, testing_meta=meta_data,
                                                            update_func=update_progress_func)
-        # Now I'm not using the computed data here
-        # update_model_state(model_id=model_id, new_progress=0, new_notes="computing the score of the trained model")
-        # learning.test_with_data_and_meta(model=model, data=data, meta_data=meta_with_clusters,
-        #                                  update_func=update_progress_func)
         update_model_state(model_id=model_id, new_progress=0, new_notes="Saving the model data")
         model_file_name = data_extraction.save_model(model=model, meta_data=meta_data, file_name=str(model_id) + " - ")
         if model_file_name is not None:
@@ -169,8 +154,6 @@ def predict_files(predictionrun_id=None, model_dir=None, files=[], original_uplo
     model, types = learning.load_model(model_dir)
     num_of_files = len(files)
     for idx, fname in enumerate(files):
-        # update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=int(idx * 1.0 / num_of_files * 100),
-        #                            new_notes='predicting columns in file: ' + fname.split('/')[-1].strip()[:-4])
         update_predictionrun_state(predictionrun_id=predictionrun_id,
                                    new_notes='predicting columns in file: ' + fname.split('/')[-1].strip()[:-4])
         data, meta_data = data_extraction.data_and_meta_from_a_mixed_file(file_name=fname, has_header=has_header,
@@ -226,13 +209,10 @@ def get_types_and_membership(predictionrun_id=None, top_k_candidates=5, model_di
         mems_idxs = mems.argsort()[::-1][:top_k_candidates]  # idxs sorted from largest (value not largest index) to smallest
         mems = mems[mems_idxs]
         mems *= 100
-        # mem_with_types["types"] = types[mems_idxs].tolist()
-        # mem_with_types["scores"] = mems.tolist()
         mem_with_types["typesscores"] = zip(mems.tolist(), types[mems_idxs].tolist())
         mem_with_types["column_no"] = m.column_no
         mem_with_types["file_name"] = m.file_name
         list_of_mem_with_types.append(mem_with_types)
-        #print mem_with_types
     return list_of_mem_with_types
 
 
@@ -262,10 +242,6 @@ def update_model_state(model_id=None, new_state=None, new_notes=None, new_progre
 
 def update_predictionrun_progress_for_partial(predictionrun_id, new_progress):
     return update_predictionrun_state(predictionrun_id=predictionrun_id, new_progress=new_progress)
-
-
-# def update_predictionrun_notes_for_partial(predictionrun_id, new_notes):
-#     return update_predictionrun_state(predictionrun_id=predictionrun_id, new_notes=new_notes)
 
 
 def update_predictionrun_state(predictionrun_id=None, new_state=None, new_notes=None, new_progress=None):

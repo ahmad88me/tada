@@ -14,7 +14,7 @@ colors_hex = zip(*colors)[1]
 
 #cmap = matplotlib.cm.get_cmap(name='viridis')
 cmap = matplotlib.cm.get_cmap(name='hsv')
-print "cmap N: "+str(cmap.N)
+
 
 input_files = [
     "badmintonplayers.csv",
@@ -24,7 +24,6 @@ input_files = [
     "golfplayers3.csv",
     "gymnasts.csv",
     "handballplayers.csv",
-#    "mountains.csv",
     "Olympic Games.csv",
     "rower.csv",
     "soccerplayers4.csv",
@@ -35,60 +34,63 @@ input_files = [
     "wrestlers.csv",
 ]
 
-#d = "../../docs/kcap2017/"
 d = "clean_input"
-d = "/Users/aalobaid/workspaces/Pyworkspace/tada/tadacode/explore/clean_input"
-#f = open(os.path.join(d, input_files[0]))
-#print f.readline()
-
-
-#df = pd.read_csv(os.path.join(d, input_files[1])).select_dtypes(include=[np.number]).dropna(axis=1, how='any')
-#plt.scatter(df['Year'], df['Year'], c=colors[0], alpha=0.5)
-
-
-# for idx, column in enumerate(df):
-#     m = df[column].mean()
-#     plt.plot(df[column], [m] * df[column].size, "o", c=colors_hex[idx], alpha=0.5, label=column)
-#
-# plt.legend()
-#
-# plt.show()
 
 
 def get_outliers(df, k=1.5):
     q1 = df.quantile(q=0.25)
     q3 = df.quantile(q=0.75)
-    return df[(df < q1 - k * (q3 - q1)) | (df > q3 + k * (q3 - q1))]
+    return df[(df < q1 - k * (q3 - q1)) | (df > q3 + k * (q3 - q1))], df[(df >= q1 - k * (q3 - q1)) & (df <= q3 + k * (q3 - q1))]
 
 
-color_idx = 0
-for idx_inp, inpf in enumerate(input_files):
-    #print "inpf: "+inpf
-    #print idx_inp
-    df = pd.read_csv(os.path.join(d, inpf)).select_dtypes(include=[np.number]).dropna(axis=1, how='any')
-    for idx, column in enumerate(df):
-        if df[column].size == 0:
-            continue
-        # m = df[column].mean()
-        # plt.plot(df[column], [m] * df[column].size, "o", c=colors_hex[color_idx], alpha=0.5, label=column[0:6]+"("+inpf[0:4]+")")
-        # plt.plot(df[column], [m] * df[column].size, random.choice(["^","v","<",">","1","2","3","4","P","X"]), c=rgb2hex(cmap(color_idx%cmap.N)), alpha=0.5,
-        #          label=column[0:6] + "(" + inpf[0:4] + ")")
-        plt.plot(df[column], [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"] * df[column].size, "o",
-                 c=rgb2hex(cmap(color_idx % cmap.N)), alpha=0.5, label=column[0:6] + "(" + inpf[0:4] + ")")
-        color_idx += 15
-        # q1 = df[column].quantile(q=0.25)
-        # q3 = df[column].quantile(q=0.75)
-        # k = 1.5
-        # k2 = 2.0
-        # outliers = df[column][(df[column] < q1 - k * (q3 - q1)) | (df[column] > q3 + k * (q3 - q1))]
-        outliers = get_outliers(df[column])
-        if outliers.size != 0:
-        #if not df[column].between(q1 - k*(q3-q1), q3 + k*(q3-q1)).all():
-            print column.lower() + "(" + inpf.lower() + ")"
+def explore_input_files():
+    color_idx = 0
+    print "outliers in: "
+    for idx_inp, inpf in enumerate(input_files):
+        df = pd.read_csv(os.path.join(d, inpf)).select_dtypes(include=[np.number]).dropna(axis=1, how='any')
+        for idx, column in enumerate(df):
+            if df[column].size == 0:
+                continue
+            plt.plot(df[column], [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"] * df[column].size, ".",
+                     c=rgb2hex(cmap(color_idx % cmap.N)), alpha=0.5, label=column[0:6] + "(" + inpf[0:4] + ")")
+            outliers, _ = get_outliers(df[column])
+            if outliers.size != 0:
+                print " >  "+column.lower() + "(" + inpf.lower() + ")" + " num of outliers is: "+str(outliers.size)
+                plt.plot(outliers, [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"] * outliers.size, "X",
+                         c=rgb2hex(cmap(color_idx % cmap.N)), alpha=1.0, label=column[0:6] + "(" + inpf[0:4] + ")")
+            color_idx += 15
 
 
-#plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+def free_form_visualization():
+    color_idx = 0
+    for idx_inp, inpf in enumerate(input_files):
+        df = pd.read_csv(os.path.join(d, inpf)).select_dtypes(include=[np.number]).dropna(axis=1, how='any')
+        for idx, column in enumerate(df):
+            if df[column].size == 0:
+                continue
+            plt.plot(df[column], [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"] * df[column].size, "1",
+                     c=rgb2hex(cmap(color_idx % cmap.N)), alpha=0.3, label=column[0:6] + "(" + inpf[0:4] + ")")
 
+            # draw the mean
+            plt.plot([df[column].mean()], [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"], "s",
+                     c=rgb2hex(cmap(color_idx % cmap.N)), alpha=0.5, label=column[0:6] + "(" + inpf[0:4] + ")")
+
+            outliers, non_outliers = get_outliers(df[column])
+
+            # draw the mean without the outliers
+            plt.plot([non_outliers.mean()], [column[0:6].lower() + "(" + inpf[0:6].lower() + ")"], "D",
+                     c=rgb2hex(cmap(color_idx % cmap.N)), alpha=0.5, label=column[0:6] + "(" + inpf[0:4] + ")")
+
+
+            color_idx += 15
+    line_up, = plt.plot([], [], "s", label='mean with outliers', c=rgb2hex(cmap(15 % cmap.N)))
+    line_down, = plt.plot([], [], "D", label='mean without outliers', c=rgb2hex(cmap(15*10 % cmap.N)))
+    plt.legend(handles=[line_up, line_down])
+
+if raw_input("Enter:\n1) Data Exploration\n2) Free Form Visualization\n")=="1":
+    explore_input_files()
+else:
+    free_form_visualization()
 plt.show()
 
 
