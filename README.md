@@ -31,5 +31,5 @@ This model is responsible for extracting the data for a collection of classes fr
 File: `data_extraction.py` and `easysparql.py`
 
 ## Step by Step guide
-[step by step guide](https://github.com/ahmad88me/tada/tree/master/how%20to/README.md)
+[step by step guide](https://github.com/ahmad88me/tada/tree/master/step_by_step/README.md)
 
