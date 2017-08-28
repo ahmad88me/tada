@@ -54,3 +54,6 @@ File: `data_extraction.py` and `easysparql.py`
 ## Data
 [Olympic Data](https://github.com/ahmad88me/tada/tree/master/tadacode/explore/clean_input)
 
+## Report
+[report](https://github.com/ahmad88me/tada/blob/master/report.pdf)
+
