@@ -192,6 +192,34 @@ def list_memberships(request, predictionrun_id):
     return render(request, 'list_memberships.html', {'mems_and_types': mems_and_types})
 
 
+def online_entity_annotation(request):
+    """
+    This to annotate cells with classes and entities
+    :param request:
+    :return:
+    """
+    if request.method == 'GET':
+        return render(request, 'online_entity_annotation.html')
+    elif request.method == 'POST':
+        files = request.FILES.getlist('csvfiles')
+        if len(files) == 0:
+            return render(request, 'online_entity_annotation.html', {'error_msg': 'no csv files are found'})
+        stored_files = []
+        for file in files:
+            dest_file_name = 'annotation' + ' - ' + random_string(length=4) + '.csv'
+            if handle_uploaded_file(uploaded_file=file,
+                                    destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
+                stored_files.append(os.path.join(settings.UPLOAD_DIR, dest_file_name))
+        if len(stored_files) == 0:
+            return render(request, 'online_entity_annotation.html', {'error_msg': 'error saving the csv files'})
+        pid = os.fork()
+        if pid == 0:
+            return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
+        else:
+            import annotator
+            annotator.annotate_csvs(stored_files)
+
+
 # Helper Functions
 
 def random_string(length=4):

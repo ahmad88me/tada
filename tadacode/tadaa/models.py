@@ -107,3 +107,18 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return str(self.id) + ') ' + self.file_name + ', ' + str(self.column_no) + ' - ' + str(self.prediction_run.name)
+
+
+class OnlineAnnotationRun(models.Model):
+    pass
+
+
+class TextEntry(models.Model):
+    annotation_run = models.ForeignKey(OnlineAnnotationRun)
+    text_value = models.CharField(max_length=120)
+
+
+class EntityClassCombination(models.Model):
+    entry = models.ForeignKey(TextEntry)
+    entity_value = models.CharField(max_length=240)
+    class_value = models.CharField(max_length=240)
