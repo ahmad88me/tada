@@ -109,16 +109,32 @@ class Membership(models.Model):
         return str(self.id) + ') ' + self.file_name + ', ' + str(self.column_no) + ' - ' + str(self.prediction_run.name)
 
 
+###################################################################
+# The below are for the textual classification and entity linking #
+###################################################################
+
+
 class OnlineAnnotationRun(models.Model):
-    pass
+    name = models.CharField(max_length=120, default='')
+    status = models.CharField(max_length=120, default='Ready')
 
 
-class TextEntry(models.Model):
+class Cell(models.Model):
     annotation_run = models.ForeignKey(OnlineAnnotationRun)
     text_value = models.CharField(max_length=120)
 
+    def get_entities(self):
+        return Entity.objects.filter(cell=self)
 
-class EntityClassCombination(models.Model):
-    entry = models.ForeignKey(TextEntry)
-    entity_value = models.CharField(max_length=240)
-    class_value = models.CharField(max_length=240)
+
+class Entity(models.Model):
+    cell = models.ForeignKey(Cell)
+    entity = models.CharField(max_length=250)
+
+    def get_classes(self):
+        return CClass.objects.filter(entity=self)
+
+
+class CClass(models.Model):
+    entity = models.ForeignKey(Entity)
+    cclass = models.CharField(max_length=250)

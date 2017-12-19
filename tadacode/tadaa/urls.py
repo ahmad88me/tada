@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+import views
 
 urlpatterns = patterns('',
     url(r'^add_model_abox', 'tadaa.views.add_model_abox'),
@@ -10,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^list_predictions', 'tadaa.views.list_predictionruns', name='list_predictionruns'),
     url(r'list_memberships/([0-9]+)', 'tadaa.views.list_memberships'),
     url(r'get_classes', 'tadaa.views.get_classes'),
-    url(r'online_entity_annotation', 'tadaa.views.online_entity_annotation'),
+    url(r'online_entity_annotation', views.OnlineEntityAnnotation.as_view()),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^home', 'tadaa.views.home'),
     url('', 'tadaa.views.home'),
