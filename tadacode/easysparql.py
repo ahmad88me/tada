@@ -1,6 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-from __init__ import QUERY_LIMIT
+# from __init__ import QUERY_LIMIT
+QUERY_LIMIT=""
 
 import pandas as pd
 import numpy as np
@@ -511,6 +512,43 @@ def get_all_classes_properties_numerical(endpoint=None):
 
 
 #####################################################################
+#                    Online Text Annotation                         #
+#####################################################################
+
+
+def get_entities(subject_name, endpoint):
+    """
+    assuming only in the form of name@en. To be extended to other languages and other types e.g. name^^someurltype
+    :param subject_name:
+    :return:
+    """
+    query = """
+        select distinct ?s where{
+            ?s ?p "%s"@en
+        }
+    """ % (subject_name)
+    results = run_query(query=query, endpoint=endpoint)
+    entities = [r['s']['value'] for r in results]
+    return entities
+
+
+def get_classes(entity, endpoint):
+    """
+    :param entity:
+    :param endpoint:
+    :return:
+    """
+    query = """
+        select distinct ?c where{
+        <%s> a ?c
+        }
+    """ % entity
+    results = run_query(query=query, endpoint=endpoint)
+    classes = [r['c']['value'] for r in results]
+    return classes
+
+
+#####################################################################
 #                         Helper Functions                          #
 #####################################################################
 
@@ -526,7 +564,6 @@ def get_url_stripped(uri):
     if uri_stripped[-1] == ">":
         uri_stripped = uri_stripped[:-1]
     return uri_stripped
-
 
 
 
