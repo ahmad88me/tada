@@ -1,24 +1,38 @@
 {%extends "base.html"%}
-{%block content%}
+{%block contentfull%}
 
-<table class="table">
+
+<table class="table table-striped">
+
+    <thead>
+    <tr class="thead-dark">
+      <th scope="col">Cell value</th>
+      <th scope="col">Entities</th>
+      <th scope="col">Classes</th>
+    </tr>
+  </thead>
+    <tbody>
+
     {%for cell in cells%}
     <tr>
         <td rowspan="{{cell.entities|length}}">{{cell.text_value}}</td>
         <td>
          {{cell.entities.0.entity}}
         </td>
+        <td>{%for c in cell.entities.0.classes%} {{c.cclass}} {%if not forloop.last%}<hr>{%endif%} {%endfor%}</td>
     </tr>
-    {%for entity in cell.entities%}
-        {% if not forloop.first %}
-        <tr>
-            <td>
-             {{entity.entity}}
-            </td>
-        </tr>
-        {%endif%}
-    {%endfor%}
+        {%for entity in cell.entities%}
+            {% if not forloop.first %}
+            <tr>
+                <td>
+                 {{entity.entity}}
+                </td>
+        <td>{%for c in cell.entities.0.classes%} {{c.cclass}} {%if not forloop.last%}<hr>{%endif%} {%endfor%}</td>
+            </tr>
+            {%endif%}
+        {%endfor%}
 
     {%endfor%}
+    </tbody>
 </table>
 {%endblock%}
