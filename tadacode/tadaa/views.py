@@ -6,7 +6,7 @@ import random
 import settings
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from models import MLModel, PredictionRun, Membership, OnlineAnnotationRun
+from models import MLModel, PredictionRun, Membership, OnlineAnnotationRun, Cell, Entity
 import core
 from django.views.generic import View
 import subprocess
@@ -237,6 +237,12 @@ class OnlineEntityAnnotation(View):
         subprocess.Popen(comm, shell=True)
         return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
 
+
+def view_annotations(request):
+    annotation_id = request.GET['annotation'].strip()
+    annotation = OnlineAnnotationRun.objects.get(id=annotation_id)
+    cells = Cell.objects.filter(annotation_run=annotation)
+    return render(request, 'view_annotations.html', {'annotation': annotation, 'cells': cells})
 
 # Helper Functions
 

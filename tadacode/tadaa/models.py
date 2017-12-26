@@ -119,23 +119,31 @@ class OnlineAnnotationRun(models.Model):
     status = models.CharField(max_length=120, default='Ready')
 
     def __str__(self):
-        return self.name + "(" + self.status + ")"
+        return str(self.id) + '> ' + self.name + "(" + self.status + ")"
 
 
 class Cell(models.Model):
     annotation_run = models.ForeignKey(OnlineAnnotationRun)
     text_value = models.CharField(max_length=120)
 
+    @property
+    def entities(self):
+        return Entity.objects.filter(cell=self)
+
     def __str__(self):
         return self.annotation_run.name + ' - ' + self.text_value
 
-    def get_entities(self):
-        return Entity.objects.filter(cell=self)
+    # def get_entities(self):
+    #     return Entity.objects.filter(cell=self)
 
 
 class Entity(models.Model):
     cell = models.ForeignKey(Cell)
     entity = models.CharField(max_length=250)
+
+    @property
+    def classes(self):
+        return CClass.objects.filter(entity=self)
 
     class Meta:
         verbose_name_plural = "Entities"
@@ -143,8 +151,8 @@ class Entity(models.Model):
     def __str__(self):
         return self.cell.text_value + ' - ' + self.entity
 
-    def get_classes(self):
-        return CClass.objects.filter(entity=self)
+    # def get_classes(self):
+    #     return CClass.objects.filter(entity=self)
 
 
 class CClass(models.Model):

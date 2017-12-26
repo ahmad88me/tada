@@ -32,6 +32,7 @@ def annotate_csvs(ann_run_id, files, endpoint):
     """
     :param ann_run_id: the id of the annotation run as a string
     :param files: a list of files in abs dir
+    :param endpoint: the endpoint url
     :return: Nothing
     """
     from tadaa.models import OnlineAnnotationRun
@@ -53,6 +54,7 @@ def annotate_single_csv(ann_run, csv_file, endpoint):
         * The entity column is the first column.
     :param ann_run:online annotation run
     :param csv_file: the directory of the file
+    :param endpoint: the endpoint url
     :return:
     """
     print 'annotating: ' + csv_file
