@@ -118,6 +118,10 @@ class OnlineAnnotationRun(models.Model):
     name = models.CharField(max_length=120, default='')
     status = models.CharField(max_length=120, default='Ready')
 
+    @property
+    def cells(self):
+        return Cell.objects.filter(annotation_run=self)
+
     def __str__(self):
         return str(self.id) + '> ' + self.name + "(" + self.status + ")"
 

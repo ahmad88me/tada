@@ -1,0 +1,15 @@
+{%extends "base.html"%}
+{%block content%}
+<table class="table">
+{%for annotation in annotations%}
+    <tr>
+        <td>
+            <a href="view_annotation?annotation={{annotation.id}}">view: {{annotation.name}}</a>
+        </td>
+        <td>
+            <a href="eliminate_general_classes?annotation={{annotation.id}}">remove general classes: {{annotation.name}}</a>
+        </td>
+    </tr>
+{%endfor%}
+</table>
+{%endblock%}

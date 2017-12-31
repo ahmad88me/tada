@@ -44,6 +44,7 @@ def run_query(query=None, endpoint=None, raiseexception=False):
         return []
     sparql = SPARQLWrapper(endpoint=endpoint)
     sparql.setQuery(query=query)
+    sparql.setMethod("POST")
     sparql.setReturnFormat(JSON)
     #sparql.setTimeout(300)
     try:
@@ -532,19 +533,84 @@ def get_entities(subject_name, endpoint):
     return entities
 
 
-def get_classes(entity, endpoint):
+def get_classes(entity, endpoint, hierarchy):
     """
     :param entity:
     :param endpoint:
+    :param hierarchy:
     :return:
     """
-    query = """
-        select distinct ?c where{
-        <%s> a ?c
-        }
-    """ % entity
+    if hierarchy:
+        query = """
+            select distinct ?c where{
+            <%s> a ?cc.
+            ?cc rdfs:subClassOf* ?c.
+            }
+        """ % entity
+    else:
+        query = """
+            select distinct ?c where{
+            <%s> a ?c
+            }
+        """ % entity
     results = run_query(query=query, endpoint=endpoint)
     classes = [r['c']['value'] for r in results]
+    return classes
+
+
+def get_classes_not_in(classes, endpoint):
+    """
+    This is to get more specific classes (e.g. given "thing", "soccer player", "person" it returns "soccer player")
+    :param classes:
+    :param endpoint:
+    :return:
+    """
+    my_classes = ",".join(["<"+c+">" for c in classes])
+    # This works but slow future improvement is required
+#     query = """
+#     select distinct ?myc where{
+#             ?ec a [].
+# ?myc a [].
+#             FILTER (?ec NOT IN (<http://dbpedia.org/ontology/SoccerPlayer>, <http://www.w3.org/2002/07/owl#Thing>)).
+#             ?ec rdfs:subClassOf+ ?ech.
+#             FILTER(?myc IN (<http://dbpedia.org/ontology/SoccerPlayer>, <http://www.w3.org/2002/07/owl#Thing>)).
+#             FILTER(?myc != ?ech)
+#         }
+#     """
+#     query = """
+#         select ?myc where{
+#             ?ec a [].
+#             ?myc a [].
+#             FILTER (?ec NOT IN (%s)).
+#             ?ec rdfs:subClassOf+ ?ech.
+#             FILTER(?myc IN (%s)).
+#             FILTER(?myc != ?ech)
+#         }
+#         """ % (my_classes, my_classes)
+#     query = """
+#     select ?myc where{
+#         ?ec a [].
+#         FILTER (?ec NOT IN (%s)).
+#         ?ec rdfs:subClassOf+ ?ech.
+#         FILTER(?ech NOT IN (%s))
+#         ?myc a [].
+#         FILTER(?myc IN (%s))
+#     }
+#     """ % (my_classes, my_classes, my_classes)
+    # This works on the soccer example but returns nothing on the read data. I do not know why
+    query = """
+    select  ?ech where{
+    ?ech a [].
+    FILTER(?ech IN (%s).
+    MINUS{
+	    ?ec a [].
+        FILTER (?ec NOT IN (%s).
+        ?ec rdfs:subClassOf+ ?ech.
+    }
+    }
+    """ % (my_classes, my_classes)
+    results = run_query(query=query, endpoint=endpoint)
+    classes = [r['myc']['value'] for r in results]
     return classes
 
 
