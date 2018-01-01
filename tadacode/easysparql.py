@@ -599,18 +599,18 @@ def get_classes_not_in(classes, endpoint):
 #     """ % (my_classes, my_classes, my_classes)
     # This works on the soccer example but returns nothing on the read data. I do not know why
     query = """
-    select  ?ech where{
+    select ?ech where{
     ?ech a [].
-    FILTER(?ech IN (%s).
+    FILTER(?ech IN (%s)).
     MINUS{
 	    ?ec a [].
-        FILTER (?ec NOT IN (%s).
+        FILTER (?ec NOT IN (%s)).
         ?ec rdfs:subClassOf+ ?ech.
     }
     }
     """ % (my_classes, my_classes)
     results = run_query(query=query, endpoint=endpoint)
-    classes = [r['myc']['value'] for r in results]
+    classes = [r['ech']['value'] for r in results]
     return classes
 
 
