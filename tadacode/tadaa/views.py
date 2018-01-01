@@ -1,4 +1,3 @@
-
 import os
 import string
 import random
@@ -6,8 +5,10 @@ import random
 import settings
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from models import MLModel, PredictionRun, Membership
+from models import MLModel, PredictionRun, Membership, OnlineAnnotationRun, Cell, Entity
 import core
+from django.views.generic import View
+import subprocess
 
 
 def home(request):
@@ -39,7 +40,7 @@ def add_model_abox(request):
         if error_msg != '':
             return render(request, 'add_model_abox.html', {'error_msg': error_msg})
         pid = os.fork()
-        #pid = 1
+        # pid = 1
         if pid == 0:  # child process
             print "child is returning"
             return redirect('list_models')
@@ -75,7 +76,7 @@ def add_model(request):
         if error_msg != '':
             return render(request, 'add_model.html', {'error_msg': error_msg})
         pid = os.fork()
-        #pid = 1
+        # pid = 1
         if pid == 0:  # child process
             print "child is returning"
             return redirect('list_models')
@@ -124,7 +125,8 @@ def predict(request):
         original_uploaded_filenames = []
         for file in files:
             dest_file_name = name + ' - ' + random_string(length=4) + '.csv'
-            if handle_uploaded_file(uploaded_file=file, destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
+            if handle_uploaded_file(uploaded_file=file,
+                                    destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
                 stored_files.append(os.path.join(settings.UPLOAD_DIR, dest_file_name))
                 original_uploaded_filenames.append(file.name)
         if len(stored_files) == 0:
@@ -134,7 +136,7 @@ def predict(request):
         print "stored files:"
         print stored_files
         pid = os.fork()
-        #pid = 1
+        # pid = 1
         if pid == 0:  # child process
             print "predict> child is returning"
             return redirect('list_predictionruns')
@@ -192,11 +194,80 @@ def list_memberships(request, predictionrun_id):
     return render(request, 'list_memberships.html', {'mems_and_types': mems_and_types})
 
 
+class OnlineEntityAnnotation(View):
+    """
+    This to annotate cells with classes and entities
+    :param request:
+    :return:
+    """
+
+    def get(self, request):
+        return render(request, 'online_entity_annotation.html')
+
+    def post(self, request):
+        if 'name' not in request.POST or request.POST['name'].strip() == '':
+            name = random_string(4)
+        else:
+            name = request.POST['name'].strip()
+        files = request.FILES.getlist('csvfiles')
+
+        if len(files) == 0:
+            return render(request, 'online_entity_annotation.html', {'error_msg': 'no csv files are found'})
+        stored_files = []
+        for file in files:
+            dest_file_name = 'annotation' + ' - ' + random_string(length=4) + '.csv'
+            if handle_uploaded_file(uploaded_file=file,
+                                    destination_file=os.path.join(settings.UPLOAD_DIR, dest_file_name)):
+                sf = os.path.join(settings.UPLOAD_DIR, dest_file_name)
+                stored_files.append('"' + sf + '"')
+
+        if len(stored_files) == 0:
+            return render(request, 'online_entity_annotation.html', {'error_msg': 'error saving the csv files'})
+        proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+        print proj_abs_dir
+        venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
+        print venv_python
+        annotation_run = OnlineAnnotationRun(name=name, status="started")
+        annotation_run.save()
+        comm = "%s %s true true %s %s" % (venv_python,
+                                          (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                                          annotation_run.id,
+                                          ",".join(stored_files))
+        print "comm: %s" % comm
+        subprocess.Popen(comm, shell=True)
+        return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
+
+
+def view_annotation(request):
+    annotation_id = request.GET['annotation'].strip()
+    annotation = OnlineAnnotationRun.objects.get(id=annotation_id)
+    cells = Cell.objects.filter(annotation_run=annotation)
+    return render(request, 'view_annotation.html', {'annotation': annotation, 'cells': cells})
+
+
+def list_annotations(request):
+    return render(request, 'list_annotations.html', {'annotations': OnlineAnnotationRun.objects.all()})
+
+
+def eliminate_general_classes(request):
+    annotation_id = request.GET['annotation'].strip()
+    annotation = OnlineAnnotationRun.objects.get(id=annotation_id)
+    proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+    print proj_abs_dir
+    venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
+    comm = "%s %s %s" % (venv_python,
+                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                         annotation.id)
+    print "comm: %s" % comm
+    subprocess.Popen(comm, shell=True)
+    return render(request, 'home.html')
+
 # Helper Functions
+
 
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
 def clean_string(s):
-    return ''.join(e for e in s if e.isalnum() or e == ' ' or e=='_' or e=='-')
+    return ''.join(e for e in s if e.isalnum() or e == ' ' or e == '_' or e == '-')
