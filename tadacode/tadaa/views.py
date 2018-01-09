@@ -194,6 +194,10 @@ def list_memberships(request, predictionrun_id):
     return render(request, 'list_memberships.html', {'mems_and_types': mems_and_types})
 
 
+#################################################################################
+#                        Online Annotation                                      #
+#################################################################################
+
 class OnlineEntityAnnotation(View):
     """
     This to annotate cells with classes and entities
@@ -229,7 +233,7 @@ class OnlineEntityAnnotation(View):
         print venv_python
         annotation_run = OnlineAnnotationRun(name=name, status="started")
         annotation_run.save()
-        comm = "%s %s true true %s %s" % (venv_python,
+        comm = "%s %s %s --csvfiles %s" % (venv_python,
                                           (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                                           annotation_run.id,
                                           ",".join(stored_files))
@@ -255,14 +259,32 @@ def eliminate_general_classes(request):
     proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
     print proj_abs_dir
     venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
-    comm = "%s %s %s" % (venv_python,
+    comm = "%s %s %s --eliminateclasses" % (venv_python,
                          (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                          annotation.id)
     print "comm: %s" % comm
     subprocess.Popen(comm, shell=True)
     return render(request, 'home.html')
 
+
+def omit_root_classes(request):
+    venv_python = get_python_venv()
+    annotation_id = request.GET['annotation'].strip()
+    comm = "%s %s %s --omitrootclasses" % (venv_python,
+                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                         annotation_id)
+    print "comm: %s" % comm
+    subprocess.Popen(comm, shell=True)
+    return render(request, 'home.html')
+
+
 # Helper Functions
+
+
+def get_python_venv():
+    proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+    venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
+    return venv_python
 
 
 def random_string(length=4):

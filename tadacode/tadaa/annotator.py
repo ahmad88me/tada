@@ -26,6 +26,7 @@ application = get_wsgi_application()
 #######################################
 
 from tadaa.models import OnlineAnnotationRun, Cell, CClass, Entity
+import argparse
 
 
 def annotate_csvs(ann_run_id, files, endpoint, gen_class_eli, hierarchy):
@@ -100,29 +101,58 @@ def eliminate_general_classes(ann_run, endpoint):
                     cclass.delete()
 
 
+def omit_root_classes(ann_run, endppoint):
+    """
+    To delete types that does not have a parent. This is to solve the problem with classes
+    :param ann_run:
+    :param endppoint:
+    :return:
+    """
+    from easysparql import get_classes_with_parents
+    classes = []
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                classes.append(cclass.cclass)
+    classes = list(set(classes))
+    classes_with_parents = get_classes_with_parents(classes=classes, endpoint=endpoint)
+    if len(classes_with_parents) == 0:
+        print "No classes with parents are returned"
+        return
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                if cclass.cclass not in classes_with_parents:
+                    cclass.delete()
+
+
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
 if __name__ == '__main__':
-    for idx, a in enumerate(sys.argv):
-        print '%d => %s' % (idx, a)
-    if len(sys.argv) == 2:
+    endpoint = "http://dbpedia.org/sparql"
+    parser = argparse.ArgumentParser(description='Annotation module to annotate a given annotation run')
+    parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
+    parser.add_argument('--eliminateclasses', action='store_true', help='eliminate classes that are too general')
+    parser.add_argument('--csvfiles', action='append', nargs='+',
+                        help='the list of csv files to be annotated')
+    parser.add_argument('--omitrootclasses', action='store_true', help='omit root classes that does not have parent')
+    args = parser.parse_args()
+    if args.eliminateclasses:
         from tadaa.models import OnlineAnnotationRun
-        ann_run = OnlineAnnotationRun.objects.get(id=sys.argv[1])
+        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print "eliminating classes"
-        eliminate_general_classes(ann_run=ann_run, endpoint="http://dbpedia.org/sparql")
+        eliminate_general_classes(ann_run=ann_run, endpoint=endpoint)
         print "classes eliminated"
-    elif len(sys.argv) < 5:
-        print "annotator expects the run id and list of files to be annotated"
-    elif sys.argv[1] not in ['true', 'false']:
-        print sys.argv[1]
-        print "second argument must be true or false to indicate whether general classes elimenation is enabled or not"
-    elif sys.argv[2] not in ['true', 'false']:
-        print sys.argv[2]
-        print "third argument must be true or false to indicate whether the classes hierarchy is included"
-    else:
-        files = sys.argv[4:]
-        annotate_csvs(ann_run_id=sys.argv[3], hierarchy=sys.argv[2] == 'true', files=files,
-                      gen_class_eli=sys.argv[1] == 'true', endpoint="http://dbpedia.org/sparql")
-        print "Annotation is completed"
+    elif args.csvfiles and len(args.csvfiles) > 0:
+        print 'csvfiles: %s' % args.csvfiles
+        print "annotation started"
+        annotate_csvs(ann_run_id=args.runid, hierarchy=True, files=args.csvfiles[0], gen_class_eli=False,
+                      endpoint="http://dbpedia.org/sparql")
+        print "annotation is done"
+    elif args.omitrootclasses:
+        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
+        print 'omitting classes with no parent'
+        omit_root_classes(ann_run=ann_run, endppoint=endpoint)
+        print 'ommiting of root classes is done'
