@@ -1,7 +1,12 @@
 # TADA: TAbular Data Annotation
 
+## Get the prerequisites
+1. [python](https://www.python.org/downloads/)
+2. [pip](https://pip.pypa.io/en/stable/installing/)
+3. [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
 
-## Installing the prerequisites:
+
+## Installing the prerequisite python libraries:
 1. You can run the below command to install the libraries.
 ```
 pip install -r requirements.txt
@@ -18,19 +23,24 @@ cd tadacode
 2. If it is your first time, run the below command:
 
 ```
-python manage.py migrate
+python manage.py makemigrations tadaa
 ```
-3. Run the server using the below command:
+3. If it is your first time, run the below command:
 
 ```
-	python manage.py runserver
+python manage.py migrate tadaa
 ```
-4. Go to `http://127.0.0.1:8000`
+4. Run the server using the below command:
+
+```
+python manage.py runserver
+```
+5. Go to `http://127.0.0.1:8000`
 
 Note: Running the application locally, after creating the model or the prediction when the status reaches 100 (even before showing that on the screen) it stop and you would need to restart the server using the below command:
 
 ```
-	python manage.py runserver
+python manage.py runserver
 ```
 
 ## Project Components:

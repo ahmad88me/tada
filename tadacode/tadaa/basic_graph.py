@@ -7,6 +7,7 @@ class Node:
         self.title = title
         self.parents = []
         self.childs = []
+        self.score = 0
 
     def __str__(self):
         return self.title

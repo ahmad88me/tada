@@ -127,21 +127,6 @@ def omit_root_classes(ann_run, endppoint):
 
 
 def build_class_graph(ann_run, endpoint):
-    # from easysparql import get_parent_of_class
-    # class BasicGraph:
-    #     pass
-    # g = BasicGraph()
-    # found = False
-    # for cell in ann_run.cells:
-    #     if not found:
-    #         for entity in cell.entities:
-    #             if not found:
-    #                 for cclass in entity.classes:
-    #                     classes_path = get_class_path(class_name=cclass.cclass, endpoint=endpoint)
-    #                     print "classes path:"
-    #                     print classes_path
-    #                     found = True
-    #                     break
     from basic_graph import BasicGraph
     graph = BasicGraph()
     for cell in ann_run.cells:
@@ -162,22 +147,7 @@ def build_graph_while_traversing(class_name, graph, endpoint):
     parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
     for p in parents:
         build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
-    #print "class name: %s  parents: %s" % (class_name, ", ".join(parents))
     graph.add_v(title=class_name, parents=parents)
-
-
-# def get_class_path(class_name, endpoint):
-#     # from easysparql import get_parent_of_class
-#     # pclass = get_parent_of_class(class_name=class_name, endpoint=endpoint)
-#     # if pclass is None:
-#     #     return []
-#     # return get_class_path(pclass) + [pclass]
-#     from easysparql import get_parents_of_class
-#     pclass = get_parents_of_class(class_name=class_name, endpoint=endpoint)
-#     if pclass is None:
-#         print "parent of %s is None" % class_name
-#         return [class_name]
-#     return get_class_path(pclass) + [class_name]
 
 
 def random_string(length=4):
