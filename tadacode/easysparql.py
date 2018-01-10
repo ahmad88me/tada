@@ -601,6 +601,31 @@ def get_classes_with_parents(classes, endpoint):
     return classes
 
 
+def get_parents_of_class(class_name, endpoint):
+    """
+    get the parent class of the given class, get the first results in case of multiple ones
+    :param class_name:
+    :param endpoint:
+    :return:
+    """
+    query = """
+    select distinct ?c where{
+    <%s> rdfs:subClassOf ?c.
+    }
+    """ % class_name
+    results = run_query(query=query, endpoint=endpoint)
+    classes = [r['c']['value'] for r in results]
+    return classes
+    # if len(classes) == 0:
+    #     return None
+    # elif len(classes) > 1:
+    #     print "multi classes: "
+    #     print classes
+    #     print query
+    #     print "***MULTIPLE PARENTS FOR THE CLASS %s ***" % class_name
+    #     raise Exception("***MULTIPLE PARENTS FOR THE CLASS %s ***" % class_name)
+    # return classes[0]
+
 
 #####################################################################
 #                         Helper Functions                          #

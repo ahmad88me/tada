@@ -126,6 +126,60 @@ def omit_root_classes(ann_run, endppoint):
                     cclass.delete()
 
 
+def build_class_graph(ann_run, endpoint):
+    # from easysparql import get_parent_of_class
+    # class BasicGraph:
+    #     pass
+    # g = BasicGraph()
+    # found = False
+    # for cell in ann_run.cells:
+    #     if not found:
+    #         for entity in cell.entities:
+    #             if not found:
+    #                 for cclass in entity.classes:
+    #                     classes_path = get_class_path(class_name=cclass.cclass, endpoint=endpoint)
+    #                     print "classes path:"
+    #                     print classes_path
+    #                     found = True
+    #                     break
+    from basic_graph import BasicGraph
+    graph = BasicGraph()
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
+    graph.draw()
+
+
+def build_graph_while_traversing(class_name, graph, endpoint):
+    """
+    :param class_name:
+    :param graph:
+    :param endpoint:
+    :return:
+    """
+    from easysparql import get_parents_of_class
+    parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
+    for p in parents:
+        build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
+    #print "class name: %s  parents: %s" % (class_name, ", ".join(parents))
+    graph.add_v(title=class_name, parents=parents)
+
+
+# def get_class_path(class_name, endpoint):
+#     # from easysparql import get_parent_of_class
+#     # pclass = get_parent_of_class(class_name=class_name, endpoint=endpoint)
+#     # if pclass is None:
+#     #     return []
+#     # return get_class_path(pclass) + [pclass]
+#     from easysparql import get_parents_of_class
+#     pclass = get_parents_of_class(class_name=class_name, endpoint=endpoint)
+#     if pclass is None:
+#         print "parent of %s is None" % class_name
+#         return [class_name]
+#     return get_class_path(pclass) + [class_name]
+
+
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
@@ -135,9 +189,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Annotation module to annotate a given annotation run')
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
     parser.add_argument('--eliminateclasses', action='store_true', help='eliminate classes that are too general')
-    parser.add_argument('--csvfiles', action='append', nargs='+',
-                        help='the list of csv files to be annotated')
+    parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--omitrootclasses', action='store_true', help='omit root classes that does not have parent')
+    parser.add_argument('--buildgraph', action='store_true', help='To build a class/type hierarchy tree/graph')
     args = parser.parse_args()
     if args.eliminateclasses:
         from tadaa.models import OnlineAnnotationRun
@@ -156,3 +210,8 @@ if __name__ == '__main__':
         print 'omitting classes with no parent'
         omit_root_classes(ann_run=ann_run, endppoint=endpoint)
         print 'ommiting of root classes is done'
+    elif args.buildgraph:
+        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
+        print 'building class graph'
+        build_class_graph(ann_run=ann_run, endpoint=endpoint)
+        print 'class graph is built'
