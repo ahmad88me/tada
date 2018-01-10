@@ -77,6 +77,26 @@ class BasicGraph:
                 dot.edge(clean(n), clean(v))
         dot.render('graph.gv', view=True)
 
+    def draw_with_scores(self):
+        from graphviz import Digraph
+        dot = Digraph(comment='The Round Table')
+        for n in self.cache:
+            #dot.node(clean(n), clean(n))
+            node = self.find_v(n)
+            # dot.node(clean(node.title) + " - " + node.score, clean(node.title) + " - " + node.score)
+            dot.node(clean_with_score(node), clean_with_score(node))
+
+        edges = {}
+        for n in self.roots:
+            if n not in edges:
+                edges[n.title] = []
+        for n in self.roots:
+            edges = self.connect_node(node=n, edges=edges)
+        for n in edges.keys():
+            for v in edges[n]:
+                dot.edge(clean_with_score(self.find_v(n)), clean_with_score(self.find_v(v)))
+        dot.render('graph.gv', view=True)
+
     def connect_node(self, node, edges):
         for child in node.childs:
             if node.title not in edges:
@@ -86,6 +106,9 @@ class BasicGraph:
             edges = self.connect_node(child, edges)
         return edges
 
+
+def clean_with_score(n):
+    return "%s (%g)" % (clean(n.title), n.score)
 
 def clean(s):
     return s.replace("http://", "")

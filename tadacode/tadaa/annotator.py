@@ -126,6 +126,29 @@ def omit_root_classes(ann_run, endppoint):
                     cclass.delete()
 
 
+def build_class_graph_with_score(ann_run, endpoint):
+    from basic_graph import BasicGraph
+    graph = BasicGraph()
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
+    for cell in ann_run.cells:
+        if len(cell.entities) == 0:
+            e_score = 0
+        else:
+            e_score = 1.0 / len(cell.entities)
+        for entity in cell.entities:
+            if len(entity.classes) == 0:
+                c_score = 0
+            else:
+                c_score = 1.0 / len(entity.classes)
+            for cclass in entity.classes:
+                n = graph.find_v(cclass.cclass)
+                n.score += c_score
+    graph.draw_with_scores()
+
+
 def build_class_graph(ann_run, endpoint):
     from basic_graph import BasicGraph
     graph = BasicGraph()
@@ -162,6 +185,8 @@ if __name__ == '__main__':
     parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--omitrootclasses', action='store_true', help='omit root classes that does not have parent')
     parser.add_argument('--buildgraph', action='store_true', help='To build a class/type hierarchy tree/graph')
+    parser.add_argument('--buildgraphscore', action='store_true',
+                        help='To build a class/type hierarchy tree/graph with score')
     args = parser.parse_args()
     if args.eliminateclasses:
         from tadaa.models import OnlineAnnotationRun
@@ -185,3 +210,8 @@ if __name__ == '__main__':
         print 'building class graph'
         build_class_graph(ann_run=ann_run, endpoint=endpoint)
         print 'class graph is built'
+    elif args.buildgraphscore:
+        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
+        print 'building class graph with score'
+        build_class_graph_with_score(ann_run=ann_run, endpoint=endpoint)
+        print 'class graph with score is built'

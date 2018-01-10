@@ -16,8 +16,11 @@ urlpatterns = patterns('',
     url(r'list_annotations', views.list_annotations),
     url(r'eliminate_general_classes', views.eliminate_general_classes),
     url(r'omit_root_classes', views.omit_root_classes),
+    url(r'build_classes_graph_with_score', views.build_classes_graph_with_score),
     url(r'build_classes_graph', views.build_classes_graph),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^home', 'tadaa.views.home'),
     url('', 'tadaa.views.home'),
 )
+
+
