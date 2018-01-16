@@ -145,7 +145,7 @@ def build_class_graph_with_score(ann_run, endpoint):
                 c_score = 1.0 / len(entity.classes)
             for cclass in entity.classes:
                 n = graph.find_v(cclass.cclass)
-                n.score += c_score
+                n.coverage_score += c_score
     graph.draw_with_scores()
 
 
@@ -173,6 +173,35 @@ def build_graph_while_traversing(class_name, graph, endpoint):
     graph.add_v(title=class_name, parents=parents)
 
 
+def compute_coverage_score_for_graph(ann_run, graph):
+    for cell in ann_run.cells:
+        if len(cell.entities) == 0:
+            e_score = 0
+        else:
+            e_score = 1.0 / len(cell.entities)
+        for entity in cell.entities:
+            if len(entity.classes) == 0:
+                c_score = 0
+            else:
+                c_score = 1.0 / len(entity.classes)
+            for cclass in entity.classes:
+                n = graph.find_v(cclass.cclass)
+                n.coverage_score += c_score
+
+
+def dotype(ann_run, endpoint):
+    from basic_graph import BasicGraph
+    graph = BasicGraph()
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
+
+    compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
+    graph.set_converage_score()
+    graph.draw_with_scores()
+
+
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
@@ -187,6 +216,7 @@ if __name__ == '__main__':
     parser.add_argument('--buildgraph', action='store_true', help='To build a class/type hierarchy tree/graph')
     parser.add_argument('--buildgraphscore', action='store_true',
                         help='To build a class/type hierarchy tree/graph with score')
+    parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     args = parser.parse_args()
     if args.eliminateclasses:
         from tadaa.models import OnlineAnnotationRun
@@ -215,3 +245,8 @@ if __name__ == '__main__':
         print 'building class graph with score'
         build_class_graph_with_score(ann_run=ann_run, endpoint=endpoint)
         print 'class graph with score is built'
+    elif args.dotype:
+        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
+        print 'typing the csv file'
+        dotype(ann_run=ann_run, endpoint=endpoint)
+        print 'done typing the csv file'

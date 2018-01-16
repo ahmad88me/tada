@@ -7,7 +7,8 @@ class Node:
         self.title = title
         self.parents = []
         self.childs = []
-        self.score = 0
+        self.coverage_score = 0
+        self._coverage_computed = False
 
     def __str__(self):
         return self.title
@@ -106,12 +107,39 @@ class BasicGraph:
             edges = self.connect_node(child, edges)
         return edges
 
+    def set_converage_score(self):
+        for n in self.roots:
+            print 'set coverage root: %s' % n.title
+            self.compute_coverage_score_for_node(n)
+        # n = self.roots[0]
+        # print 'set coverage root: %s' % n.title
+        # self.compute_coverage_score_for_node(n)
+
+    def compute_coverage_score_for_node(self, node):
+        #s = node.coverage_score
+        print 'enter in %s' % node.title
+        if node._coverage_computed:
+            return node.coverage_score
+        for child in node.childs:
+            #node.coverage_score += self.compute_coverage_score_for_node(child)
+            #s += self.compute_coverage_score_for_node(child)
+            node.coverage_score += self.compute_coverage_score_for_node(child)
+        if len(node.childs) == 0:
+            print 'leave score of %s: %g' % (node.title, node.coverage_score)
+        else:
+            print 'mid score of %s: %g' % (node.title, node.coverage_score)
+        print 'leaving %s' % node.title
+        node._coverage_computed = True
+        return node.coverage_score
+
 
 def clean_with_score(n):
-    return "%s (%g)" % (clean(n.title), n.score)
+    return "%s (%g)" % (clean(n.title), n.coverage_score)
+
 
 def clean(s):
     return s.replace("http://", "")
+
 
 if __name__ == '__main__':
     g = BasicGraph()

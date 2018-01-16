@@ -299,6 +299,17 @@ def build_classes_graph_with_score(request):
     subprocess.Popen(comm, shell=True)
     return render(request, 'home.html')
 
+
+def do_type(request):
+    venv_python = get_python_venv()
+    annotation_id = request.GET['annotation'].strip()
+    comm = "%s %s %s --dotype" % (venv_python,
+                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                         annotation_id)
+    print "comm: %s" % comm
+    subprocess.Popen(comm, shell=True)
+    return render(request, 'home.html')
+
 # Helper Functions
 
 
