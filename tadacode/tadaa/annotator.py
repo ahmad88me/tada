@@ -190,15 +190,24 @@ def compute_coverage_score_for_graph(ann_run, graph):
 
 
 def dotype(ann_run, endpoint):
+    from easysparql import get_classes_subjects_count
     from basic_graph import BasicGraph
     graph = BasicGraph()
     for cell in ann_run.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
                 build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
-
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()
+    # see iteration 6 and 7
+    # classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
+    # graph.set_nodes_subjects_counts(classes_counts)
+    # graph.set_specificity_score()
+    # graph.draw_with_scores()
+    leaves = graph.get_leaves_from_graph()
+    classes_counts = get_classes_subjects_count(classes=[l.title for l in leaves], endpoint=endpoint)
+    graph.set_nodes_subjects_counts(d=classes_counts, leaves=leaves)
+    # graph.set_specificity_score()
     graph.draw_with_scores()
 
 
