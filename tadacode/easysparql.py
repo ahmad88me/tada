@@ -698,11 +698,7 @@ def get_num_class_subjects(class_uri, endpoint):
     ?c rdfs:subClassOf* <%s>.
     }
     """ % class_uri
-    print "running query"
-    print query
     results = run_query(query=query, endpoint=endpoint)
-    print 'results: '
-    print results
     return results[0]['num']['value']
 
 

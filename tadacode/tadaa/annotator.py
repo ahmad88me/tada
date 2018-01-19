@@ -215,6 +215,7 @@ def dotype(ann_run, endpoint):
     graph.set_nodes_subjects_counts(d=classes_counts)
 
     graph.set_specificity_score()
+    graph.set_path_specificity()
     graph.draw_with_scores()
 
 

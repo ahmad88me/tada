@@ -10,6 +10,7 @@ class Node:
         self.specificity_score = -1
         self._coverage_computed = False
         self.num_of_subjects = -1
+        self.path_specificity = -1
 
     def __str__(self):
         return self.title
@@ -132,6 +133,26 @@ class BasicGraph:
         node._coverage_computed = True
         return node.coverage_score
 
+    def set_path_specificity(self):
+        for n in self.roots:
+            n.path_specificity = 1
+
+        for n in self.roots:
+            self.set_path_specificity_for_node(n)
+
+    def set_path_specificity_for_node(self, node):
+        print 'pspec node: %s' % node.title
+        if node.path_specificity != -1 and node.parents != []:
+            return
+        if node.parents == []:
+            print 'pspec node %s is parent' % node.title
+            node.path_specificity = 1
+        else:
+            print 'pspec node %s is not parent with specscore: %g' % (node.title, node.specificity_score)
+            node.path_specificity = min([p.path_specificity for p in node.parents]) * node.specificity_score
+        for child in node.childs:
+            self.set_path_specificity_for_node(child)
+
     # iteration 8
     def set_nodes_subjects_counts(self, d):
         for n in self.roots:
@@ -198,17 +219,19 @@ class BasicGraph:
         if node.parents == []:
             node.specificity_score = 1
         else:
-            parents_num_subjects = []
-            for parent in node.parents:
-                if parent.num_of_subjects > 0:
-                    parents_num_subjects.append(parent.num_of_subjects)
-                else:
-                    raise Exception("num of subjects should not be zero as in iteration 8 for each type we also count the sub types")
-            if len(parents_num_subjects) == 0:  # will not be reached do to the previous exception but I'm keeping it just in case that sub types are counted due to a future change. But as for now, this should not be reached
-                node.specificity_score = 1
-                raise Exception("parent num of subject is zero, which should not happen")
-            else:
-                node.specificity_score = node.num_of_subjects * 1.0 / sum(parents_num_subjects) * 1.0 / len(parents_num_subjects)
+            # see iteration 9
+            # parents_num_subjects = []
+            # for parent in node.parents:
+            #     if parent.num_of_subjects > 0:
+            #         parents_num_subjects.append(parent.num_of_subjects)
+            #     else:
+            #         raise Exception("num of subjects should not be zero as in iteration 8 for each type we also count the sub types")
+            # if len(parents_num_subjects) == 0:  # will not be reached do to the previous exception but I'm keeping it just in case that sub types are counted due to a future change. But as for now, this should not be reached
+            #     node.specificity_score = 1
+            #     raise Exception("parent num of subject is zero, which should not happen")
+            # else:
+            #     node.specificity_score = node.num_of_subjects * 1.0 / sum(parents_num_subjects) * 1.0 / len(parents_num_subjects)
+            node.specificity_score = node.num_of_subjects * 1.0 / max([p.num_of_subjects for p in node.parents])
 
         for child in node.childs:
             self.compute_specificity_for_node(child)
@@ -258,8 +281,8 @@ class BasicGraph:
 
 
 def clean_with_score(n):
-    return "%s coverage(%g) num(%d) specificity(%g)" % (
-        clean(n.title), n.coverage_score, n.num_of_subjects, n.specificity_score)
+    return "%s cove(%g) num(%d) spec(%g) pspec(%f)" % (
+        clean(n.title), n.coverage_score, n.num_of_subjects, n.specificity_score, n.path_specificity)
 
 
 def clean(s):
