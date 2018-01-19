@@ -628,30 +628,30 @@ def get_parents_of_class(class_name, endpoint):
 
 
 # See the last issue in iteration 5 of the demo paper that is in progress
-def get_classes_subjects_count(classes, endpoint):
-    """
-    return the count of subjects per class
-    :param classes:
-    :param endpoint:
-    :return:
-    """
-    classes_str = ",".join(["<"+c+">" for c in classes])
-    query = """
-    select ?c count(?s) as ?num
-    where{
-    ?s a ?c.
-    FILTER (?c IN (%s))
-    }
-    GROUP BY ?c
-    """ % classes_str
-    # print "query: "
-    # print query
-    results = run_query(query=query, endpoint=endpoint)
-    classes_nums = [(r['c']['value'], r['num']['value']) for r in results]
-    d = {}
-    for c, n in classes_nums:
-        d[c] = int(n)
-    return d
+# def get_classes_subjects_count(classes, endpoint):
+#     """
+#     return the count of subjects per class
+#     :param classes:
+#     :param endpoint:
+#     :return:
+#     """
+#     classes_str = ",".join(["<"+c+">" for c in classes])
+#     query = """
+#     select ?c count(?s) as ?num
+#     where{
+#     ?s a ?c.
+#     FILTER (?c IN (%s))
+#     }
+#     GROUP BY ?c
+#     """ % classes_str
+#     # print "query: "
+#     # print query
+#     results = run_query(query=query, endpoint=endpoint)
+#     classes_nums = [(r['c']['value'], r['num']['value']) for r in results]
+#     d = {}
+#     for c, n in classes_nums:
+#         d[c] = int(n)
+#     return d
 
 # See the iteration 7
 # def get_classes_subjects_count(classes, endpoint):
@@ -678,6 +678,32 @@ def get_classes_subjects_count(classes, endpoint):
 #     print 'results: '
 #     print results
 #     return results[0]['num']['value']
+
+# iteration 8
+def get_classes_subjects_count(classes, endpoint):
+    print "in get_classes_subjects_count"
+    d = {}
+    for c in classes:
+        num = get_num_class_subjects(c, endpoint)
+        d[c] = int(num)
+    return d
+
+
+def get_num_class_subjects(class_uri, endpoint):
+    print "class uri %s" % class_uri
+    query = """
+    select count(?s) as ?num
+    where {
+    ?s a ?c.
+    ?c rdfs:subClassOf* <%s>.
+    }
+    """ % class_uri
+    print "running query"
+    print query
+    results = run_query(query=query, endpoint=endpoint)
+    print 'results: '
+    print results
+    return results[0]['num']['value']
 
 
 #####################################################################

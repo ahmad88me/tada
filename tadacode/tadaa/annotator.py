@@ -204,10 +204,17 @@ def dotype(ann_run, endpoint):
     # graph.set_nodes_subjects_counts(classes_counts)
     # graph.set_specificity_score()
     # graph.draw_with_scores()
-    leaves = graph.get_leaves_from_graph()
-    classes_counts = get_classes_subjects_count(classes=[l.title for l in leaves], endpoint=endpoint)
-    graph.set_nodes_subjects_counts(d=classes_counts, leaves=leaves)
-    # graph.set_specificity_score()
+
+    # see iteration 8
+    # leaves = graph.get_leaves_from_graph()
+    # classes_counts = get_classes_subjects_count(classes=[l.title for l in leaves], endpoint=endpoint)
+    # graph.set_nodes_subjects_counts(d=classes_counts, leaves=leaves)
+
+    # iteration 8
+    classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
+    graph.set_nodes_subjects_counts(d=classes_counts)
+
+    graph.set_specificity_score()
     graph.draw_with_scores()
 
 

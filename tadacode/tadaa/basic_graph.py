@@ -132,6 +132,22 @@ class BasicGraph:
         node._coverage_computed = True
         return node.coverage_score
 
+    # iteration 8
+    def set_nodes_subjects_counts(self, d):
+        for n in self.roots:
+            self.set_subjects_count_for_node(n, d)
+
+    def set_subjects_count_for_node(self, node, d):
+        if node.num_of_subjects != -1:  # it is already set
+            return
+        for child in node.childs:
+            self.set_subjects_count_for_node(child, d)
+        if node.title in d:
+            node.num_of_subjects = int(d[node.title])
+        else:
+            node.num_of_subjects = 0
+            raise Exception("in iteration 8 this should not happen as we are checking the childs as well")
+
     # see iteration 6 and 7
     # def set_nodes_subjects_counts(self, d):
     #     for n in self.roots:
@@ -147,50 +163,55 @@ class BasicGraph:
     #     else:
     #         node.num_of_subjects = 0.0
 
-    def set_nodes_subjects_counts(self, d, leaves):
-        for leaf in leaves:
-            if leaf.title not in d:
-                leaf.num_of_subjects = 0
-                raise Exception("just for reporting and it is not an error")
-            else:
-                leaf.num_of_subjects = d[leaf.title]
-
-        for n in self.roots:
-            self.set_subjects_count_for_node(n, d)
-
-    def set_subjects_count_for_node(self, node, d):
-        if node.num_of_subjects != -1:  # it is already set
-            return
-        else:
-            node.num_of_subjects = 0
-            for child in node.childs:
-                self.set_subjects_count_for_node(child, d)
-                print "node: %s has num of subjects %s and child %s has num of subjects %s" % (
-                node.title, str(node.num_of_subjects), child.title, str(child.num_of_subjects))
-                print "node: %s and child %s " % (type(node.num_of_subjects), type(child.num_of_subjects))
-                node.num_of_subjects += child.num_of_subjects
-
-    # def set_specificity_score(self):
-    #     for n in self.roots:
-    #         self.compute_specificity_for_node(n)
-    #
-    # def compute_specificity_for_node(self, node):
-    #     if node.specificity_score != -1:  # if specificity score is computed then do not continue
-    #         return
-    #     if node.parents == []:
-    #         node.specificity_score = 1
-    #     else:
-    #         parents_num_subjects = []
-    #         for parent in node.parents:
-    #             if parent.num_of_subjects > 0:
-    #                 parents_num_subjects.append(parent.num_of_subjects)
-    #         if len(parents_num_subjects) == 0:
-    #             node.specificity_score = 1
+    # see iteration 8
+    # def set_nodes_subjects_counts(self, d, leaves):
+    #     for leaf in leaves:
+    #         if leaf.title not in d:
+    #             leaf.num_of_subjects = 0
+    #             raise Exception("just for reporting and it is not an error")
     #         else:
-    #             node.specificity_score = node.num_of_subjects * 1.0 / sum(parents_num_subjects) * 1.0 / len(parents_num_subjects)
+    #             leaf.num_of_subjects = d[leaf.title]
     #
-    #     for child in node.childs:
-    #         self.compute_specificity_for_node(child)
+    #     for n in self.roots:
+    #         self.set_subjects_count_for_node(n, d)
+    #
+    # def set_subjects_count_for_node(self, node, d):
+    #     if node.num_of_subjects != -1:  # it is already set
+    #         return
+    #     else:
+    #         node.num_of_subjects = 0
+    #         for child in node.childs:
+    #             self.set_subjects_count_for_node(child, d)
+    #             print "node: %s has num of subjects %s and child %s has num of subjects %s" % (
+    #             node.title, str(node.num_of_subjects), child.title, str(child.num_of_subjects))
+    #             print "node: %s and child %s " % (type(node.num_of_subjects), type(child.num_of_subjects))
+    #             node.num_of_subjects += child.num_of_subjects
+
+    def set_specificity_score(self):
+        for n in self.roots:
+            self.compute_specificity_for_node(n)
+
+    def compute_specificity_for_node(self, node):
+        if node.specificity_score != -1:  # if specificity score is computed
+            return
+
+        if node.parents == []:
+            node.specificity_score = 1
+        else:
+            parents_num_subjects = []
+            for parent in node.parents:
+                if parent.num_of_subjects > 0:
+                    parents_num_subjects.append(parent.num_of_subjects)
+                else:
+                    raise Exception("num of subjects should not be zero as in iteration 8 for each type we also count the sub types")
+            if len(parents_num_subjects) == 0:  # will not be reached do to the previous exception but I'm keeping it just in case that sub types are counted due to a future change. But as for now, this should not be reached
+                node.specificity_score = 1
+                raise Exception("parent num of subject is zero, which should not happen")
+            else:
+                node.specificity_score = node.num_of_subjects * 1.0 / sum(parents_num_subjects) * 1.0 / len(parents_num_subjects)
+
+        for child in node.childs:
+            self.compute_specificity_for_node(child)
 
     # def set_specificity_score(self):
     #     for n in self.roots:
