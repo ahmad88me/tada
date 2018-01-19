@@ -216,6 +216,8 @@ def dotype(ann_run, endpoint):
 
     graph.set_specificity_score()
     graph.set_path_specificity()
+    graph.set_score_for_graph(0.9)
+    print graph.get_scores()
     graph.draw_with_scores()
 
 

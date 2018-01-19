@@ -11,6 +11,7 @@ class Node:
         self._coverage_computed = False
         self.num_of_subjects = -1
         self.path_specificity = -1
+        self.score = -1
 
     def __str__(self):
         return self.title
@@ -107,6 +108,30 @@ class BasicGraph:
                 edges[node.title].append(child.title)
             edges = self.connect_node(child, edges)
         return edges
+
+    def get_scores(self):
+        nodes = []
+        for n in self.roots:
+            nodes += self.get_score_for_node(n)
+        nodes = list(set(nodes))
+        return sorted(nodes, key=lambda node: node.score, reverse=True)
+
+    def get_score_for_node(self, node):
+        nodes = [node]
+        for child in node.childs:
+            nodes += self.get_score_for_node(child)
+        return nodes
+
+    def set_score_for_graph(self, coverage_weight=0.5):
+        for n in self.roots:
+            self.set_score_for_node(n, coverage_weight)
+
+    def set_score_for_node(self, node, coverage_weight):
+        if node.score != -1:
+            return
+        node.score = node.coverage_score * coverage_weight + (1-coverage_weight) * -node.path_specificity
+        for child in node.childs:
+            self.set_score_for_node(child, coverage_weight)
 
     def set_converage_score(self):
         for n in self.roots:
@@ -281,8 +306,8 @@ class BasicGraph:
 
 
 def clean_with_score(n):
-    return "%s cove(%g) num(%d) spec(%g) pspec(%f)" % (
-        clean(n.title), n.coverage_score, n.num_of_subjects, n.specificity_score, n.path_specificity)
+    return "%s cove(%g) num(%d) spec(%g) pspec(%f) score(%f)" % (
+        clean(n.title), n.coverage_score, n.num_of_subjects, n.specificity_score, n.path_specificity, n.score)
 
 
 def clean(s):
