@@ -216,8 +216,11 @@ def dotype(ann_run, endpoint):
 
     graph.set_specificity_score()
     graph.set_path_specificity()
-    graph.set_score_for_graph(0.9)
-    print graph.get_scores()
+    graph.set_score_for_graph(0.01)
+    #print graph.get_scores()
+    print "scores: "
+    for n in graph.get_scores():
+        print "%f %s" % (n.score, n.title)
     graph.draw_with_scores()
 
 
@@ -237,24 +240,25 @@ if __name__ == '__main__':
                         help='To build a class/type hierarchy tree/graph with score')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     args = parser.parse_args()
+    if args.csvfiles and len(args.csvfiles) > 0:
+        print 'csvfiles: %s' % args.csvfiles
+        print "annotation started"
+        annotate_csvs(ann_run_id=args.runid, hierarchy=True, files=args.csvfiles[0], gen_class_eli=False,
+                      endpoint="http://dbpedia.org/sparql")
+        print "annotation is done"
     if args.eliminateclasses:
         from tadaa.models import OnlineAnnotationRun
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print "eliminating classes"
         eliminate_general_classes(ann_run=ann_run, endpoint=endpoint)
         print "classes eliminated"
-    elif args.csvfiles and len(args.csvfiles) > 0:
-        print 'csvfiles: %s' % args.csvfiles
-        print "annotation started"
-        annotate_csvs(ann_run_id=args.runid, hierarchy=True, files=args.csvfiles[0], gen_class_eli=False,
-                      endpoint="http://dbpedia.org/sparql")
-        print "annotation is done"
-    elif args.omitrootclasses:
+    if args.omitrootclasses:
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print 'omitting classes with no parent'
         omit_root_classes(ann_run=ann_run, endppoint=endpoint)
         print 'ommiting of root classes is done'
-    elif args.buildgraph:
+
+    if args.buildgraph:
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print 'building class graph'
         build_class_graph(ann_run=ann_run, endpoint=endpoint)

@@ -306,6 +306,10 @@ def do_type(request):
     comm = "%s %s %s --dotype" % (venv_python,
                          (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                          annotation_id)
+    # commented the below just to try
+    # comm = "%s %s %s --eliminateclasses --omitrootclasses --dotype " % (venv_python,
+    #                      (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+    #                      annotation_id)
     print "comm: %s" % comm
     subprocess.Popen(comm, shell=True)
     return render(request, 'home.html')

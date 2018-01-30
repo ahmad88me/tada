@@ -30,22 +30,28 @@ class BasicGraph:
 
     def add_v(self, title, parents):
         if title in self.cache:
-            node = self.find_v(title)
-            print "%s already in the graph" % node.title
+            # node = self.find_v(title)
+            # print "%s already in the graph" % node.title
+            print "%s already in the graph" % title
+            return
         else:
             node = Node(title=title)
             print "%s new to the graph" % node.title
         self.cache.append(title)
         if parents == [] and node not in self.roots:
+            # if node.title == 'http://www.w3.org/2002/07/owl#Thing':  # forcing thing root just to test the overall algo.
+            #     self.roots.append(node)
             self.roots.append(node)
         else:
             parents = [self.find_v(p) for p in parents]
+            # # just temp
+            # parents = [p for p in parents if p is not None]
             node.parents += parents
             node.parents = list(set(node.parents))
             for pnode in parents:
                 pnode.childs.append(node)
                 pnode.childs = list(set(pnode.childs))
-        return node
+        # return node
 
     def find_v(self, title):
         for node in self.roots:
@@ -159,24 +165,48 @@ class BasicGraph:
         return node.coverage_score
 
     def set_path_specificity(self):
-        for n in self.roots:
-            n.path_specificity = 1
+        # for n in self.roots:
+        #     n.path_specificity = 1
 
-        for n in self.roots:
+        # for n in self.roots:
+        #     self.set_path_specificity_for_node(n)
+        for n in self.get_leaves_from_graph():
             self.set_path_specificity_for_node(n)
 
-    def set_path_specificity_for_node(self, node):
-        print 'pspec node: %s' % node.title
-        if node.path_specificity != -1 and node.parents != []:
-            return
-        if node.parents == []:
-            print 'pspec node %s is parent' % node.title
-            node.path_specificity = 1
-        else:
-            print 'pspec node %s is not parent with specscore: %g' % (node.title, node.specificity_score)
-            node.path_specificity = min([p.path_specificity for p in node.parents]) * node.specificity_score
-        for child in node.childs:
-            self.set_path_specificity_for_node(child)
+    # def set_path_specificity_for_node(self, node):
+    #     #print 'pspec node: %s' % node.title
+    #     if node.path_specificity != -1 and node.parents != []:
+    #         return
+    #     if node.parents == []:
+    #         #print 'pspec node %s is parent' % node.title
+    #         node.path_specificity = 1
+    #     else:
+    #         #print 'pspec node %s is not parent with specscore: %g' % (node.title, node.specificity_score)
+    #         node.path_specificity = min([p.path_specificity for p in node.parents]) * node.specificity_score
+    #
+    #     for child in node.childs:
+    #         self.set_path_specificity_for_node(child)
+
+    def set_path_specificity_for_node(self, node):  # solve the bug #2
+        if node.path_specificity == -1:
+            if node.parents == []:
+                node.path_specificity = 1
+            else:
+                node.path_specificity = min([self.set_path_specificity_for_node(p) for p in node.parents]) * node.specificity_score
+        return node.path_specificity
+
+        #
+        #
+        # if node.path_specificity != -1 and node.parents != []: # node path specificity is computed and it is not a root
+        #     return node.path_specificity
+        # if node.parents == []:  # root node
+        #     node.path_specificity = 1
+        # else:
+        #     node.path_specificity = min([self.set_path_specificity_for_node(p) for p in node.parents]) * node.specificity_score
+        # # compute path specificity for its children
+        # for child in node.childs:
+        #     self.set_path_specificity_for_node(child)
+        # return node.path_specificity
 
     # iteration 8
     def set_nodes_subjects_counts(self, d):
