@@ -165,10 +165,11 @@ def build_graph_while_traversing(class_name, graph, endpoint):
     :return:
     """
     from easysparql import get_parents_of_class
-    parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
-    for p in parents:
-        build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
-    graph.add_v(title=class_name, parents=parents)
+    if class_name not in graph.cache:
+        parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
+        for p in parents:
+            build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
+        graph.add_v(title=class_name, parents=parents)
 
 
 def compute_coverage_score_for_graph(ann_run, graph):

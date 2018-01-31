@@ -27,6 +27,7 @@ class BasicGraph:
     def __init__(self):
         self.roots = []
         self.cache = []  # this is used to check whether an item is in the graph or not
+        self.index = {}
 
     def add_v(self, title, parents):
         if title in self.cache:
@@ -35,6 +36,7 @@ class BasicGraph:
         else:
             node = Node(title=title)
             print "%s new to the graph" % node.title
+            self.index[title] = node  # title should not be previously in the index
         self.cache.append(title)
         if parents == [] and node not in self.roots:
             self.roots.append(node)
@@ -47,21 +49,27 @@ class BasicGraph:
                 pnode.childs = list(set(pnode.childs))
 
     def find_v(self, title):
-        for node in self.roots:
-            target_node = self.find_v_node(title=title, node=node)
-            if target_node:
-                return target_node
-        print "%s is not found" % title
+        if title in self.index:
+            return self.index[title]
         return None
 
-    def find_v_node(self, title, node):
-        if title == node.title:
-            return node
-        for n in node.childs:
-            target_node = self.find_v_node(title, n)
-            if target_node:
-                return target_node
-        return None
+    # now using the index to make it faster to find the node
+    # def find_v(self, title):
+    #     for node in self.roots:
+    #         target_node = self.find_v_node(title=title, node=node)
+    #         if target_node:
+    #             return target_node
+    #     print "%s is not found" % title
+    #     return None
+    #
+    # def find_v_node(self, title, node):
+    #     if title == node.title:
+    #         return node
+    #     for n in node.childs:
+    #         target_node = self.find_v_node(title, n)
+    #         if target_node:
+    #             return target_node
+    #     return None
 
     def draw(self):
         from graphviz import Digraph
