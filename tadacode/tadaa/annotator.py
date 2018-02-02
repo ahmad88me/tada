@@ -172,29 +172,45 @@ def build_class_graph(ann_run, endpoint):
 #         graph.add_v(title=class_name, parents=parents)
 
 
-def build_graph_while_traversing(class_name, endpoint, lock, pipe, depth=0):
+def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
     """
     :param class_name:
     :param endpoint:
+    :param g_lock:
+    :param v_lock:
+    :param g_pipe:
+    :param v_pipe:
+    :param depth:
     :return:
     """
-    # print "class_name: %s depth: %d" % (class_name, depth)
+    print "class_name: %s depth: %d" % (class_name, depth)
     from easysparql import get_parents_of_class
-    lock.acquire()
-    pipe.send(1)
-    graph = pipe.recv()
-    lock.release()
-    if class_name not in graph.cache:
+    v_lock.acquire()
+    v_pipe.send(1)
+    visited = v_pipe.recv()
+    v_lock.release()
+
+    if class_name not in visited:
         parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
-        # print parents
-        if len(parents) > 20:
-            print "a lot of parents (%d) for: %s" % (len(parents), class_name)
+        # node_dict = {
+        #     "class_name": class_name,
+        #     "parents": parents
+        # }
+        # visited.append(node_dict)
+        v_lock.acquire()
+        v_pipe.send(1)
+        visited = v_pipe.recv()
+        visited[class_name] = parents
+        v_pipe.send(visited)
+        v_lock.release()
+
         if True:
             if depth > 800:
                 print "class_name: %s depth: %d" % (class_name, depth)
+                raise Exception("very high depth")
         #if depth < 500:
             for p in parents:
-                build_graph_while_traversing(class_name=p, endpoint=endpoint, lock=lock, pipe=pipe, depth=depth+1)
+                build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
         # else:
         #     from ppool import Pool
         #     params = []
@@ -204,12 +220,46 @@ def build_graph_while_traversing(class_name, endpoint, lock, pipe, depth=0):
         #     pool = Pool(max_num_of_processes=2, func=build_graph_while_traversing, params_list=params)
         #     pool.run()
         #     print "inner pool is done"
-        lock.acquire()
-        pipe.send(1)
-        graph = pipe.recv()
-        graph.add_v(title=class_name, parents=parents)
-        pipe.send(graph)
-        lock.release()
+
+
+def build_graph_from_nodes(graph, nodes_dict):
+    import math
+    nodes_keys = list(nodes_dict)
+    max_iter = len(nodes_keys) ** 2
+    print "number of nodes is: %d" % (len(nodes_keys))
+
+    while len(nodes_keys) > 0:
+        k = nodes_keys.pop(0)
+
+        parents_are_in = True
+        for p in nodes_dict[k]:
+            if p not in graph.cache:
+                parents_are_in = False
+                break
+
+        if parents_are_in:
+            # print "adding: %s" % d["class_name"]
+            graph.add_v(k, nodes_dict[k])
+        else:
+            # print "laten: %s" % k
+            # print "its parents: %s" % str(nodes_dict[k])
+            nodes_keys.append(k)
+
+            for p in nodes_dict[k]:
+                if p not in nodes_dict:
+                    print "parent %s does not exists at all (class %s)" % (p, k)
+                    raise Exception("ERROR1")
+                # elif p not in nodes_keys:
+                #     print "parent %s was originally there but not anymore (class %s)" % (p, k)
+                #     raise Exception("ERROR2")
+        if max_iter > 0:
+            max_iter -= 1
+        else:
+            print "remaining: %d" % len(nodes_keys)
+            for k in nodes_keys:
+                print "['']"
+            print nodes_keys
+            raise Exception("The maximum number of iterations to build a graph has been reached")
 
 
 def compute_coverage_score_for_graph(ann_run, graph):
@@ -225,19 +275,19 @@ def compute_coverage_score_for_graph(ann_run, graph):
                 c_score = 1.0 / len(entity.classes)
             for cclass in entity.classes:
                 n = graph.find_v(cclass.cclass)
+                if n is None:
+                    print "couldn't find %s" % cclass.cclass
                 n.coverage_score += c_score
 
 
-def writer_func(graph, pipe):
+def v_writer_func(visited, pipe):
+    v = None
     while True:
-        g = pipe.recv()
-        #v = pipe.recv()
-        if g == 1:
-            pipe.send(graph)
-            #pipe.send(visited)
+        v = pipe.recv()
+        if v == 1:
+            pipe.send(visited)
         else:
-            graph = g
-            #visited = v
+            visited = v
 
 
 def dotype(ann_run, endpoint):
@@ -248,25 +298,33 @@ def dotype(ann_run, endpoint):
     graph = BasicGraph()
     params = []
     processes = []
-    lock = Lock()
-    reader_end, writer_end = Pipe()
-    writer_process = Process(target=writer_func, args=(graph, writer_end))
-    writer_process.start()
+    v_lock = Lock()
+    v_reader_end, v_writer_end = Pipe()
+    v_writer_process = Process(target=v_writer_func, args=({}, v_writer_end))
+    v_writer_process.start()
 
     for cell in ann_run.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
                 # build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
-                params.append((cclass.cclass, endpoint, lock, reader_end))
+                params.append((cclass.cclass, endpoint, v_lock, v_reader_end))
 
     pool = Pool(max_num_of_processes=10, func=build_graph_while_traversing, params_list=params)
     print "will run the pool"
     pool.run()
     print "the pool is done"
 
-    reader_end.send(1)
-    graph = reader_end.recv()
-    writer_process.terminate()
+    v_reader_end.send(1)
+    visited = v_reader_end.recv()
+    v_writer_process.terminate()
+
+    for k in visited:
+        print "[%s] =>" % k
+        print "\t\t %s" % ",".join(visited[k])
+
+    print "\n\n\n\n"
+
+    build_graph_from_nodes(graph=graph, nodes_dict=visited)
 
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()

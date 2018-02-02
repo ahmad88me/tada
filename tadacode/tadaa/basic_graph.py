@@ -33,10 +33,10 @@ class BasicGraph:
         if title in self.cache:
             print "%s already in the graph" % title
             return
-        else:
-            node = Node(title=title)
-            print "%s new to the graph" % node.title
-            self.index[title] = node  # title should not be previously in the index
+
+        node = Node(title=title)
+        print "%s new to the graph" % node.title
+        self.index[title] = node  # title should not be previously in the index
         self.cache.append(title)
         if parents == [] and node not in self.roots:
             self.roots.append(node)
