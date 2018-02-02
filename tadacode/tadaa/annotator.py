@@ -156,20 +156,46 @@ def build_class_graph(ann_run, endpoint):
                 build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
     graph.draw()
 
+# not multi threading
+# def build_graph_while_traversing(class_name, graph, endpoint):
+#     """
+#     :param class_name:
+#     :param graph:
+#     :param endpoint:
+#     :return:
+#     """
+#     from easysparql import get_parents_of_class
+#     if class_name not in graph.cache:
+#         parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
+#         for p in parents:
+#             build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
+#         graph.add_v(title=class_name, parents=parents)
 
-def build_graph_while_traversing(class_name, graph, endpoint):
+
+def build_graph_while_traversing(class_name, endpoint, lock, pipe):
     """
     :param class_name:
-    :param graph:
     :param endpoint:
     :return:
     """
     from easysparql import get_parents_of_class
+    lock.acquire()
+    pipe.send(1)
+    graph = pipe.recv()
+    print type(graph)
+    print graph.cache
+    lock.release()
     if class_name not in graph.cache:
         parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
+        print parents
         for p in parents:
-            build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
+            build_graph_while_traversing(class_name=p, endpoint=endpoint, lock=lock, pipe=pipe)
+        lock.acquire()
+        pipe.send(1)
+        graph = pipe.recv()
         graph.add_v(title=class_name, parents=parents)
+        pipe.send(graph)
+        lock.release()
 
 
 def compute_coverage_score_for_graph(ann_run, graph):
@@ -188,14 +214,49 @@ def compute_coverage_score_for_graph(ann_run, graph):
                 n.coverage_score += c_score
 
 
+def writer_func(graph, pipe):
+    while True:
+        g = pipe.recv()
+        if g == 1:
+            pipe.send(graph)
+        else:
+            graph = g
+
+
 def dotype(ann_run, endpoint):
     from easysparql import get_classes_subjects_count
     from basic_graph import BasicGraph
     graph = BasicGraph()
+    params = []
     for cell in ann_run.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
-                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
+                # build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
+                params.append((cclass.cclass, endpoint))
+
+    from multiprocessing import Process, Lock, Pipe, Pool
+    processes = []
+    lock = Lock()
+    reader_end, writer_end = Pipe()
+    writer_process = Process(target=writer_func, args=(graph, writer_end))
+    writer_process.start()
+    for par in params:
+        p = Process(target=build_graph_while_traversing, args=(par[0], par[1], lock, reader_end))
+        p.start()
+        print "!spawned"
+        processes.append(p)
+
+    import time
+
+
+    for p in processes:
+        p.join()
+        print "!join"
+
+    writer_end.send(1)
+    graph = writer_end.recv()
+    writer_process.terminate()
+
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()
 
