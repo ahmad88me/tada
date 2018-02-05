@@ -156,21 +156,6 @@ def build_class_graph(ann_run, endpoint):
                 build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
     graph.draw()
 
-# not multi threading
-# def build_graph_while_traversing(class_name, graph, endpoint):
-#     """
-#     :param class_name:
-#     :param graph:
-#     :param endpoint:
-#     :return:
-#     """
-#     from easysparql import get_parents_of_class
-#     if class_name not in graph.cache:
-#         parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
-#         for p in parents:
-#             build_graph_while_traversing(class_name=p, graph=graph, endpoint=endpoint)
-#         graph.add_v(title=class_name, parents=parents)
-
 
 def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
     """
@@ -192,11 +177,6 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
 
     if class_name not in visited:
         parents = get_parents_of_class(class_name=class_name, endpoint=endpoint)
-        # node_dict = {
-        #     "class_name": class_name,
-        #     "parents": parents
-        # }
-        # visited.append(node_dict)
         v_lock.acquire()
         v_pipe.send(1)
         visited = v_pipe.recv()
@@ -204,62 +184,53 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
         v_pipe.send(visited)
         v_lock.release()
 
-        if True:
-            if depth > 800:
-                print "class_name: %s depth: %d" % (class_name, depth)
-                raise Exception("very high depth")
-        #if depth < 500:
-            for p in parents:
-                build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
-        # else:
-        #     from ppool import Pool
-        #     params = []
-        #     for p in parents:
-        #         params.append((p, endpoint, lock, pipe))
-        #     print "inner pool"
-        #     pool = Pool(max_num_of_processes=2, func=build_graph_while_traversing, params_list=params)
-        #     pool.run()
-        #     print "inner pool is done"
+        print "class_name: %s depth: %d" % (class_name, depth)
+        raise Exception("very high depth")
+        for p in parents:
+            build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
 
 
 def build_graph_from_nodes(graph, nodes_dict):
-    import math
     nodes_keys = list(nodes_dict)
-    max_iter = len(nodes_keys) ** 2
     print "number of nodes is: %d" % (len(nodes_keys))
 
+    cyclic = False
+    old_count = 0
     while len(nodes_keys) > 0:
-        k = nodes_keys.pop(0)
-
-        parents_are_in = True
-        for p in nodes_dict[k]:
-            if p not in graph.cache:
-                parents_are_in = False
+        if old_count != len(nodes_keys):
+            old_count = len(nodes_keys)
+        else:
+            cyclic = True
+            break
+        for i in range(old_count):
+            if len(nodes_keys) <= 0:
                 break
 
-        if parents_are_in:
-            # print "adding: %s" % d["class_name"]
-            graph.add_v(k, nodes_dict[k])
-        else:
-            # print "laten: %s" % k
-            # print "its parents: %s" % str(nodes_dict[k])
-            nodes_keys.append(k)
+            k = nodes_keys.pop(0)
 
+            parents_are_in = True
             for p in nodes_dict[k]:
-                if p not in nodes_dict:
-                    print "parent %s does not exists at all (class %s)" % (p, k)
-                    raise Exception("ERROR1")
-                # elif p not in nodes_keys:
-                #     print "parent %s was originally there but not anymore (class %s)" % (p, k)
-                #     raise Exception("ERROR2")
-        if max_iter > 0:
-            max_iter -= 1
-        else:
-            print "remaining: %d" % len(nodes_keys)
-            for k in nodes_keys:
-                print "['']"
-            print nodes_keys
-            raise Exception("The maximum number of iterations to build a graph has been reached")
+                if p not in graph.cache:
+                    parents_are_in = False
+                    break
+
+            if parents_are_in:
+                graph.add_v(k, nodes_dict[k])
+            else:
+                nodes_keys.append(k)
+                for p in nodes_dict[k]:
+                    if p not in nodes_dict:
+                        print "parent %s does not exists at all (class %s)" % (p, k)
+                        raise Exception("ERROR1")
+
+    if cyclic:
+        print "cyclic"
+        print "remaining: %d" % len(nodes_keys)
+        for k in nodes_keys:
+            print "Remaining : %s" % k
+        print nodes_keys
+    else:
+        print "not cyclic (acyclic)"
 
 
 def compute_coverage_score_for_graph(ann_run, graph):
