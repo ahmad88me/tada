@@ -184,53 +184,75 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
         v_pipe.send(visited)
         v_lock.release()
 
-        print "class_name: %s depth: %d" % (class_name, depth)
-        raise Exception("very high depth")
         for p in parents:
             build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
 
 
+# def build_graph_from_nodes(graph, nodes_dict):
+#     """
+#     :param graph:
+#     :param nodes_dict: each node (key) contains a list of its parents
+#     :return:
+#     """
+#     nodes_keys = list(nodes_dict)
+#     print "number of nodes is: %d" % (len(nodes_keys))
+#
+#     cyclic = False
+#     old_count = 0
+#     while len(nodes_keys) > 0:
+#         if old_count != len(nodes_keys):
+#             old_count = len(nodes_keys)
+#         else:
+#             cyclic = True
+#             break
+#         for i in range(old_count):
+#             if len(nodes_keys) <= 0:
+#                 break
+#
+#             k = nodes_keys.pop(0)
+#
+#             parents_are_in = True
+#             for p in nodes_dict[k]:
+#                 if p not in graph.cache:
+#                     parents_are_in = False
+#                     break
+#
+#             if parents_are_in:
+#                 graph.add_v(k, nodes_dict[k])
+#             else:
+#                 nodes_keys.append(k)
+#                 for p in nodes_dict[k]:
+#                     if p not in nodes_dict:
+#                         print "parent %s does not exists at all (class %s)" % (p, k)
+#                         raise Exception("ERROR1")
+#
+#     if cyclic:
+#         print "cyclic"
+#         print "remaining: %d" % len(nodes_keys)
+#         for k in nodes_keys:
+#             print "Remaining : %s" % k
+#         for nk in list(nodes_dict):
+#             if nk not in nodes_keys:
+#                 del nodes_dict[nk]
+#     else:
+#         print "not cyclic (acyclic)"
+
+
 def build_graph_from_nodes(graph, nodes_dict):
-    nodes_keys = list(nodes_dict)
-    print "number of nodes is: %d" % (len(nodes_keys))
-
-    cyclic = False
-    old_count = 0
-    while len(nodes_keys) > 0:
-        if old_count != len(nodes_keys):
-            old_count = len(nodes_keys)
-        else:
-            cyclic = True
-            break
-        for i in range(old_count):
-            if len(nodes_keys) <= 0:
-                break
-
-            k = nodes_keys.pop(0)
-
-            parents_are_in = True
-            for p in nodes_dict[k]:
-                if p not in graph.cache:
-                    parents_are_in = False
-                    break
-
-            if parents_are_in:
-                graph.add_v(k, nodes_dict[k])
-            else:
-                nodes_keys.append(k)
-                for p in nodes_dict[k]:
-                    if p not in nodes_dict:
-                        print "parent %s does not exists at all (class %s)" % (p, k)
-                        raise Exception("ERROR1")
-
-    if cyclic:
-        print "cyclic"
-        print "remaining: %d" % len(nodes_keys)
-        for k in nodes_keys:
-            print "Remaining : %s" % k
-        print nodes_keys
-    else:
-        print "not cyclic (acyclic)"
+    """
+    :param graph:
+    :param nodes_dict: each node (key) contains a list of its parents
+    :return:
+    """
+    # add nodes
+    for node in nodes_dict:
+        graph.add_v(node, None)
+    # add edges
+    for node in nodes_dict:
+        for p in nodes_dict[node]:
+            graph.add_e(p, node)
+    graph.build_roots()
+    graph.break_cycles()
 
 
 def compute_coverage_score_for_graph(ann_run, graph):
@@ -262,10 +284,12 @@ def v_writer_func(visited, pipe):
 
 
 def dotype(ann_run, endpoint):
+    import time
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
     from easysparql import get_classes_subjects_count
     from basic_graph import BasicGraph
+    timed_events = []
     graph = BasicGraph()
     params = []
     processes = []
@@ -279,12 +303,13 @@ def dotype(ann_run, endpoint):
             for cclass in entity.classes:
                 # build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
                 params.append((cclass.cclass, endpoint, v_lock, v_reader_end))
-
+    start = time.time()
     pool = Pool(max_num_of_processes=10, func=build_graph_while_traversing, params_list=params)
     print "will run the pool"
     pool.run()
     print "the pool is done"
-
+    end = time.time()
+    timed_events.append(("build graph while traversing", end-start))
     v_reader_end.send(1)
     visited = v_reader_end.recv()
     v_writer_process.terminate()
@@ -294,22 +319,37 @@ def dotype(ann_run, endpoint):
         print "\t\t %s" % ",".join(visited[k])
 
     print "\n\n\n\n"
-
+    start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
-
+    end = time.time()
+    timed_events.append(("build graph2", end-start))
+    start = time.time()
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()
+    end = time.time()
+    timed_events.append(("coverage", end-start))
 
     # iteration 8
+    start = time.time()
     classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
     graph.set_nodes_subjects_counts(d=classes_counts)
+    end = time.time()
+    timed_events.append(("classes counts", end-start))
 
+    start = time.time()
     graph.set_specificity_score()
     graph.set_path_specificity()
+    end = time.time()
+    timed_events.append(("specificity", end-start))
+    start = time.time()
     graph.set_score_for_graph(0.01)
+    end = time.time()
+    timed_events.append(("latest score", end-start))
     print "scores: "
     for n in graph.get_scores():
         print "%f %s" % (n.score, n.title)
+    for te in timed_events:
+        print "event: %s took: %.2f seconds" % (te[0], te[1])
     graph.draw_with_scores()
 
 

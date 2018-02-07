@@ -30,6 +30,11 @@ class BasicGraph:
         self.index = {}
 
     def add_v(self, title, parents):
+        """
+        :param title:
+        :param parents: a list of parents
+        :return:
+        """
         if title in self.cache:
             print "%s already in the graph" % title
             return
@@ -38,7 +43,9 @@ class BasicGraph:
         print "%s new to the graph" % node.title
         self.index[title] = node  # title should not be previously in the index
         self.cache.append(title)
-        if parents == [] and node not in self.roots:
+        if parents is None:
+            pass
+        elif parents == [] and node not in self.roots:
             self.roots.append(node)
         else:
             parents = [self.find_v(p) for p in parents]
@@ -48,28 +55,41 @@ class BasicGraph:
                 pnode.childs.append(node)
                 pnode.childs = list(set(pnode.childs))
 
+    def add_e(self, from_title, to_title):
+        parent_node = self.index[from_title]
+        child_node = self.index[to_title]
+        if child_node not in parent_node.childs:
+            parent_node.childs.append(child_node)
+        if parent_node not in child_node.parents:
+            child_node.parents.append(parent_node)
+
+    def remove_edge(self, from_node, to_node):
+        from_node.childs.remove(to_node)
+        to_node.parents.remove(from_node)
+
+    def build_roots(self):
+        for n in self.index:
+            node = self.index[n]
+            if node.parents == []:
+                self.roots.append(node)
+        self.roots = list(set(self.roots))
+
+    def break_cycles(self):
+        for r in self.roots:
+            self.dfs_break_cycle([r])
+
+    def dfs_break_cycle(self, visited):
+        node = visited[-1]
+        for ch in node.childs:
+            if ch in visited:  # there is a cycle
+                self.remove_edge(node, ch)
+            else:
+                self.dfs_break_cycle(visited=visited+[ch])
+
     def find_v(self, title):
         if title in self.index:
             return self.index[title]
         return None
-
-    # now using the index to make it faster to find the node
-    # def find_v(self, title):
-    #     for node in self.roots:
-    #         target_node = self.find_v_node(title=title, node=node)
-    #         if target_node:
-    #             return target_node
-    #     print "%s is not found" % title
-    #     return None
-    #
-    # def find_v_node(self, title, node):
-    #     if title == node.title:
-    #         return node
-    #     for n in node.childs:
-    #         target_node = self.find_v_node(title, n)
-    #         if target_node:
-    #             return target_node
-    #     return None
 
     def draw(self):
         from graphviz import Digraph
