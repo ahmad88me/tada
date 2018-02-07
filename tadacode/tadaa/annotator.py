@@ -140,7 +140,8 @@ def build_class_graph_with_score(ann_run, endpoint):
             if len(entity.classes) == 0:
                 c_score = 0
             else:
-                c_score = 1.0 / len(entity.classes)
+                #c_score = 1.0 / len(entity.classes)
+                c_score = e_score * 1.0 / len(entity.classes)
             for cclass in entity.classes:
                 n = graph.find_v(cclass.cclass)
                 n.coverage_score += c_score
@@ -194,15 +195,25 @@ def build_graph_from_nodes(graph, nodes_dict):
     :param nodes_dict: each node (key) contains a list of its parents
     :return:
     """
+    print "adding nodes"
     # add nodes
     for node in nodes_dict:
         graph.add_v(node, None)
+
+    print "all nodes are added"
     # add edges
+
+    print "adding edges"
     for node in nodes_dict:
         for p in nodes_dict[node]:
             graph.add_e(p, node)
+    print "all edges are added"
     graph.build_roots()
+    print "roots are built\n\n***\n\n\n\n\n***********"
+    graph.draw("graph-pre.gv")
+    print "will break the cycles"
     graph.break_cycles()
+    print "cycles are broken"
 
 
 def compute_coverage_score_for_graph(ann_run, graph):
@@ -282,6 +293,21 @@ def count_classes(classes, endpoint):
     return d
 
 
+def remove_nodes(ann_run, classes):
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                if cclass.cclass in classes:
+                    CClass.objects.get(cclass=cclass.cclass, entity=entity).delete()
+
+
+def remove_empty(ann_run):
+    for cell in ann_run.cells:
+        for entity in cell.entities:
+            if len(entity.classes) == 0:
+                Entity.objects.get(id=entity.id).delete()
+
+
 def dotype(ann_run, endpoint):
     import time
     from multiprocessing import Process, Lock, Pipe
@@ -318,16 +344,29 @@ def dotype(ann_run, endpoint):
         print "\t\t %s" % ",".join(visited[k])
 
     print "\n\n\n\n"
+    print "build graph from nodes\n\n"
     start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
     end = time.time()
     timed_events.append(("build graph2", end-start))
+    print "remove nodes\n\n"
+    start = time.time()
+    remove_nodes(ann_run=ann_run, classes=graph.remove_lonely_nodes())
+    end = time.time()
+    timed_events.append(("remove lonely nodes", end-start))
+    graph.draw("graph-post.gv")
+    start = time.time()
+    remove_empty(ann_run=ann_run)
+    end = time.time()
+    timed_events.append(("remove empty entities", end - start))
+    print "coverage\n\n"
     start = time.time()
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()
     end = time.time()
     timed_events.append(("coverage", end-start))
 
+    print "count subjects \n\n"
     # iteration 8
     start = time.time()
     # classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
@@ -336,6 +375,7 @@ def dotype(ann_run, endpoint):
     end = time.time()
     timed_events.append(("classes counts", end-start))
 
+    print "specificity\n\n"
     start = time.time()
     graph.set_specificity_score()
     graph.set_path_specificity()
