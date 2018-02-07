@@ -188,56 +188,6 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
             build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
 
 
-# def build_graph_from_nodes(graph, nodes_dict):
-#     """
-#     :param graph:
-#     :param nodes_dict: each node (key) contains a list of its parents
-#     :return:
-#     """
-#     nodes_keys = list(nodes_dict)
-#     print "number of nodes is: %d" % (len(nodes_keys))
-#
-#     cyclic = False
-#     old_count = 0
-#     while len(nodes_keys) > 0:
-#         if old_count != len(nodes_keys):
-#             old_count = len(nodes_keys)
-#         else:
-#             cyclic = True
-#             break
-#         for i in range(old_count):
-#             if len(nodes_keys) <= 0:
-#                 break
-#
-#             k = nodes_keys.pop(0)
-#
-#             parents_are_in = True
-#             for p in nodes_dict[k]:
-#                 if p not in graph.cache:
-#                     parents_are_in = False
-#                     break
-#
-#             if parents_are_in:
-#                 graph.add_v(k, nodes_dict[k])
-#             else:
-#                 nodes_keys.append(k)
-#                 for p in nodes_dict[k]:
-#                     if p not in nodes_dict:
-#                         print "parent %s does not exists at all (class %s)" % (p, k)
-#                         raise Exception("ERROR1")
-#
-#     if cyclic:
-#         print "cyclic"
-#         print "remaining: %d" % len(nodes_keys)
-#         for k in nodes_keys:
-#             print "Remaining : %s" % k
-#         for nk in list(nodes_dict):
-#             if nk not in nodes_keys:
-#                 del nodes_dict[nk]
-#     else:
-#         print "not cyclic (acyclic)"
-
-
 def build_graph_from_nodes(graph, nodes_dict):
     """
     :param graph:
@@ -281,6 +231,55 @@ def v_writer_func(visited, pipe):
             pipe.send(visited)
         else:
             visited = v
+
+
+def count_classes_writer_func(pipe):
+    d = {}
+    while True:
+        v = pipe.recv()
+        if v == 1:
+            pipe.send(d)
+        else:
+            k = v.keys()[0]
+            d[k] = v[k]
+
+
+def count_classes_func(c, endpoint, lock, pipe):
+    from easysparql import get_classes_subjects_count
+    d = get_classes_subjects_count(c, endpoint)
+    lock.acquire()
+    pipe.send(d)
+    lock.release()
+
+
+def count_classes(classes, endpoint):
+    """
+    count classes from a given endpoint using a pool of processes
+    :param classes:
+    :param endpoint:
+    :return:
+    """
+    print "in count classes"
+    from multiprocessing import Process, Lock, Pipe
+    from ppool import Pool
+
+    lock = Lock()
+    a_end, b_end = Pipe()
+
+    print "in count classes> preparing the pool"
+    param_list = [([c], endpoint, lock, b_end) for c in classes]
+    pool = Pool(max_num_of_processes=10, func=count_classes_func, params_list=param_list)
+    pool.run()
+
+    print "in count classes> the writer process"
+    writer_process = Process(target=count_classes_writer_func, args=(a_end,))
+    writer_process.start()
+
+    b_end.send(1)
+    d = b_end.recv()
+    writer_process.terminate()
+    print "in count classes> returns :%s" % str(d)
+    return d
 
 
 def dotype(ann_run, endpoint):
@@ -331,7 +330,8 @@ def dotype(ann_run, endpoint):
 
     # iteration 8
     start = time.time()
-    classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
+    # classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
+    classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
     graph.set_nodes_subjects_counts(d=classes_counts)
     end = time.time()
     timed_events.append(("classes counts", end-start))
