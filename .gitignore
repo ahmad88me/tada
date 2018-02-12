@@ -6,6 +6,9 @@ db.sqlite3
 graph.gv
 graph.gv.pdf
 
+graph*.gv
+graph*.gv.pdf
+
 tadacode/local_uploads/*.csv
 tadacode/local_models/*.csv
 
