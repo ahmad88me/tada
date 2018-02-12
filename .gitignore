@@ -11,9 +11,6 @@ graph-pre.gv
 graph-pre.gv.pdf
 
 # for now only
-graph*.gv.pdf
-
-
 graph*.gv
 graph*.gv.pdf
 
