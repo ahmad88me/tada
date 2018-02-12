@@ -30,15 +30,22 @@ class BasicGraph:
         self.index = {}
 
     def add_v(self, title, parents):
+        """
+        :param title:
+        :param parents: a list of parents
+        :return:
+        """
         if title in self.cache:
             print "%s already in the graph" % title
             return
-        else:
-            node = Node(title=title)
-            print "%s new to the graph" % node.title
-            self.index[title] = node  # title should not be previously in the index
+
+        node = Node(title=title)
+        print "%s new to the graph" % node.title
+        self.index[title] = node  # title should not be previously in the index
         self.cache.append(title)
-        if parents == [] and node not in self.roots:
+        if parents is None:
+            pass
+        elif parents == [] and node not in self.roots:
             self.roots.append(node)
         else:
             parents = [self.find_v(p) for p in parents]
@@ -48,71 +55,111 @@ class BasicGraph:
                 pnode.childs.append(node)
                 pnode.childs = list(set(pnode.childs))
 
+    def add_e(self, from_title, to_title):
+        parent_node = self.index[from_title]
+        child_node = self.index[to_title]
+        if child_node not in parent_node.childs:
+            parent_node.childs.append(child_node)
+        if parent_node not in child_node.parents:
+            child_node.parents.append(parent_node)
+
+    def remove_edge(self, from_node, to_node):
+        from_node.childs.remove(to_node)
+        to_node.parents.remove(from_node)
+
+    def build_roots(self):
+        for n in self.cache:
+            node = self.index[n]
+            if node.parents == [] and len(node.childs) > 0:
+                self.roots.append(node)
+        self.roots = list(set(self.roots))
+
+    def remove_lonely_nodes(self):
+        removed_titles = []
+        for n in self.cache:
+            node = self.index[n]
+            if node.parents == node.childs == []:
+                del self.index[n]
+                self.cache.remove(n)
+                removed_titles.append(n)
+        return removed_titles
+
+    def break_cycles(self):
+        for r in self.roots:
+            self.dfs_break_cycle([r])
+
+    def dfs_break_cycle(self, visited):
+        node = visited[-1]
+        for ch in node.childs:
+            if ch in visited:  # there is a cycle
+                self.remove_edge(node, ch)
+            else:
+                self.dfs_break_cycle(visited=visited+[ch])
+
     def find_v(self, title):
         if title in self.index:
             return self.index[title]
         return None
 
-    # now using the index to make it faster to find the node
-    # def find_v(self, title):
-    #     for node in self.roots:
-    #         target_node = self.find_v_node(title=title, node=node)
-    #         if target_node:
-    #             return target_node
-    #     print "%s is not found" % title
-    #     return None
-    #
-    # def find_v_node(self, title, node):
-    #     if title == node.title:
-    #         return node
-    #     for n in node.childs:
-    #         target_node = self.find_v_node(title, n)
-    #         if target_node:
-    #             return target_node
-    #     return None
-
-    def draw(self):
+    def draw(self, file_name='graph.gv'):
         from graphviz import Digraph
         dot = Digraph(comment='The Round Table')
+        print "cache: "
+        print self.cache
+        print "roots: "
+        print self.roots
         for n in self.cache:
-            dot.node(clean(n), clean(n))
+            # dot.node(clean(n), clean(n))
+            #print "drawing node: %s" % clean(n)
+            dot.node(clean(n))
+        print "draw nodes"
         edges = {}
-        for n in self.roots:
-            if n not in edges:
-                edges[n.title] = []
-        for n in self.roots:
-            edges = self.connect_node(node=n, edges=edges)
-        for n in edges.keys():
-            for v in edges[n]:
-                dot.edge(clean(n), clean(v))
-        dot.render('graph.gv', view=True)
+        for n in self.cache:
+            node = self.index[n]
+            for ch in node.childs:
+                dot.edge(clean(n), clean(ch.title))
+        # for n in self.roots:
+        #     if n not in edges:
+        #         edges[n.title] = []
+        # for n in self.roots:
+        #     edges = self.connect_node(node=n, edges=edges)
+        # for n in edges.keys():
+        #     for v in edges[n]:
+        #         dot.edge(clean(n), clean(v))
+        dot.render(file_name, view=True)
 
     def draw_with_scores(self):
         from graphviz import Digraph
         dot = Digraph(comment='The Round Table')
         for n in self.cache:
             node = self.find_v(n)
-            dot.node(clean_with_score(node), clean_with_score(node))
+            #dot.node(clean_with_score(node), clean_with_score(node))
+            dot.node(clean_with_score(node))
 
-        edges = {}
-        for n in self.roots:
-            if n not in edges:
-                edges[n.title] = []
-        for n in self.roots:
-            edges = self.connect_node(node=n, edges=edges)
-        for n in edges.keys():
-            for v in edges[n]:
-                dot.edge(clean_with_score(self.find_v(n)), clean_with_score(self.find_v(v)))
+        for n in self.cache:
+            node = self.index[n]
+            for ch in node.childs:
+                dot.edge(clean_with_score(node), clean_with_score(ch))
+
+        # edges = {}
+        # for n in self.roots:
+        #     if n not in edges:
+        #         edges[n.title] = []
+        # for n in self.roots:
+        #     edges = self.connect_node(node=n, edges=edges)
+        # for n in edges.keys():
+        #     for v in edges[n]:
+        #         dot.edge(clean_with_score(self.find_v(n)), clean_with_score(self.find_v(v)))
         dot.render('graph.gv', view=True)
 
-    def connect_node(self, node, edges):
-        for child in node.childs:
-            if node.title not in edges:
-                edges[node.title] = []
-            if child.title not in edges[node.title]:
-                edges[node.title].append(child.title)
-            edges = self.connect_node(child, edges)
-        return edges
+    # def connect_node(self, node, edges):
+    #     for child in node.childs:
+    #         if node.title not in edges:
+    #             edges[node.title] = []
+    #         if child.title not in edges[node.title]:
+    #             edges[node.title].append(child.title)
+    #         edges = self.connect_node(child, edges)
+    #     return edges
 
     def get_scores(self):
         nodes = []

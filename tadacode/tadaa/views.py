@@ -314,6 +314,19 @@ def do_type(request):
     subprocess.Popen(comm, shell=True)
     return render(request, 'home.html')
 
+
+def online_annotation_entity_stat(request):
+    ann_run = request.GET['annotation']
+    d = {}
+    annotation_run = OnlineAnnotationRun(id=ann_run)
+    for cell in annotation_run.cells:
+        for entity in cell.entities:
+            for cclass in entity.classes:
+                if cclass.cclass not in d:
+                    d[cclass.cclass] = []
+                d[cclass.cclass].append(entity.entity)
+    return render(request, 'view_entity_annotation_stat.html', {'d': d})
+
 # Helper Functions
 
 
