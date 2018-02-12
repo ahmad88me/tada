@@ -40,6 +40,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTOCOMMIT = True
+
 
 # Application definition
 

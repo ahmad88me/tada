@@ -8,6 +8,8 @@ import string
 import os
 import sys
 
+MAX_NUM_PROCESSES = 10
+
 proj_path = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 # This is so Django knows where to find stuff.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tadaa.settings")
@@ -58,26 +60,109 @@ def annotate_single_csv(ann_run, csv_file, endpoint, hierarchy):
     :param endpoint: the endpoint url
     :return:
     """
+    import time
+    from ppool import Pool
+    from multiprocessing import Lock, Pipe, Process
+    start = time.time()
     print 'annotating: ' + csv_file
     mat = pd.read_csv(csv_file).as_matrix()
     # Here we assume that the entity column is the first one
     # get entity column
     entity_column_id = 0
+    # for r in mat:
+    #     annotate_single_cell(ann_run=ann_run, cell_value=r[entity_column_id], endpoint=endpoint, hierarchy=hierarchy)
+    params_list = []
+    lock = Lock()
+    a_end, b_end = Pipe()
+
+    v_writer_process = Process(target=annotation_writer_func, args=(b_end,))
+    v_writer_process.start()
+
     for r in mat:
-        annotate_single_cell(ann_run=ann_run, cell_value=r[entity_column_id], endpoint=endpoint, hierarchy=hierarchy)
+        params_list.append((ann_run, r[entity_column_id], endpoint, hierarchy, lock, a_end))
+    pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=annotate_single_cell, params_list=params_list)
+    pool.run()
+    print "sending 1"
+    a_end.send(1)
+    print "will ask for the dict list"
+    dict_list = a_end.recv()
+    print "received the dict list"
+    annotation_write_to_db(dict_list)
+    print "1 is sent"
+    v_writer_process.terminate()
+    end = time.time()
+    print "Time spent: %f" % (end-start)
 
 
-def annotate_single_cell(ann_run, cell_value, endpoint, hierarchy):
+def annotation_writer_func(pipe):
+    dict_list = []
+    while True:
+        v = pipe.recv()
+        if v == 1:
+            print "annotation_writer_func> will return"
+            pipe.send(dict_list)
+            # print "annotation_writer_func> will start inserting into the DB"
+            # for d in dict_list:
+            #     for cell_value in d.keys():
+            #         cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
+            #         cell.save()
+            #         for entity_value in d[cell_value]["entities"].keys():
+            #             entity = Entity(cell=cell, entity=entity_value)
+            #             entity.save()
+            #             for class_value in d[cell_value]["entities"][entity_value]:
+            #                 cclass = CClass(entity, cclass=class_value)
+            #                 cclass.save()
+        else:
+            print "annotation_writer_func> will append"
+            dict_list.append(v)
+            print "annotation_writer_func> appended"
+
+
+def annotation_write_to_db(dict_list):
+    for d in dict_list:
+        for cell_value in d.keys():
+            cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
+            cell.save()
+            for entity_value in d[cell_value]["entities"].keys():
+                entity = Entity(cell=cell, entity=entity_value)
+                entity.save()
+                for class_value in d[cell_value]["entities"][entity_value]:
+                    cclass = CClass(entity=entity, cclass=class_value)
+                    cclass.save()
+
+
+def annotate_single_cell(ann_run, cell_value, endpoint, hierarchy, lock, pipe):
     from easysparql import get_entities, get_classes
+    dcell = {}
+    #lock.acquire()
     cell = Cell(text_value=cell_value, annotation_run=ann_run)
-    cell.save()
+    #cell.save()
+    #lock.release()
+    dcell[cell_value] = {"ann_run": ann_run, "entities": {}}
+    print "cell: "+cell_value
     for entity in get_entities(subject_name=cell.text_value, endpoint=endpoint):
-        entity = Entity(cell=cell, entity=entity)
-        entity.save()
-        for c in get_classes(entity=entity.entity, endpoint=endpoint, hierarchy=hierarchy):
-            print c
-            cclass = CClass(entity=entity, cclass=c)
-            cclass.save()
+        #lock.acquire()
+        #entity = Entity(cell=cell, entity=entity)
+        #entity.save()
+        #entity_string = entity.entity
+        #lock.release()
+        dcell[cell_value]["entities"][entity] = []
+        classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
+        #lock.acquire()
+        print "entity: "+entity
+        for c in classes:
+            #print c
+            #cclass = CClass(entity=entity, cclass=c)
+            #cclass.save()
+            dcell[cell_value]["entities"][entity].append(c)
+        #lock.release()
+    print "will acquire"
+    lock.acquire()
+    print "sending ..."
+    pipe.send(dcell)
+    print "send"
+    lock.release()
+    print "release"
 
 
 def eliminate_general_classes(ann_run, endpoint):
@@ -279,7 +364,7 @@ def count_classes(classes, endpoint):
 
     print "in count classes> preparing the pool"
     param_list = [([c], endpoint, lock, b_end) for c in classes]
-    pool = Pool(max_num_of_processes=10, func=count_classes_func, params_list=param_list)
+    pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=count_classes_func, params_list=param_list)
     pool.run()
 
     print "in count classes> the writer process"
@@ -329,7 +414,7 @@ def dotype(ann_run, endpoint):
                 # build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
                 params.append((cclass.cclass, endpoint, v_lock, v_reader_end))
     start = time.time()
-    pool = Pool(max_num_of_processes=10, func=build_graph_while_traversing, params_list=params)
+    pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=build_graph_while_traversing, params_list=params)
     print "will run the pool"
     pool.run()
     print "the pool is done"
@@ -412,7 +497,7 @@ if __name__ == '__main__':
     if args.csvfiles and len(args.csvfiles) > 0:
         print 'csvfiles: %s' % args.csvfiles
         print "annotation started"
-        annotate_csvs(ann_run_id=args.runid, hierarchy=True, files=args.csvfiles[0], gen_class_eli=False,
+        annotate_csvs(ann_run_id=args.runid, hierarchy=False, files=args.csvfiles[0], gen_class_eli=False,
                       endpoint="http://dbpedia.org/sparql")
         print "annotation is done"
     if args.eliminateclasses:
