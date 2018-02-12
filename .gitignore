@@ -5,6 +5,14 @@ db.sqlite3
 # generated graph
 graph.gv
 graph.gv.pdf
+graph-post.gv
+graph-post.gv.pdf
+graph-pre.gv
+graph-pre.gv.pdf
+
+# for now only
+graph*.gv.pdf
+
 
 tadacode/local_uploads/*.csv
 tadacode/local_models/*.csv
