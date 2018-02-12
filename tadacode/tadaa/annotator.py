@@ -295,7 +295,7 @@ def build_graph_from_nodes(graph, nodes_dict):
     print "all edges are added"
     graph.build_roots()
     print "roots are built\n\n***\n\n\n\n\n***********"
-    graph.draw("graph-pre.gv")
+    #graph.draw("graph-pre.gv")
     print "will break the cycles"
     graph.break_cycles()
     print "cycles are broken"
@@ -362,17 +362,21 @@ def count_classes(classes, endpoint):
     lock = Lock()
     a_end, b_end = Pipe()
 
-    print "in count classes> preparing the pool"
-    param_list = [([c], endpoint, lock, b_end) for c in classes]
-    pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=count_classes_func, params_list=param_list)
-    pool.run()
-
     print "in count classes> the writer process"
     writer_process = Process(target=count_classes_writer_func, args=(a_end,))
     writer_process.start()
 
+    print "in count classes> preparing the pool"
+    param_list = [([c], endpoint, lock, b_end) for c in classes]
+    pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=count_classes_func, params_list=param_list)
+    pool.run()
+    print "pool run if finished"
+
+    print "sending 1"
     b_end.send(1)
+    print "waiting to receive"
     d = b_end.recv()
+    print "received"
     writer_process.terminate()
     print "in count classes> returns :%s" % str(d)
     return d
@@ -439,7 +443,7 @@ def dotype(ann_run, endpoint):
     remove_nodes(ann_run=ann_run, classes=graph.remove_lonely_nodes())
     end = time.time()
     timed_events.append(("remove lonely nodes", end-start))
-    graph.draw("graph-post.gv")
+    #graph.draw("graph-post.gv")
     start = time.time()
     remove_empty(ann_run=ann_run)
     end = time.time()
@@ -455,7 +459,9 @@ def dotype(ann_run, endpoint):
     # iteration 8
     start = time.time()
     # classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
+    print "inside == will count classes"
     classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
+    print "outside == after classes are counted"
     graph.set_nodes_subjects_counts(d=classes_counts)
     end = time.time()
     timed_events.append(("classes counts", end-start))
