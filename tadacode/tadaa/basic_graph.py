@@ -109,23 +109,12 @@ class BasicGraph:
         print "roots: "
         print self.roots
         for n in self.cache:
-            # dot.node(clean(n), clean(n))
-            #print "drawing node: %s" % clean(n)
             dot.node(clean(n))
         print "draw nodes"
-        edges = {}
         for n in self.cache:
             node = self.index[n]
             for ch in node.childs:
                 dot.edge(clean(n), clean(ch.title))
-        # for n in self.roots:
-        #     if n not in edges:
-        #         edges[n.title] = []
-        # for n in self.roots:
-        #     edges = self.connect_node(node=n, edges=edges)
-        # for n in edges.keys():
-        #     for v in edges[n]:
-        #         dot.edge(clean(n), clean(v))
         dot.render(file_name, view=True)
 
     def draw_with_scores(self):
@@ -133,7 +122,6 @@ class BasicGraph:
         dot = Digraph(comment='The Round Table')
         for n in self.cache:
             node = self.find_v(n)
-            #dot.node(clean_with_score(node), clean_with_score(node))
             dot.node(clean_with_score(node))
 
         for n in self.cache:
@@ -141,25 +129,7 @@ class BasicGraph:
             for ch in node.childs:
                 dot.edge(clean_with_score(node), clean_with_score(ch))
 
-        # edges = {}
-        # for n in self.roots:
-        #     if n not in edges:
-        #         edges[n.title] = []
-        # for n in self.roots:
-        #     edges = self.connect_node(node=n, edges=edges)
-        # for n in edges.keys():
-        #     for v in edges[n]:
-        #         dot.edge(clean_with_score(self.find_v(n)), clean_with_score(self.find_v(v)))
         dot.render('graph.gv', view=True)
-
-    # def connect_node(self, node, edges):
-    #     for child in node.childs:
-    #         if node.title not in edges:
-    #             edges[node.title] = []
-    #         if child.title not in edges[node.title]:
-    #             edges[node.title].append(child.title)
-    #         edges = self.connect_node(child, edges)
-    #     return edges
 
     def get_scores(self):
         nodes = []
