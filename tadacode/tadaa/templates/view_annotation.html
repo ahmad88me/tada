@@ -2,7 +2,8 @@
 {%block contentfull%}
 
 
-<table class="table table-striped">
+
+<table class="table">
 
     <thead>
     <tr class="thead-dark">
@@ -14,25 +15,33 @@
     <tbody>
 
     {%for cell in cells%}
-    <tr>
-        <td rowspan="{{cell.entities|length}}">{{cell.text_value}}</td>
-        <td>
-         {{cell.entities.0.entity}}
-        </td>
-        <td>{%for c in cell.entities.0.classes%} {{c.cclass}} {%if not forloop.last%}<hr>{%endif%} {%endfor%}</td>
-    </tr>
-        {%for entity in cell.entities%}
-            {% if not forloop.first %}
-            <tr>
+            {%for entity in cell.entities%}
+            <tr bgcolor class="tobecolored" colorid="{{forloop.parentloop.counter0}}">
+            <!--<tr bgcolor=""+colors[{{forloop.parentloop.counter0}}%colors.length]>-->
+                <td>{{cell.text_value}} ({{forloop.parentloop.counter0}})</td>
+                <td>{{entity.entity}}</td>
                 <td>
-                 {{entity.entity}}
-                </td>
-        <td>{%for c in cell.entities.0.classes%} {{c.cclass}} {%if not forloop.last%}<hr>{%endif%} {%endfor%}</td>
-            </tr>
-            {%endif%}
-        {%endfor%}
+                    {%for cclass in entity.classes%}
+                        {{cclass.cclass}}<br>
+                    {%endfor%}
 
+                </td>
+            </tr>
+            {%endfor%}
     {%endfor%}
     </tbody>
 </table>
+
+
+<script>
+var colors = [
+"#E6B0AA", "#D7BDE2", "#A9CCE3", "#A3E4D7", "#A9DFBF", "#F9E79F", "#F5CBA7"
+,"#F5B7B1" , "#D2B4DE", "#AED6F1", "#A2D9CE", "#ABEBC6", "#FAD7A0", "#EDBB99"
+];
+
+    $(".tobecolored").each(function(index){
+        $(this).attr('bgcolor', colors[$(this).attr('colorid')%colors.length] );
+    });
+</script>
+
 {%endblock%}
