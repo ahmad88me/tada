@@ -253,53 +253,6 @@ def list_annotations(request):
     return render(request, 'list_annotations.html', {'annotations': OnlineAnnotationRun.objects.all()})
 
 
-def eliminate_general_classes(request):
-    annotation_id = request.GET['annotation'].strip()
-    annotation = OnlineAnnotationRun.objects.get(id=annotation_id)
-    proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-    print proj_abs_dir
-    venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
-    comm = "%s %s %s --eliminateclasses" % (venv_python,
-                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                         annotation.id)
-    print "comm: %s" % comm
-    subprocess.Popen(comm, shell=True)
-    return render(request, 'home.html')
-
-
-def omit_root_classes(request):
-    venv_python = get_python_venv()
-    annotation_id = request.GET['annotation'].strip()
-    comm = "%s %s %s --omitrootclasses" % (venv_python,
-                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                         annotation_id)
-    print "comm: %s" % comm
-    subprocess.Popen(comm, shell=True)
-    return render(request, 'home.html')
-
-
-def build_classes_graph(request):
-    venv_python = get_python_venv()
-    annotation_id = request.GET['annotation'].strip()
-    comm = "%s %s %s --buildgraph" % (venv_python,
-                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                         annotation_id)
-    print "comm: %s" % comm
-    subprocess.Popen(comm, shell=True)
-    return render(request, 'home.html')
-
-
-def build_classes_graph_with_score(request):
-    venv_python = get_python_venv()
-    annotation_id = request.GET['annotation'].strip()
-    comm = "%s %s %s --buildgraphscore" % (venv_python,
-                         (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                         annotation_id)
-    print "comm: %s" % comm
-    subprocess.Popen(comm, shell=True)
-    return render(request, 'home.html')
-
-
 def do_type(request):
     venv_python = get_python_venv()
     annotation_id = request.GET['annotation'].strip()

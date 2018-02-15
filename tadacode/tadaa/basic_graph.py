@@ -104,10 +104,6 @@ class BasicGraph:
     def draw(self, file_name='graph.gv'):
         from graphviz import Digraph
         dot = Digraph(comment='The Round Table')
-        print "cache: "
-        print self.cache
-        print "roots: "
-        print self.roots
         for n in self.cache:
             dot.node(clean(n))
         print "draw nodes"
@@ -117,19 +113,65 @@ class BasicGraph:
                 dot.edge(clean(n), clean(ch.title))
         dot.render(file_name, view=True)
 
-    def draw_with_scores(self):
+    def draw_with_scores(self, multi=True):
+        if not multi:
+            from graphviz import Digraph
+            dot = Digraph(comment='The Round Table')
+            for n in self.cache:
+                node = self.find_v(n)
+                dot.node(clean_with_score(node))
+
+            for n in self.cache:
+                node = self.index[n]
+                for ch in node.childs:
+                    dot.edge(clean_with_score(node), clean_with_score(ch))
+
+            dot.render('graph.gv', view=True)
+        else:
+            self.draw_with_score_separate()
+
+    def draw_with_score_separate(self):
+        print "roots: "
+        print self.roots
+        for idx, r in enumerate(self.roots):
+            self.draw_score_for_root(r, "%d_graph.gv"%idx)
+        # self.draw_score_for_root(self.roots[0], "1_graph.gv")
+
+    def draw_score_for_root(self, root, file_name):
         from graphviz import Digraph
         dot = Digraph(comment='The Round Table')
-        for n in self.cache:
-            node = self.find_v(n)
-            dot.node(clean_with_score(node))
+        print "for root: %s" % root.title
+        nodes = self.get_all_child_nodes(root, [])
+        print "num dec: %d" % len(nodes)
+        print "if dup: %d" % len(list(set(nodes)))
+        print "childs: "
+        if len(nodes) <= 3:
+            return
+        for n in nodes:
+            print n
+            dot.node(clean_with_score(n))
 
-        for n in self.cache:
-            node = self.index[n]
-            for ch in node.childs:
-                dot.edge(clean_with_score(node), clean_with_score(ch))
+        for n in nodes:
+            for ch in n.childs:
+                dot.edge(clean_with_score(n), clean_with_score(ch))
 
-        dot.render('graph.gv', view=True)
+        dot.render(file_name, view=True)
+
+    def get_all_child_nodes(self, node, visited):
+        """
+        called by draw_score_for_root
+        :param node:
+        :param visited:
+        :return:
+        """
+        if node in visited:
+            print "cycle node: %s" % node.title
+            return visited
+        visited_local = visited[:] + [node]
+
+        for ch in node.childs:
+            visited_local = self.get_all_child_nodes(ch, visited_local)
+        return visited_local
 
     def get_scores(self):
         nodes = []
@@ -161,7 +203,6 @@ class BasicGraph:
             self.compute_coverage_score_for_node(n)
 
     def compute_coverage_score_for_node(self, node):
-        # s = node.coverage_score
         print 'enter in %s' % node.title
         if node._coverage_computed:
             return node.coverage_score

@@ -7,6 +7,7 @@ import random
 import string
 import os
 import sys
+import math
 
 MAX_NUM_PROCESSES = 10
 
@@ -101,17 +102,6 @@ def annotation_writer_func(pipe):
         if v == 1:
             print "annotation_writer_func> will return"
             pipe.send(dict_list)
-            # print "annotation_writer_func> will start inserting into the DB"
-            # for d in dict_list:
-            #     for cell_value in d.keys():
-            #         cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
-            #         cell.save()
-            #         for entity_value in d[cell_value]["entities"].keys():
-            #             entity = Entity(cell=cell, entity=entity_value)
-            #             entity.save()
-            #             for class_value in d[cell_value]["entities"][entity_value]:
-            #                 cclass = CClass(entity, cclass=class_value)
-            #                 cclass.save()
         else:
             print "annotation_writer_func> will append"
             dict_list.append(v)
@@ -163,84 +153,6 @@ def annotate_single_cell(ann_run, cell_value, endpoint, hierarchy, lock, pipe):
     print "send"
     lock.release()
     print "release"
-
-
-def eliminate_general_classes(ann_run, endpoint):
-    from easysparql import get_classes_not_in
-    classes = []
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                classes.append(cclass.cclass)
-    classes = list(set(classes))
-    s_classes = get_classes_not_in(classes=classes, endpoint=endpoint)
-    if len(s_classes) == 0:
-        print "No classes is returned"
-        return
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                if cclass.cclass not in s_classes:
-                    cclass.delete()
-
-
-def omit_root_classes(ann_run, endppoint):
-    """
-    To delete types that does not have a parent. This is to solve the problem with classes
-    :param ann_run:
-    :param endppoint:
-    :return:
-    """
-    from easysparql import get_classes_with_parents
-    classes = []
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                classes.append(cclass.cclass)
-    classes = list(set(classes))
-    classes_with_parents = get_classes_with_parents(classes=classes, endpoint=endpoint)
-    if len(classes_with_parents) == 0:
-        print "No classes with parents are returned"
-        return
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                if cclass.cclass not in classes_with_parents:
-                    cclass.delete()
-
-
-def build_class_graph_with_score(ann_run, endpoint):
-    from basic_graph import BasicGraph
-    graph = BasicGraph()
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
-    for cell in ann_run.cells:
-        if len(cell.entities) == 0:
-            e_score = 0
-        else:
-            e_score = 1.0 / len(cell.entities)
-        for entity in cell.entities:
-            if len(entity.classes) == 0:
-                c_score = 0
-            else:
-                #c_score = 1.0 / len(entity.classes)
-                c_score = e_score * 1.0 / len(entity.classes)
-            for cclass in entity.classes:
-                n = graph.find_v(cclass.cclass)
-                n.coverage_score += c_score
-    graph.draw_with_scores()
-
-
-def build_class_graph(ann_run, endpoint):
-    from basic_graph import BasicGraph
-    graph = BasicGraph()
-    for cell in ann_run.cells:
-        for entity in cell.entities:
-            for cclass in entity.classes:
-                build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
-    graph.draw()
 
 
 def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
@@ -397,12 +309,28 @@ def remove_empty(ann_run):
                 Entity.objects.get(id=entity.id).delete()
 
 
+def remove_noise_entities(ann_run):
+    for cell in ann_run.cells:
+        if len(cell.entities) >= 2:
+            max_num = 0
+            for entity in cell.entities:
+                num_classes = len(entity.classes)
+                if num_classes > max_num:
+                    max_num = num_classes
+            num_classes_limit = math.sqrt(max_num)
+            for entity in cell.entities:
+                if len(entity.classes) < num_classes_limit:
+                    entity.delete()
+
+
 def dotype(ann_run, endpoint):
     import time
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
     from easysparql import get_classes_subjects_count
     from basic_graph import BasicGraph
+    remove_noise_entities(ann_run)
+
     timed_events = []
     graph = BasicGraph()
     params = []
@@ -415,7 +343,6 @@ def dotype(ann_run, endpoint):
     for cell in ann_run.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
-                # build_graph_while_traversing(class_name=cclass.cclass, graph=graph, endpoint=endpoint)
                 params.append((cclass.cclass, endpoint, v_lock, v_reader_end))
     start = time.time()
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=build_graph_while_traversing, params_list=params)
@@ -458,7 +385,6 @@ def dotype(ann_run, endpoint):
     print "count subjects \n\n"
     # iteration 8
     start = time.time()
-    # classes_counts = get_classes_subjects_count(classes=graph.cache, endpoint=endpoint)
     print "inside == will count classes"
     classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
     print "outside == after classes are counted"
@@ -492,12 +418,6 @@ if __name__ == '__main__':
     endpoint = "http://dbpedia.org/sparql"
     parser = argparse.ArgumentParser(description='Annotation module to annotate a given annotation run')
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
-    parser.add_argument('--eliminateclasses', action='store_true', help='eliminate classes that are too general')
-    parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
-    parser.add_argument('--omitrootclasses', action='store_true', help='omit root classes that does not have parent')
-    parser.add_argument('--buildgraph', action='store_true', help='To build a class/type hierarchy tree/graph')
-    parser.add_argument('--buildgraphscore', action='store_true',
-                        help='To build a class/type hierarchy tree/graph with score')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     args = parser.parse_args()
     if args.csvfiles and len(args.csvfiles) > 0:
@@ -506,29 +426,7 @@ if __name__ == '__main__':
         annotate_csvs(ann_run_id=args.runid, hierarchy=False, files=args.csvfiles[0], gen_class_eli=False,
                       endpoint="http://dbpedia.org/sparql")
         print "annotation is done"
-    if args.eliminateclasses:
-        from tadaa.models import OnlineAnnotationRun
-        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
-        print "eliminating classes"
-        eliminate_general_classes(ann_run=ann_run, endpoint=endpoint)
-        print "classes eliminated"
-    if args.omitrootclasses:
-        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
-        print 'omitting classes with no parent'
-        omit_root_classes(ann_run=ann_run, endppoint=endpoint)
-        print 'ommiting of root classes is done'
-
-    if args.buildgraph:
-        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
-        print 'building class graph'
-        build_class_graph(ann_run=ann_run, endpoint=endpoint)
-        print 'class graph is built'
-    elif args.buildgraphscore:
-        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
-        print 'building class graph with score'
-        build_class_graph_with_score(ann_run=ann_run, endpoint=endpoint)
-        print 'class graph with score is built'
-    elif args.dotype:
+    if args.dotype:
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print 'typing the csv file'
         dotype(ann_run=ann_run, endpoint=endpoint)
