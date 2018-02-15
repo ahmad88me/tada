@@ -113,8 +113,9 @@ class BasicGraph:
                 dot.edge(clean(n), clean(ch.title))
         dot.render(file_name, view=True)
 
-    def draw_with_scores(self, multi=True):
+    def draw_with_scores(self, multi=False):
         if not multi:
+            print "not multi"
             from graphviz import Digraph
             dot = Digraph(comment='The Round Table')
             for n in self.cache:
@@ -128,11 +129,10 @@ class BasicGraph:
 
             dot.render('graph.gv', view=True)
         else:
+            print "multi"
             self.draw_with_score_separate()
 
     def draw_with_score_separate(self):
-        print "roots: "
-        print self.roots
         for idx, r in enumerate(self.roots):
             self.draw_score_for_root(r, "%d_graph.gv"%idx)
         # self.draw_score_for_root(self.roots[0], "1_graph.gv")
@@ -140,15 +140,10 @@ class BasicGraph:
     def draw_score_for_root(self, root, file_name):
         from graphviz import Digraph
         dot = Digraph(comment='The Round Table')
-        print "for root: %s" % root.title
         nodes = self.get_all_child_nodes(root, [])
-        print "num dec: %d" % len(nodes)
-        print "if dup: %d" % len(list(set(nodes)))
-        print "childs: "
         if len(nodes) <= 3:
             return
         for n in nodes:
-            print n
             dot.node(clean_with_score(n))
 
         for n in nodes:
@@ -186,16 +181,22 @@ class BasicGraph:
             nodes += self.get_score_for_node(child)
         return nodes
 
-    def set_score_for_graph(self, coverage_weight=0.5):
+    def set_score_for_graph(self, coverage_weight=0.5, coverage_norm=1):
+        """
+        :param coverage_weight: the alpha
+        :param coverage_norm: since coverage is actually increase when the number of entities increase, we need to
+        normalize the coverage score by dividing it with the coverage_norm
+        :return:
+        """
         for n in self.roots:
-            self.set_score_for_node(n, coverage_weight)
+            self.set_score_for_node(n, coverage_weight, coverage_norm)
 
-    def set_score_for_node(self, node, coverage_weight):
+    def set_score_for_node(self, node, coverage_weight, coverage_norm):
         if node.score != -1:
             return
-        node.score = node.coverage_score * coverage_weight + (1-coverage_weight) * -node.path_specificity
+        node.score = node.coverage_score * coverage_weight * coverage_norm + (1-coverage_weight) * -node.path_specificity
         for child in node.childs:
-            self.set_score_for_node(child, coverage_weight)
+            self.set_score_for_node(child, coverage_weight, coverage_norm)
 
     def set_converage_score(self):
         for n in self.roots:

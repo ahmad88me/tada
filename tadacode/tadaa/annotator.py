@@ -323,14 +323,38 @@ def remove_noise_entities(ann_run):
                     entity.delete()
 
 
+def get_coverage_normalization_value(ann_run):
+    s = 0
+    for cell in ann_run.cells:
+        if len(cell.entities) !=0:
+            s+=1
+    if s!=0:
+        return 1.0/s
+    return 1
+
+
+def store_scores(ann_run,scores):
+    """
+    :param scores: a list of tuples in the form of score, type url order by most probable types
+    :return:
+    """
+    ann_run.results = ""
+    for uri in scores[:5]:
+        ann_run.results += uri[-99:] + ","
+    ann_run.save()
+
+
 def dotype(ann_run, endpoint):
     import time
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
     from easysparql import get_classes_subjects_count
     from basic_graph import BasicGraph
+    ann_run.status = 'removing noisy entities'
+    ann_run.save()
     remove_noise_entities(ann_run)
-
+    ann_run.status = 'subclass queries'
+    ann_run.save()
     timed_events = []
     graph = BasicGraph()
     params = []
@@ -355,59 +379,67 @@ def dotype(ann_run, endpoint):
     visited = v_reader_end.recv()
     v_writer_process.terminate()
 
-    for k in visited:
-        print "[%s] =>" % k
-        print "\t\t %s" % ",".join(visited[k])
-
     print "\n\n\n\n"
     print "build graph from nodes\n\n"
+    ann_run.status = 'building the class graph'
+    ann_run.save()
     start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
     end = time.time()
     timed_events.append(("build graph2", end-start))
-    print "remove nodes\n\n"
+    print "remove single nodes\n\n"
     start = time.time()
     remove_nodes(ann_run=ann_run, classes=graph.remove_lonely_nodes())
     end = time.time()
     timed_events.append(("remove lonely nodes", end-start))
-    #graph.draw("graph-post.gv")
     start = time.time()
     remove_empty(ann_run=ann_run)
     end = time.time()
     timed_events.append(("remove empty entities", end - start))
     print "coverage\n\n"
+    ann_run.status = 'Computing the coverage scores'
+    ann_run.save()
     start = time.time()
     compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
     graph.set_converage_score()
     end = time.time()
     timed_events.append(("coverage", end-start))
-
+    ann_run.status = 'Performing count queries'
+    ann_run.save()
     print "count subjects \n\n"
     # iteration 8
     start = time.time()
-    print "inside == will count classes"
     classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
-    print "outside == after classes are counted"
+
     graph.set_nodes_subjects_counts(d=classes_counts)
     end = time.time()
     timed_events.append(("classes counts", end-start))
-
     print "specificity\n\n"
+    ann_run.status = 'Computing the specificiy scores'
+    ann_run.save()
+
     start = time.time()
     graph.set_specificity_score()
     graph.set_path_specificity()
     end = time.time()
     timed_events.append(("specificity", end-start))
     start = time.time()
-    graph.set_score_for_graph(0.5)
+    graph.set_score_for_graph(coverage_weight=0.1, coverage_norm=get_coverage_normalization_value(ann_run))
     end = time.time()
     timed_events.append(("latest score", end-start))
+    ann_run.status = 'Computing the overall scores'
+    ann_run.save()
+
+    latest_scores = graph.get_scores()
+    store_scores(ann_run, [n.title for n in latest_scores])
     print "scores: "
-    for n in graph.get_scores():
+    for n in latest_scores:
         print "%f %s" % (n.score, n.title)
     for te in timed_events:
         print "event: %s took: %.2f seconds" % (te[0], te[1])
     graph.draw_with_scores()
+    ann_run.status = 'Annotation is complete'
+    ann_run.save()
 
 
 def random_string(length=4):

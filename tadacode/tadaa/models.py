@@ -117,6 +117,7 @@ class Membership(models.Model):
 class OnlineAnnotationRun(models.Model):
     name = models.CharField(max_length=120, default='')
     status = models.CharField(max_length=120, default='Ready')
+    results = models.CharField(max_length=500, default='')
 
     @property
     def cells(self):

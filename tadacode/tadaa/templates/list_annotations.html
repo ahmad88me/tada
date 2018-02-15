@@ -1,19 +1,36 @@
 {%extends "base.html"%}
 {%block content%}
 <table class="table">
+    <thead>
+    <tr>
+        <th>Dataset name</th>
+        <th>status</th>
+        <th>row level annotation</th>
+        <th>To Annotate</th>
+        <th>Class Statistics</th>
+        <th>See annotation</th>
+    </tr>
+    </thead>
+    <tbody>
 {%for annotation in annotations%}
     <tr>
+        <td>{{annotation.name}}</td>
+        <td>{{annotation.status}}</td>
         <td>
-            <a href="view_annotation?annotation={{annotation.id}}">view: {{annotation.name}}</a>
+            <a href="view_annotation?annotation={{annotation.id}}">{{annotation.name}}</a>
         </td>
         <td>
-            <a href="do_type?annotation={{annotation.id}}">type the csv file: {{annotation.name}}</a>
+            <a href="do_type?annotation={{annotation.id}}">To annotate</a>
         </td>
         <td>
-            <a href="view_classes_stat?annotation={{annotation.id}}">view classes stat: {{annotation.name}}</a>
+            <a href="view_classes_stat?annotation={{annotation.id}}">To show stats</a>
+        </td>
+        <td>
+            <a href="annotation_results?annotation={{annotation.id}}">See annotation results</a>
         </td>
     </tr>
 {%endfor%}
+    </tbody>
 </table>
 {%endblock%}
 

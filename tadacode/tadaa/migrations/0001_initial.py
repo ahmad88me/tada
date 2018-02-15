@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
                 ('cclass', models.CharField(max_length=250)),
             ],
             options={
+                'verbose_name_plural': 'CClasses',
             },
             bases=(models.Model,),
         ),
@@ -41,6 +42,7 @@ class Migration(migrations.Migration):
                 ('cell', models.ForeignKey(to='tadaa.Cell')),
             ],
             options={
+                'verbose_name_plural': 'Entities',
             },
             bases=(models.Model,),
         ),
@@ -64,7 +66,7 @@ class Migration(migrations.Migration):
                 ('file_name', models.CharField(default=b'', max_length=80)),
                 ('url', models.URLField()),
                 ('public', models.BooleanField(default=True)),
-                ('created_on', models.DateTimeField(default=datetime.datetime(2017, 12, 19, 8, 42, 38, 282238))),
+                ('created_on', models.DateTimeField(default=datetime.datetime(2018, 2, 15, 16, 5, 27, 751290))),
                 ('progress', models.PositiveIntegerField(default=0)),
                 ('notes', models.CharField(max_length=120)),
                 ('extraction_method', models.CharField(max_length=10, choices=[(b'tbox', b'T-Box'), (b'abox', b'A-Box')])),
@@ -81,6 +83,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(default=b'', max_length=120)),
                 ('status', models.CharField(default=b'Ready', max_length=120)),
+                ('results', models.CharField(default=b'', max_length=500)),
             ],
             options={
             },
@@ -93,7 +96,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(default=b'', max_length=120)),
                 ('types', models.TextField(default=b'')),
                 ('public', models.BooleanField(default=True)),
-                ('created_on', models.DateTimeField(default=datetime.datetime(2017, 12, 19, 8, 42, 38, 283124))),
+                ('created_on', models.DateTimeField(default=datetime.datetime(2018, 2, 15, 16, 5, 27, 752149))),
                 ('progress', models.PositiveIntegerField(default=0)),
                 ('notes', models.CharField(max_length=120)),
                 ('state', models.CharField(default=b'notstarted', max_length=10, choices=[(b'running', b'Running'), (b'stopped', b'Stopped'), (b'complete', b'Complete'), (b'notstarted', b'Not Started Yet')])),

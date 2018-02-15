@@ -249,6 +249,12 @@ def view_annotation(request):
     return render(request, 'view_annotation.html', {'annotation': annotation, 'cells': cells})
 
 
+def annotation_results(request):
+    annotation_id = request.GET['annotation'].strip()
+    annotation = OnlineAnnotationRun.objects.get(id=annotation_id)
+    return render(request, 'annotation_results.html', {'classes': annotation.results.split(',')})
+
+
 def list_annotations(request):
     return render(request, 'list_annotations.html', {'annotations': OnlineAnnotationRun.objects.all()})
 
