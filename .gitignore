@@ -11,8 +11,9 @@ graph-pre.gv
 graph-pre.gv.pdf
 
 # for now only
-graph*.gv
-graph*.gv.pdf
+*graph*.gv
+*graph*.gv.pdf
+
 
 tadacode/local_uploads/*.csv
 tadacode/local_models/*.csv
