@@ -17,8 +17,7 @@
     {%for cell in cells%}
             {%for entity in cell.entities%}
             <tr bgcolor class="tobecolored" colorid="{{forloop.parentloop.counter0}}">
-            <!--<tr bgcolor=""+colors[{{forloop.parentloop.counter0}}%colors.length]>-->
-                <td>{{cell.text_value}} ({{forloop.parentloop.counter0}})</td>
+                <td>{{cell.text_value}}</td>
                 <td>{{entity.entity}}</td>
                 <td>
                     {%for cclass in entity.classes%}

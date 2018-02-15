@@ -399,7 +399,7 @@ def dotype(ann_run, endpoint):
     end = time.time()
     timed_events.append(("specificity", end-start))
     start = time.time()
-    graph.set_score_for_graph(0.01)
+    graph.set_score_for_graph(0.5)
     end = time.time()
     timed_events.append(("latest score", end-start))
     print "scores: "
@@ -418,6 +418,7 @@ if __name__ == '__main__':
     endpoint = "http://dbpedia.org/sparql"
     parser = argparse.ArgumentParser(description='Annotation module to annotate a given annotation run')
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
+    parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     args = parser.parse_args()
     if args.csvfiles and len(args.csvfiles) > 0:
