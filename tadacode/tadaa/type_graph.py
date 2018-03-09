@@ -27,6 +27,35 @@ from basic_graph import BasicGraph, Node
 
 class TypeGraph(BasicGraph):
 
+    # new specificity function
+    # def fs(self, node):
+    #     """
+    #     function that computes the specificity of a node
+    #
+    #                   1           1
+    #     fs(x, d) = -------- - -----------
+    #                 (x+1)^10    (d+1)^0.1
+    #
+    #     :param node: node
+    #     :return: the specificity score
+    #     """
+    #     x = node.path_specificity
+    #     d = node.depth
+    #     fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
+    #     return fs_score
+
+    def fs(self, node):
+        return -node.path_specificity / (node.depth + 1)
+
+    def fc(self, node):
+        """
+        actually exists in the annotator module.
+        a function that compute the coverage score of a given node
+        :param node: node
+        :return: the coverage score
+        """
+        pass
+
     def break_cycles(self):
         for r in self.roots:
             self.dfs_break_cycle([r])
