@@ -124,28 +124,15 @@ def annotation_write_to_db(dict_list):
 def annotate_single_cell(ann_run, cell_value, endpoint, hierarchy, lock, pipe):
     from easysparql import get_entities, get_classes
     dcell = {}
-    #lock.acquire()
     cell = Cell(text_value=cell_value, annotation_run=ann_run)
-    #cell.save()
-    #lock.release()
     dcell[cell_value] = {"ann_run": ann_run, "entities": {}}
     print "cell: "+cell_value
     for entity in get_entities(subject_name=cell.text_value, endpoint=endpoint):
-        #lock.acquire()
-        #entity = Entity(cell=cell, entity=entity)
-        #entity.save()
-        #entity_string = entity.entity
-        #lock.release()
         dcell[cell_value]["entities"][entity] = []
         classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
-        #lock.acquire()
         print "entity: "+entity
         for c in classes:
-            #print c
-            #cclass = CClass(entity=entity, cclass=c)
-            #cclass.save()
             dcell[cell_value]["entities"][entity].append(c)
-        #lock.release()
     print "will acquire"
     lock.acquire()
     print "sending ..."
@@ -349,14 +336,16 @@ def dotype(ann_run, endpoint):
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
     from easysparql import get_classes_subjects_count
-    from basic_graph import BasicGraph
+    #from basic_graph import BasicGraph
+    from type_graph import TypeGraph
     ann_run.status = 'removing noisy entities'
     ann_run.save()
     remove_noise_entities(ann_run)
     ann_run.status = 'subclass queries'
     ann_run.save()
     timed_events = []
-    graph = BasicGraph()
+    #graph = BasicGraph()
+    graph = TypeGraph()
     params = []
     processes = []
     v_lock = Lock()
@@ -415,7 +404,7 @@ def dotype(ann_run, endpoint):
     end = time.time()
     timed_events.append(("classes counts", end-start))
     print "specificity\n\n"
-    ann_run.status = 'Computing the specificiy scores'
+    ann_run.status = 'Computing the specificity scores'
     ann_run.save()
 
     start = time.time()
@@ -424,7 +413,8 @@ def dotype(ann_run, endpoint):
     end = time.time()
     timed_events.append(("specificity", end-start))
     start = time.time()
-    graph.set_score_for_graph(coverage_weight=0.1, coverage_norm=get_coverage_normalization_value(ann_run))
+    graph.set_depth_for_graph()
+    graph.set_score_for_graph(coverage_weight=0.001, coverage_norm=get_coverage_normalization_value(ann_run))
     end = time.time()
     timed_events.append(("latest score", end-start))
     ann_run.status = 'Computing the overall scores'
