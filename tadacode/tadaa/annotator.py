@@ -27,9 +27,12 @@ application = get_wsgi_application()
 #######################################
 #       For the annotation script     #
 #######################################
-
+from settings import MODELS_DIR
+from django.core.files import File
+from django.core.files.base import ContentFile
 from tadaa.models import OnlineAnnotationRun, Cell, CClass, Entity
 import argparse
+import json
 
 
 def annotate_csvs(ann_run_id, files, endpoint, gen_class_eli, hierarchy):
@@ -432,8 +435,39 @@ def dotype(ann_run, endpoint):
     for te in timed_events:
         print "event: %s took: %.2f seconds" % (te[0], te[1])
     graph.draw_with_scores()
+    graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
+    graph_file_name = graph_file_name.replace(' ', '_')
+    graph.save(os.path.join(MODELS_DIR, graph_file_name))
+    ann_run.graph_file.name = os.path.join(MODELS_DIR, graph_file_name)
+
+    # f = graph.save(os.path.join(MODELS_DIR, graph_file_name))
+    # ann_run.graph_file = File(f)
+    #s = graph.save_to_string()
+    #f = ContentFile(s)
+
+    # with open(os.path.join(MODELS_DIR, graph_file_name), 'w') as f:
+    # f = open(os.path.join(MODELS_DIR, graph_file_name), 'w')
+    # ff = File(f)
+    # ff.write(s)
+    # ff.close()
+    # ff.open('r')
+    # ann_run.graph_file = ff
     ann_run.status = 'Annotation is complete'
     ann_run.save()
+
+
+def load_graph(ann_run):
+    from type_graph import TypeGraph
+    f = open(ann_run.graph_file.path, 'r')
+    j = json.loads(f.read())
+    g = TypeGraph()
+    g.load(j)
+    return g
+
+
+def score_graph(graph, alpha, ann_run):
+    graph.set_score_for_graph(coverage_weight=alpha, m=get_m(ann_run))
+    return [n.title for n in graph.get_scores()]
 
 
 def random_string(length=4):

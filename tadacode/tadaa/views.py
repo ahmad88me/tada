@@ -286,6 +286,19 @@ def online_annotation_entity_stat(request):
                 d[cclass.cclass].append(entity.entity)
     return render(request, 'view_entity_annotation_stat.html', {'d': d})
 
+
+def advance_annotation(request):
+    if 'ann' not in request.GET or 'alpha' not in request.GET:
+        return render(request, 'advanced_annotation.html', {'anns': OnlineAnnotationRun.objects.all(), 'alpha': 0.3})
+    else:
+        from annotator import load_graph, score_graph
+        alpha = float(request.GET['alpha'])
+        ann_run = OnlineAnnotationRun.objects.get(id=request.GET['ann'])
+        graph = load_graph(ann_run=ann_run)
+        return render(request, 'advanced_annotation.html',
+                      {'anns': OnlineAnnotationRun.objects.all(), 'alpha': alpha,
+                       'results': score_graph(ann_run=ann_run, alpha=alpha, graph=graph)})
+
 # Helper Functions
 
 

@@ -1,3 +1,4 @@
+import json
 from basic_graph import BasicGraph, Node
 # class Node:
 #     def __init__(self):
@@ -219,6 +220,60 @@ class TypeGraph(BasicGraph):
             node.depth = 1 + max_node.depth
 
         return node.depth
+
+    def save_to_string(self):
+        j = {}
+        for title in self.cache:
+            node = self.index[title]
+            j[title] = {
+                "title": title,
+                "Lc": node.coverage_score,
+                "Ls": node.path_specificity,
+                "d": node.depth,
+                "childs": [n.title for n in node.childs]
+            }
+        s = json.dumps(j)
+        print "graph in str: "
+        print s
+        return s
+
+    def save(self, abs_file_dir):
+        f = open(abs_file_dir, 'w')
+        j = {}
+        for title in self.cache:
+            node = self.index[title]
+            j[title] = {
+                "title": title,
+                "Lc": node.coverage_score,
+                "Ls": node.path_specificity,
+                "d": node.depth,
+                "childs": [n.title for n in node.childs]
+            }
+        json.dump(j, f)
+        f.close()
+        f = open(abs_file_dir, 'r')
+        return f
+
+    def load(self, j):
+        titles = j.keys()
+        # add nodes
+        for t in titles:
+            self.add_v(t, parents=None)
+        # add paths
+        for t in titles:
+            for ch in j[t]["childs"]:
+                self.add_e(t, ch)
+        # infer and set the roots
+        self.build_roots()
+        # set other attributes:
+        for t in titles:
+            jn = j[t]
+            node = self.index[t]
+            node.coverage_score = jn["Lc"]
+            node.path_specificity = jn["Ls"]
+            node.depth = jn["d"]
+
+        #self.draw()
 
 
 def clean_with_score(n):
