@@ -1,10 +1,11 @@
-
+import os
 import numpy as np
 
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 
+from settings import MODELS_DIR
 
 class MLModel(models.Model):
     name = models.CharField(max_length=120, default='')
@@ -118,6 +119,7 @@ class OnlineAnnotationRun(models.Model):
     name = models.CharField(max_length=120, default='')
     status = models.CharField(max_length=120, default='Ready')
     results = models.CharField(max_length=500, default='')
+    graph_file = models.FileField(upload_to=MODELS_DIR, default=os.path.join(MODELS_DIR, 'default.graph'))
 
     @property
     def cells(self):

@@ -1,6 +1,7 @@
 # sqlite3 database file
 .venv
-db.sqlite3
+*.sqlite3
+*.graph
 
 # generated graph
 graph.gv
