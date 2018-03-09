@@ -28,6 +28,10 @@ from basic_graph import BasicGraph, Node
 
 class TypeGraph(BasicGraph):
 
+    def __init__(self, *args, **kwargs):
+        self.m = 0
+        super(TypeGraph, self).__init__(*args, **kwargs)
+
     # new specificity function
     def fs(self, node):
         """
@@ -42,7 +46,8 @@ class TypeGraph(BasicGraph):
         """
         x = node.path_specificity
         d = node.depth
-        fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
+        # fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
+        fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.05
         return fs_score
 
     # def fs(self, node):
@@ -254,7 +259,8 @@ class TypeGraph(BasicGraph):
         f = open(abs_file_dir, 'r')
         return f
 
-    def load(self, j):
+    def load(self, j, m):
+        self.m = m
         titles = j.keys()
         # add nodes
         for t in titles:
@@ -273,12 +279,23 @@ class TypeGraph(BasicGraph):
             node.path_specificity = jn["Ls"]
             node.depth = jn["d"]
 
+        self.set_labels()
         #self.draw()
+
+    def set_labels(self):
+        for t in self.cache:
+            node = self.index[t]
+            #node.label = clean_with_score(node)
+            node.label = clean_with_f_scores(self, node)
 
 
 def clean_with_score(n):
     return "%s cove(%g) num(%d) depth(%d) pspec(%f) score(%f)" % (
         clean(n.title), n.coverage_score, n.num_of_subjects, n.depth, n.path_specificity, n.score)
+
+
+def clean_with_f_scores(g, n):
+    return "%s fc(%g) fs(%g)" % (clean(n.title), g.fs(n), g.fc(n, g.m))
 
 
 def clean(s):

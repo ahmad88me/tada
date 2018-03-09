@@ -291,13 +291,14 @@ def advance_annotation(request):
     if 'ann' not in request.GET or 'alpha' not in request.GET:
         return render(request, 'advanced_annotation.html', {'anns': OnlineAnnotationRun.objects.all(), 'alpha': 0.3})
     else:
-        from annotator import load_graph, score_graph
+        from annotator import load_graph, score_graph, get_nodes, get_edges
         alpha = float(request.GET['alpha'])
         ann_run = OnlineAnnotationRun.objects.get(id=request.GET['ann'])
         graph = load_graph(ann_run=ann_run)
+        results = score_graph(ann_run=ann_run, alpha=alpha, graph=graph)
         return render(request, 'advanced_annotation.html',
-                      {'anns': OnlineAnnotationRun.objects.all(), 'alpha': alpha,
-                       'results': score_graph(ann_run=ann_run, alpha=alpha, graph=graph)})
+                      {'anns': OnlineAnnotationRun.objects.all(), 'alpha': alpha, 'network': 'network',
+                       'nodes': get_nodes(graph), 'edges': get_edges(graph), 'results': results})
 
 # Helper Functions
 

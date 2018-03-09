@@ -13,6 +13,7 @@ class Node:
         self.path_specificity = -1
         self.score = -1
         self.depth = -1
+        self.label = 'label'
 
     def __str__(self):
         return self.title
@@ -24,7 +25,7 @@ class Node:
         return self.title
 
 
-class BasicGraph:
+class BasicGraph(object):
     def __init__(self):
         self.roots = []
         self.cache = []  # this is used to check whether an item is in the graph or not
@@ -183,6 +184,14 @@ class BasicGraph:
             leaves += self.get_leaves_of_node(child)
         return leaves
 
+    def get_edges(self):
+        edges = []
+        for t in self.cache:
+            node = self.index[t]
+            for ch in node.childs:
+                e = (node.title, ch.title)
+                edges.append(e)
+        return edges
 
 # def clean_with_score(n):
 #     return "%s cove(%g) num(%d) depth(%d) pspec(%f) score(%f)" % (

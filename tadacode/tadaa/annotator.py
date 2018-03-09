@@ -461,13 +461,22 @@ def load_graph(ann_run):
     f = open(ann_run.graph_file.path, 'r')
     j = json.loads(f.read())
     g = TypeGraph()
-    g.load(j)
+    g.load(j, get_m(ann_run))
     return g
 
 
 def score_graph(graph, alpha, ann_run):
     graph.set_score_for_graph(coverage_weight=alpha, m=get_m(ann_run))
     return [n.title for n in graph.get_scores()]
+
+
+def get_nodes(graph):
+    return [graph.index[t] for t in graph.cache]
+    #return graph.cache
+
+
+def get_edges(graph):
+    return graph.get_edges()
 
 
 def random_string(length=4):
