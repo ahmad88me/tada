@@ -414,7 +414,7 @@ def dotype(ann_run, endpoint):
     timed_events.append(("specificity", end-start))
     start = time.time()
     graph.set_depth_for_graph()
-    graph.set_score_for_graph(coverage_weight=0.001, coverage_norm=get_coverage_normalization_value(ann_run))
+    graph.set_score_for_graph(coverage_weight=0.1, coverage_norm=get_coverage_normalization_value(ann_run))
     end = time.time()
     timed_events.append(("latest score", end-start))
     ann_run.status = 'Computing the overall scores'

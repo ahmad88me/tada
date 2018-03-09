@@ -28,24 +28,24 @@ from basic_graph import BasicGraph, Node
 class TypeGraph(BasicGraph):
 
     # new specificity function
-    # def fs(self, node):
-    #     """
-    #     function that computes the specificity of a node
-    #
-    #                   1           1
-    #     fs(x, d) = -------- - -----------
-    #                 (x+1)^10    (d+1)^0.1
-    #
-    #     :param node: node
-    #     :return: the specificity score
-    #     """
-    #     x = node.path_specificity
-    #     d = node.depth
-    #     fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
-    #     return fs_score
-
     def fs(self, node):
-        return -node.path_specificity / (node.depth + 1)
+        """
+        function that computes the specificity of a node
+
+                      1           1
+        fs(x, d) = -------- - -----------
+                    (x+1)^10    (d+1)^0.1
+
+        :param node: node
+        :return: the specificity score
+        """
+        x = node.path_specificity
+        d = node.depth
+        fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
+        return fs_score
+
+    # def fs(self, node):
+    #     return -node.path_specificity / (node.depth + 1)
 
     def fc(self, node):
         """
@@ -133,7 +133,7 @@ class TypeGraph(BasicGraph):
     def set_score_for_node(self, node, coverage_weight, coverage_norm):
         if node.score != -1:
             return
-        node.score = node.coverage_score * coverage_weight * coverage_norm + (1-coverage_weight) * -node.path_specificity / (node.depth + 1)
+        node.score = node.coverage_score * coverage_weight * coverage_norm + (1-coverage_weight) * self.fs(node)
         for child in node.childs:
             self.set_score_for_node(child, coverage_weight, coverage_norm)
 
