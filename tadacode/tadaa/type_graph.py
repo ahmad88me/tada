@@ -47,14 +47,15 @@ class TypeGraph(BasicGraph):
     # def fs(self, node):
     #     return -node.path_specificity / (node.depth + 1)
 
-    def fc(self, node):
+    def fc(self, node, m):
         """
         actually exists in the annotator module.
         a function that compute the coverage score of a given node
         :param node: node
+        :param m: the number of cells that has entities and types
         :return: the coverage score
         """
-        pass
+        return node.coverage_score/m
 
     def break_cycles(self):
         for r in self.roots:
@@ -120,7 +121,7 @@ class TypeGraph(BasicGraph):
             nodes += self.get_score_for_node(child)
         return nodes
 
-    def set_score_for_graph(self, coverage_weight=0.5, coverage_norm=1):
+    def set_score_for_graph(self, coverage_weight=0.5, m=1):
         """
         :param coverage_weight: the alpha
         :param coverage_norm: since coverage is actually increase when the number of entities increase, we need to
@@ -128,14 +129,14 @@ class TypeGraph(BasicGraph):
         :return:
         """
         for n in self.roots:
-            self.set_score_for_node(n, coverage_weight, coverage_norm)
+            self.set_score_for_node(n, coverage_weight, m)
 
-    def set_score_for_node(self, node, coverage_weight, coverage_norm):
+    def set_score_for_node(self, node, coverage_weight, m):
         if node.score != -1:
             return
-        node.score = node.coverage_score * coverage_weight * coverage_norm + (1-coverage_weight) * self.fs(node)
+        node.score = coverage_weight * self.fc(node=node, m=m) + (1-coverage_weight) * self.fs(node)
         for child in node.childs:
-            self.set_score_for_node(child, coverage_weight, coverage_norm)
+            self.set_score_for_node(child, coverage_weight, m)
 
     def set_converage_score(self):
         for n in self.roots:

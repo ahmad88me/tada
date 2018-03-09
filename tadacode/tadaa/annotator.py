@@ -310,14 +310,18 @@ def remove_noise_entities(ann_run):
                     entity.delete()
 
 
-def get_coverage_normalization_value(ann_run):
+def get_m(ann_run):
+    """
+    :param ann_run:
+    :return: number of cells that has entities
+    """
     s = 0
     for cell in ann_run.cells:
         if len(cell.entities) !=0:
             s+=1
     if s!=0:
-        return 1.0/s
-    return 1
+        return s * 1.0
+    return 1.0
 
 
 def store_scores(ann_run,scores):
@@ -414,7 +418,7 @@ def dotype(ann_run, endpoint):
     timed_events.append(("specificity", end-start))
     start = time.time()
     graph.set_depth_for_graph()
-    graph.set_score_for_graph(coverage_weight=0.1, coverage_norm=get_coverage_normalization_value(ann_run))
+    graph.set_score_for_graph(coverage_weight=0.1, m=get_m(ann_run))
     end = time.time()
     timed_events.append(("latest score", end-start))
     ann_run.status = 'Computing the overall scores'
