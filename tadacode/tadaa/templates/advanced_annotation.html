@@ -65,7 +65,15 @@
         nodes: nodes,
         edges: edges
     };
-    var options = {};
+    //var options = {};
+    var options = {
+                layout: {
+                    hierarchical: {
+                        direction: "UD"
+                    }
+                }
+    };
+
 
     // initialize your network!
     var network = new vis.Network(container, data, options);
