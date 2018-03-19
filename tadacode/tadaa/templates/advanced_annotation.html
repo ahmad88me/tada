@@ -36,7 +36,7 @@
 
     var nodes = new vis.DataSet([
         {%for n in nodes%}
-            {id: "{{n.title}}", label: "{{n.label}}"},
+            {id: "{{n.title}}", label: "{{n.label}}", color: '#7BE141', shape: 'box' },
         {%endfor%}
     ]);
 
@@ -52,7 +52,7 @@
 
      var edges = new vis.DataSet([
         {%for f,t in edges%}
-            {from: "{{f}}", to: "{{t}}"},
+            {from: "{{f}}", to: "{{t}}", arrows:'to'},
         {%endfor%}
     ]);
 
@@ -69,7 +69,8 @@
     var options = {
                 layout: {
                     hierarchical: {
-                        direction: "UD"
+                        direction: "UD",
+                        sortMethod: "directed"
                     }
                 }
     };
