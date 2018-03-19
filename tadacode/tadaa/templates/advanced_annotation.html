@@ -1,5 +1,5 @@
 {%extends "base.html"%}
-{%block content%}
+{%block contentfull%}
 
 {%if network%}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
@@ -8,12 +8,20 @@
     <style type="text/css">
         #mynetwork {
             width: 800px;
-            height: 400px;
+            height: 500px;
             border: 1px solid lightgray;
         }
     </style>
 
+<div id="basearea"></div>
+
 <div id="mynetwork"></div>
+
+<script>
+    $('#mynetwork').css('width', $('#basearea').css('width'));
+
+</script>
+
 
 <script type="text/javascript">
     // create an array with nodes
