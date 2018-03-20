@@ -89,6 +89,8 @@ class BasicGraph(object):
     def break_cycles(self):
         for r in self.roots:
             self.dfs_break_cycle([r])
+        # breaking cycles which remove edges can cause nodes with no parents which are not initially in the roots
+        self.fix_roots()
 
     def dfs_break_cycle(self, visited):
         node = visited[-1]
@@ -97,6 +99,13 @@ class BasicGraph(object):
                 self.remove_edge(node, ch)
             else:
                 self.dfs_break_cycle(visited=visited+[ch])
+
+    def fix_roots(self):
+        for title in self.index.keys():
+            node = self.index[title]
+            if len(node.parents) == 0 and node not in self.roots:
+                self.roots.append(node)
+                print "fixing root %s" % node.title
 
     def find_v(self, title):
         if title in self.index:

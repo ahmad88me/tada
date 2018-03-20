@@ -33,21 +33,26 @@ class TypeGraph(BasicGraph):
         super(TypeGraph, self).__init__(*args, **kwargs)
 
     # new specificity function
-    def fs(self, node):
+    def fs(self, node, delta=0.01, epsilon=10):
         """
         function that computes the specificity of a node
 
-                      1           1
-        fs(x, d) = -------- - -----------
-                    (x+1)^10    (d+1)^0.1
+                      1                         1
+        fs(x, d) = ---------------------  -  ----------- + 1
+                    (Lc(node)+1)^10           (d+1)^0.1
+
+        more generally,
+                      1                        1
+        fs(x, d) = ---------------------- - ----------- + 1
+                    (Lc(node)+1)^epsilon    (d+1)^delta
 
         :param node: node
         :return: the specificity score
         """
-        x = node.path_specificity
+        l = node.path_specificity
         d = node.depth
         # fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
-        fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.05
+        fs_score = 1.0/(l+1)**epsilon - 1.0/(d+1)**delta + 1
         return fs_score
 
     # def fs(self, node):

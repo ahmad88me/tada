@@ -11,16 +11,27 @@
             height: 500px;
             border: 1px solid lightgray;
         }
+
+
     </style>
 
 <div id="basearea"></div>
 
 <div id="mynetwork"></div>
 
+
+
+
+
+
 <script>
     $('#mynetwork').css('width', $('#basearea').css('width'));
 
 </script>
+
+
+
+
 
 
 <script type="text/javascript">
@@ -70,8 +81,12 @@
                 layout: {
                     hierarchical: {
                         direction: "UD",
-                        sortMethod: "directed"
+                        sortMethod: "directed",
+                        nodeSpacing: 300
                     }
+                },
+                physics: {
+                    enabled: true,
                 }
     };
 

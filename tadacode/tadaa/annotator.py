@@ -48,9 +48,11 @@ def annotate_csvs(ann_run_id, files, endpoint, gen_class_eli, hierarchy):
     except:
         ann_run = OnlineAnnotationRun(name=random_string(5), status='started')
     for f in files:
-        ann_run.status = 'annotating file: ' + str(f.split(os.path.sep)[-1])
+        ann_run.status = 'adding dataset: ' + str(f.split(os.path.sep)[-1])
         ann_run.save()
         annotate_single_csv(ann_run=ann_run, csv_file=f, endpoint=endpoint, hierarchy=hierarchy)
+    ann_run.status = 'datasets are added'
+    ann_run.save()
 
 
 def annotate_single_csv(ann_run, csv_file, endpoint, hierarchy):
@@ -403,7 +405,6 @@ def dotype(ann_run, endpoint):
     ann_run.status = 'Performing count queries'
     ann_run.save()
     print "count subjects \n\n"
-    # iteration 8
     start = time.time()
     classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
 
@@ -492,10 +493,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.csvfiles and len(args.csvfiles) > 0:
         print 'csvfiles: %s' % args.csvfiles
-        print "annotation started"
+        print "adding dataset"
         annotate_csvs(ann_run_id=args.runid, hierarchy=False, files=args.csvfiles[0], gen_class_eli=False,
                       endpoint="http://dbpedia.org/sparql")
-        print "annotation is done"
+        print "data set is added successfully. Done"
     if args.dotype:
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print 'typing the csv file'
