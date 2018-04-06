@@ -69,6 +69,7 @@ class TypeGraph(BasicGraph):
         return node.coverage_score/m
 
     def break_cycles(self):
+
         for r in self.roots:
             self.dfs_break_cycle([r])
 
