@@ -43,6 +43,9 @@ Note: Running the application locally, after creating the model or the predictio
 python manage.py runserver
 ```
 
+## Data for entity column semantic labeling
+[Olympic Data](https://github.com/ahmad88me/tada/tree/master/tadacode/explore/updated_input_new_for_tada)
+
 ## Project Components:
 
 #### Fuzzy c-means:
@@ -62,7 +65,8 @@ File: `data_extraction.py` and `easysparql.py`
 [step by step guide](https://github.com/ahmad88me/tada/tree/master/step_by_step/README.md)
 
 ## Data
-[Olympic Data](https://github.com/ahmad88me/tada/tree/master/tadacode/explore/clean_input)
+[Olympic Data](https://github.com/ahmad88me/tada/tree/master/tadacode/explore/updated_input_new_for_tada)
+
 
 ## Report
 [report](https://github.com/ahmad88me/tada/blob/master/report.pdf)
