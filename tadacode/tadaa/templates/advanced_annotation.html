@@ -36,18 +36,20 @@
 
 <script type="text/javascript">
     // create an array with nodes
-/*
-    var nodes = new vis.DataSet([
-        {id: "xyz", label: 'Node 1'},
-        {id: 2, label: 'Node 2'},
-        {id: 3, label: 'Node 3'},
-        {id: 4, label: 'Node 4'},
-        {id: 5, label: 'Node 5'}
-    ]);*/
 
     var nodes = new vis.DataSet([
         {%for n in nodes%}
+
+            {%if n.title in highlights%}
+            {id: "{{n.title}}", label: "{{n.label}}", color: '#f44242', shape: 'box' },
+            {%else %}
             {id: "{{n.title}}", label: "{{n.label}}", color: '#7BE141', shape: 'box' },
+            {%endif%}
+
+
+
+
+
         {%endfor%}
     ]);
 
@@ -82,11 +84,12 @@
                     hierarchical: {
                         direction: "UD",
                         sortMethod: "directed",
-                        nodeSpacing: 300
+                        nodeSpacing: 400
                     }
                 },
                 physics: {
-                    enabled: true,
+                    enabled: false,
+
                 }
     };
 
@@ -108,7 +111,7 @@
         <label for="ann-select">Annotation Model</label>
         <select class="form-control" name="ann" id="ann-select">
             {%for ann in anns%}
-            <option value="{{ann.id}}">{{ann.id}} - {{ann.name}}</option>
+            <option value="{{ann.id}}" {%if ann.id == selected%}selected{%endif%}>{{ann.id}} - {{ann.name}}</option>
             {%endfor%}
         </select>
     </div>

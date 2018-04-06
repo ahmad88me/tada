@@ -301,7 +301,7 @@ def clean_with_score(n):
 
 def clean_with_f_scores(g, n):
     title = "/".join(clean(n.title).split('/')[-2:])
-    return "%s fc(%g) fs(%g)" % (title, g.fs(n), g.fc(n, g.m))
+    return "%s fc(%g) fs(%g)" % (title, g.fc(n, g.m), g.fs(n))
 
 
 def clean(s):

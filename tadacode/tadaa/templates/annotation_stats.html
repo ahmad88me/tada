@@ -1,0 +1,43 @@
+{%extends "base.html"%}
+{%block content%}
+
+<form>
+    <div class="form-group ">
+        <label for="ann-select">Annotation Model</label>
+        <select class="form-control" name="ann" id="ann-select">
+            {%for ann in anns%}
+            <option value="{{ann.id}}" {%if ann.id == selected%}selected{%endif%}>{{ann.id}} - {{ann.name}}</option>
+            {%endfor%}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn form-control darkl">Show</button>
+    </div>
+</form>
+
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Stat</th>
+        <th>Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%for k,v in stats.items%}
+    <tr>
+        <td>{{k}}</td>
+        <td>{{v}}</td>
+    </tr>
+    {%endfor%}
+    </tbody>
+</table>
+
+
+
+{%endblock%}
+
+
+

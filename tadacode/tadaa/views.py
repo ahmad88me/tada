@@ -289,16 +289,46 @@ def online_annotation_entity_stat(request):
 
 def advance_annotation(request):
     if 'ann' not in request.GET or 'alpha' not in request.GET:
-        return render(request, 'advanced_annotation.html', {'anns': OnlineAnnotationRun.objects.all(), 'alpha': 0.3})
+        anns = OnlineAnnotationRun.objects.all()
+        return render(request, 'advanced_annotation.html', {'anns': anns, 'alpha': 0.3, 'selected': anns[0].id})
     else:
         from annotator import load_graph, score_graph, get_nodes, get_edges
         alpha = float(request.GET['alpha'])
         ann_run = OnlineAnnotationRun.objects.get(id=request.GET['ann'])
         graph = load_graph(ann_run=ann_run)
         results = score_graph(ann_run=ann_run, alpha=alpha, graph=graph)
+        #graph.draw_with_scores()
         return render(request, 'advanced_annotation.html',
                       {'anns': OnlineAnnotationRun.objects.all(), 'alpha': alpha, 'network': 'network',
-                       'nodes': get_nodes(graph), 'edges': get_edges(graph), 'results': results})
+                       'highlights': results[:5], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
+                       'results': results, 'selected': ann_run.id})
+
+
+def annotation_stats(request):
+    anns = OnlineAnnotationRun.objects.all()
+    if 'ann' not in request.GET:
+        return render(request, 'annotation_stats.html', {'anns': anns})
+    else:
+        ann = OnlineAnnotationRun.objects.get(id=request.GET['ann'])
+        selected = ann.id
+        # entity linking percentage
+        total_cells = ann.cells
+        ann_cells = [c for c in ann.cells if len(c.entities) > 0]
+        entity_linking = len(ann_cells) * 100.0 / len(total_cells)
+        # average number of entities per cell
+        total_entities = [len(c.entities) for c in ann.cells]
+        print 'total entities'
+        print total_entities
+        entities_per_cell = sum(total_entities) * 1.0 / len(total_cells)
+        entities_per_ann_cell = sum(total_entities) * 1.0 / len(ann_cells)
+        stats = {
+            'entity linking percentage': entity_linking,
+            'average number of entities per cell': entities_per_cell,
+            'average number of entities per annotated cell': entities_per_ann_cell
+        }
+    return render(request, 'annotation_stats.html', {'anns': anns, 'selected': selected, 'stats': stats})
+
+
 
 # Helper Functions
 
