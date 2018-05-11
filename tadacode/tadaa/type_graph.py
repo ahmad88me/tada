@@ -69,7 +69,6 @@ class TypeGraph(BasicGraph):
         return node.coverage_score/m
 
     def break_cycles(self):
-
         for r in self.roots:
             self.dfs_break_cycle([r])
 
@@ -77,6 +76,9 @@ class TypeGraph(BasicGraph):
         node = visited[-1]
         for ch in node.childs:
             if ch in visited:  # there is a cycle
+                print "\n\n******CYCLE*****"
+                print "%s -> %s\n\n\n" % (node.title, ch.title)
+                raise Exception("boom")
                 self.remove_edge(node, ch)
             else:
                 self.dfs_break_cycle(visited=visited+[ch])
