@@ -3,8 +3,10 @@
 import os
 import json
 from collections import Counter
+import chardet
 
 BASE_DIR = '../local_data/'
+
 
 def get_files_names():
     f = open(os.path.join(BASE_DIR, "web_commons_classes.csv"))
@@ -26,7 +28,10 @@ def tables_stats(files_names):
     for fname in files_names:
         f = open(os.path.join(BASE_DIR, "web_commons_tables", fname))
         s = f.read()
-        j = json.loads(s)
+        detected_encoding = chardet.detect(s)
+        print detected_encoding
+        s_raw = s.decode(detected_encoding['encoding'])
+        j = json.loads(s_raw)
         primary_list['type'].append(j['tableType'])
         primary_list['orientation'].append(j['tableOrientation'])
         primary_list['entity_column_index'].append(j['keyColumnIndex'])

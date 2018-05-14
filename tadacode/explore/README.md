@@ -8,3 +8,7 @@ code. You can run it from the command line to see the visualization of the files
  ```
 
 
+# explore web commons
+
+## difficulties
+1. different encodings for different files
