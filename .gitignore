@@ -3,6 +3,7 @@
 *.sqlite3
 *.graph
 *.json
+mysql.cnf
 
 # generated graph
 graph.gv
