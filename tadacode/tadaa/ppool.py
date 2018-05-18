@@ -1,5 +1,6 @@
 from multiprocessing import Process
 
+
 class Pool(object):
     def __init__(self, max_num_of_processes, func, params_list):
         self.max_num_of_processes = max_num_of_processes

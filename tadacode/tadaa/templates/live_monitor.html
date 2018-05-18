@@ -1,0 +1,101 @@
+{% extends "base.html"%}
+{%block contentfull%}
+
+
+
+<div class="row">
+
+    {%for ckey, cval in counters.items%}
+        <div class="col-xs-4 col-sm-3 col-md-2 col-lg-2">
+            <div class="card h-100">
+                <div class="card-body" >
+                    <canvas id="canvas-{{ckey}}" width="100%" height="100%"></canvas><br>
+                    <p style="text-align: center;" class="card-text">
+                        {{ckey}}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    {%endfor%}
+
+</div>
+
+
+
+<script>
+
+var chartColors = {
+	red: 'rgb(255, 99, 132)',
+	orange: 'rgb(255, 159, 64)',
+	yellow: 'rgb(255, 205, 86)',
+	green: 'rgb(75, 192, 192)',
+	blue: 'rgb(54, 162, 235)',
+	purple: 'rgb(153, 102, 255)',
+	grey: 'rgb(201, 203, 207)'
+};
+
+var colors = Object.keys(chartColors);
+var color_id = Math.floor(Math.random() * colors.length);
+console.log('color_id: '+color_id)
+
+var ctx;
+var myDoughnutChart;
+{%for ckey, cval in counters.items%}
+
+   ctx = document.getElementById('canvas-{{ckey}}').getContext('2d');
+   myDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+				datasets: [{
+					data: [
+						1
+					],
+                    backgroundColor: [chartColors[colors[color_id]]],
+                    borderWidth: [0],
+					label: 'Dataset 1',
+				}]
+			},
+    options: {cutoutPercentage: 90},
+    centerText: {
+        display: true,
+        text: "{{cval}}"
+    }
+});
+
+
+
+
+Chart.Chart.pluginService.register({
+    beforeDraw: function(chart) {
+        if (chart.config.centerText.display !== null &&
+            typeof chart.config.centerText.display !== 'undefined' &&
+            chart.config.centerText.display) {
+            drawTotals(chart);
+        }
+    },
+});
+
+function drawTotals(chart) {
+    var width = chart.chart.width,
+    height = chart.chart.height,
+    ctx = chart.chart.ctx;
+    ctx.restore();
+    var fontSize = (height / 114).toFixed(2);
+    ctx.font = fontSize + "em sans-serif";
+    ctx.textBaseline = "middle";
+    var text = chart.config.centerText.text,
+    textX = Math.round((width - ctx.measureText(text).width) / 2),
+    textY = height / 2;
+    ctx.fillText(text, textX, textY);
+    ctx.save();
+}
+
+
+{%endfor%}
+
+</script>
+
+
+
+{%endblock%}

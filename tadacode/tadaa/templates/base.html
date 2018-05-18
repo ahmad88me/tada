@@ -7,49 +7,22 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Tadaa</title>
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 
-    <!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>-->
-<!--<script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery.min.js"><\/script>')</script>-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 
 
-    <!-- jQuery UI which is needed for the autocomplete in model addition -->
-    <!--<script-->
-  <!--src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"-->
-  <!--integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="-->
-  <!--crossorigin="anonymous"></script>-->
-
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 
 
 
 
-    <!-- Bootstrap -->
-    <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
 
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
 
     <style>
         .darkl{background-color: #333333; color: #FBFBFB;}
@@ -107,34 +80,74 @@ a.bg-dark:focus, a.bg-dark:hover {
 
 </head>
 <body>
+<!-- bootstrap 3 -->
 <!-- original top dark navigation bar-->
-<nav class="navbar navbar-inverse ">
-    <a class="navbar-brand" href="/home">Tadaa</a>
-    <ul class="nav navbar-nav ">
-        <!--<li><a href="/add_model">Add Model (T-Box)</a></li>-->
-        <!--<li><a href="/add_model_abox">Add Model (A-Box)</a></li>-->
-        <!--<li><a href="/list_models">Models</a></li>-->
-        <!--<li><a href="/predict">Predict</a></li>-->
-        <!--<li><a href="/list_predictions">List Predictions</a></li>-->
-        <li><a href="/online_entity_annotation">Add dataset</a></li>
-        <li><a href="/list_annotations">Annotate dataset</a></li>
-        <li><a href="/advanced_annotation">Advanced annotation</a></li>
-        <li><a href="/about">About</a></li>
-    </ul>
-</nav>
+<!--<nav class="navbar navbar-dark">-->
+    <!--<a class="navbar-brand" href="/home">Tadaa</a>-->
+    <!--<ul class="nav navbar-nav ">-->
+        <!--&lt;!&ndash;<li><a href="/add_model">Add Model (T-Box)</a></li>&ndash;&gt;-->
+        <!--&lt;!&ndash;<li><a href="/add_model_abox">Add Model (A-Box)</a></li>&ndash;&gt;-->
+        <!--&lt;!&ndash;<li><a href="/list_models">Models</a></li>&ndash;&gt;-->
+        <!--&lt;!&ndash;<li><a href="/predict">Predict</a></li>&ndash;&gt;-->
+        <!--&lt;!&ndash;<li><a href="/list_predictions">List Predictions</a></li>&ndash;&gt;-->
+        <!--<li><a href="/online_entity_annotation">Add dataset</a></li>-->
+        <!--<li><a href="/list_annotations">Annotate dataset</a></li>-->
+        <!--<li><a href="/advanced_annotation">Advanced annotation</a></li>-->
+        <!--<li><a href="/about">About</a></li>-->
+    <!--</ul>-->
+<!--</nav>-->
+
+
+
+
+  <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="/home">Tadaa</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <!--<li class="nav-item active">-->
+              <!--<a class="nav-link" href="#">Home-->
+                <!--<span class="sr-only">(current)</span>-->
+              <!--</a>-->
+            <!--</li>-->
+            <!--<li class="nav-item">-->
+              <!--<a class="nav-link" href="#">About</a>-->
+            <!--</li>-->
+            <li class="nav-item"><a class="nav-link" href="/online_entity_annotation">Add dataset</a></li>
+            <li class="nav-item"><a class="nav-link" href="/list_annotations">Annotate dataset</a></li>
+            <li class="nav-item"><a class="nav-link" href="/advanced_annotation">Advanced annotation</a></li>
+            <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+
+
 
 
 
 <div class="container-fluid">
 <div class="row">
+    <div class="col-lg-12 text-center">
+          <h1 class="mt-5"> </h1>
+        </div>
     <div class="col-md-2">
     </div>
     <div class="col-md-8">
+
     {%block content%}
-{%endblock%}
+    {%endblock%}
     </div>
     <div class="col-md-2"> </div>
-    <div class="col-md-12">{%block contentfull%}{%endblock%}</div>
+    <div class="col-md-12">
+        {%block contentfull%}{%endblock%}
+    </div>
 </div>
 </div>
 

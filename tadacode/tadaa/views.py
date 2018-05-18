@@ -1,6 +1,7 @@
 import os
 import string
 import random
+from collections import Counter
 
 import settings
 from django.shortcuts import render, redirect
@@ -328,6 +329,11 @@ def annotation_stats(request):
         }
     return render(request, 'annotation_stats.html', {'anns': anns, 'selected': selected, 'stats': stats})
 
+
+def live_monitor(request):
+    statuses = [s.status for s in OnlineAnnotationRun.objects.all()]
+    c = Counter(statuses)
+    return render(request, 'live_monitor.html', {'counters': dict(c)})
 
 
 # Helper Functions
