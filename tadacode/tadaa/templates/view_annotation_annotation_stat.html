@@ -1,0 +1,31 @@
+{%extends "base.html"%}
+{%block contentfull%}
+
+
+
+
+
+<table class="table table-striped" >
+
+    <thead>
+    <tr class="thead-dark">
+      <th scope="col">annotation</th>
+      <th scope="col">entity linking %</th>
+      <th scope="col">entities per cell</th>
+      <th scope="col">entities per linked cell</th>
+    </tr>
+  </thead>
+    <tbody>
+
+    {%for d in stats%}
+    <tr>
+        <td> {{d.ann.id}} - {{d.ann.name}} </td>
+        <td> {{d.entity_linking}}</td>
+        <td> {{d.entities_per_cell}}</td>
+        <td> {{d.entities_per_linked_cell}}</td>
+    </tr>
+
+    {%endfor%}
+    </tbody>
+</table>
+{%endblock%}

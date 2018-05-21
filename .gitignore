@@ -5,6 +5,8 @@
 *.json
 mysql.cnf
 tadaa_cycles.txt
+db.sqlite3.webcommons
+
 
 # generated graph
 graph.gv

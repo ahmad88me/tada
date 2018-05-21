@@ -327,7 +327,25 @@ def annotation_stats(request):
             'average number of entities per cell': entities_per_cell,
             'average number of entities per annotated cell': entities_per_ann_cell
         }
-    return render(request, 'annotation_stats.html', {'anns': anns, 'selected': selected, 'stats': stats})
+    return render(request, 'annotation_entity_stats.html', {'anns': anns, 'selected': selected, 'stats': stats})
+
+
+def online_annotation_annotation_stat(request):
+    stats = []
+    for o in OnlineAnnotationRun.objects.filter(status='Annotation is complete'):
+        d = {}
+        d["ann"] = o
+        d["entity_linking"] = len([c for c in o.cells if len(c.entities) > 0]) * 100.0 / len(o.cells)
+        d["entities_per_cell"] = sum([len(c.entities) for c in o.cells]) * 1.0 / len(o.cells)
+        ss = [len(c.entities) for c in o.cells if len(c.entities) > 0]
+        d["entities_per_linked_cell"] = sum(ss) * 1.0 / len(ss)
+        # rounding
+        d["entity_linking"] = str(round(d["entity_linking"], 2))
+        d["entities_per_cell"] = str(round(d["entities_per_cell"], 2))
+        d["entities_per_linked_cell"] = str(round(d["entities_per_linked_cell"], 2))
+
+        stats.append(d)
+    return render(request, 'view_annotation_annotation_stat.html', {"stats": stats})
 
 
 def live_monitor(request):
