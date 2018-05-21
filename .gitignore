@@ -4,6 +4,7 @@
 *.graph
 *.json
 mysql.cnf
+tadaa_cycles.txt
 
 # generated graph
 graph.gv
