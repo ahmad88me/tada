@@ -3,6 +3,7 @@
 <table class="table">
     <thead>
     <tr>
+        <th>#</th>
         <th>Dataset name</th>
         <th>status</th>
         <th>row level annotation</th>
@@ -14,6 +15,7 @@
     <tbody>
 {%for annotation in annotations%}
     <tr>
+        <td>{{annotation.id}}</td>
         <td>{{annotation.name}}</td>
         <td>{{annotation.status}}</td>
         <td>

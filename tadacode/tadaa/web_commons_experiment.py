@@ -4,6 +4,7 @@ import csv
 import os
 import sys
 import subprocess
+from datetime import datetime
 # f = open("web_commons_progress.txt")
 
 
@@ -102,6 +103,12 @@ def build_model(annotation_run):
     subprocess.call(comm, shell=True)
 
 
+def build_model_from_id(id):
+    run = OnlineAnnotationRun.objects.get(id=id)
+    build_model(run)
+    print "\n\nModel %s\n\n" % run.name
+
+
 def build_models():
     runs = OnlineAnnotationRun.objects.filter(status='Ready')
     for r in runs:
@@ -117,7 +124,39 @@ def build_empty_models_from_status():
         annotation_run = OnlineAnnotationRun(name=file_name)
         annotation_run.save()
 
+
+def annotate_by_id(id, log=False):
+    annotation_run = OnlineAnnotationRun.objects.get(id=id)
+    comm = "%s %s %s --dotype" % (venv_python,
+                                       (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                                       annotation_run.id)
+    if log:
+        comm += ' >> %d.log' % annotation_run.id
+    print "comm: %s" % comm
+    subprocess.call(comm, shell=True)
+
+
+def build_model_from_id(id):
+    run = OnlineAnnotationRun.objects.get(id=id)
+    build_model(run)
+    print "\n\nModel %s\n\n" % run.name
+
+
+def annotate_all():
+    runs = OnlineAnnotationRun.objects.filter(status='datasets are added')
+    sorted_runs = sorted(runs, key=lambda r: len(r.cells))
+    for r in sorted_runs:
+        print "%s annotating %s" % (str(datetime.now()), r.name)
+        annotate_by_id(r.id, log=True)
+
+
 # to create empty models (done)
 #build_empty_models_from_status()
 # to annotate models (in progress)
-build_models()
+#build_models()
+#build_empty_models_from_status()
+#print sys.argv
+#build_model_from_id(sys.argv[1])
+# annotate_by_id(596)
+#annotate_by_id(sys.argv[1])
+annotate_all()

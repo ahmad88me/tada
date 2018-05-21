@@ -201,7 +201,7 @@ def build_graph_from_nodes(graph, nodes_dict):
     print "roots are built\n\n***\n\n\n\n\n***********"
     #graph.draw("graph-pre.gv")
     print "will break the cycles"
-    graph.break_cycles()
+    graph.break_cycles(log_path=proj_path)
     print "cycles are broken"
 
 

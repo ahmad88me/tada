@@ -27,9 +27,9 @@ class Node:
 
 class BasicGraph(object):
     def __init__(self):
-        self.roots = []
+        self.roots = []  # a list of nodes that has no parents (e.g. roots)
         self.cache = []  # this is used to check whether an item is in the graph or not
-        self.index = {}
+        self.index = {}  # like a hash table to access a node by its title
 
     def add_v(self, title, parents):
         """
@@ -68,6 +68,8 @@ class BasicGraph(object):
     def remove_edge(self, from_node, to_node):
         from_node.childs.remove(to_node)
         to_node.parents.remove(from_node)
+        if to_node.parents == []:
+            self.roots.append(to_node)
 
     def build_roots(self):
         for n in self.cache:

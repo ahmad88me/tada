@@ -1,5 +1,8 @@
+import os
+import subprocess
 import json
 from basic_graph import BasicGraph, Node
+
 # class Node:
 #     def __init__(self):
 #         self.__init__('default')
@@ -68,20 +71,24 @@ class TypeGraph(BasicGraph):
         """
         return node.coverage_score/m
 
-    def break_cycles(self):
+    def break_cycles(self, log_path=None):
         for r in self.roots:
-            self.dfs_break_cycle([r])
+            self.dfs_break_cycle(visited=[r], log_path=log_path)
 
-    def dfs_break_cycle(self, visited):
+    def dfs_break_cycle(self, visited, log_path):
         node = visited[-1]
         for ch in node.childs:
             if ch in visited:  # there is a cycle
                 print "\n\n******CYCLE*****"
                 print "%s -> %s\n\n\n" % (node.title, ch.title)
-                raise Exception("boom")
+                if log_path is not None:
+                    comm = 'echo "%s, %s" >> %s' % (node.title, ch.title, os.path.join(log_path, 'tadaa_cycles.txt'))
+                    print "comm: %s" % comm
+                    subprocess.call(comm, shell=True)
+                # raise Exception("boom")
                 self.remove_edge(node, ch)
             else:
-                self.dfs_break_cycle(visited=visited+[ch])
+                self.dfs_break_cycle(visited=visited+[ch], log_path=log_path)
 
     def draw_with_scores(self, multi=False):
         if not multi:
@@ -224,6 +231,9 @@ class TypeGraph(BasicGraph):
 
     def set_depth_for_node(self, node):
         if node.depth == -1:  # depth is not set
+            if(len(node.parents)==0):
+                error_msg = "set_depth_for_node: the node: %s should've been in the root?" % node.title
+                raise Exception("")
             max_node = node.parents[0]
             self.set_depth_for_node(max_node)
             for p in node.parents[1:]:
