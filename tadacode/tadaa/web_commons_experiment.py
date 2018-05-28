@@ -158,6 +158,7 @@ def annotate_all():
 # testing
 #print sys.argv
 #build_model_from_id(sys.argv[1])
+build_model_from_id(712)
 # annotate_by_id(596)
 #annotate_by_id(sys.argv[1])
 # step 4
