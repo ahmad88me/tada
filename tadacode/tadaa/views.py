@@ -291,7 +291,10 @@ def online_annotation_entity_stat(request):
 def advance_annotation(request):
     if 'ann' not in request.GET or 'alpha' not in request.GET:
         anns = OnlineAnnotationRun.objects.all()
-        return render(request, 'advanced_annotation.html', {'anns': anns, 'alpha': 0.3, 'selected': anns[0].id})
+        if len(anns) > 0:
+            return render(request, 'advanced_annotation.html', {'anns': anns, 'alpha': 0.3, 'selected': anns[0].id})
+        else:
+            return render(request, 'advanced_annotation.html', {'anns': anns, 'alpha': 0.3, 'selected': 0})
     else:
         from annotator import load_graph, score_graph, get_nodes, get_edges
         alpha = float(request.GET['alpha'])
