@@ -86,6 +86,7 @@ elif os.environ['db'] == 'mysql':
             'ENGINE': 'django.db.backends.mysql',
             'OPTIONS': {
                 'read_default_file': os.path.join(BASE_DIR, 'mysql.cnf'),
+                'charset': 'utf8mb4'
             },
         }
     }
