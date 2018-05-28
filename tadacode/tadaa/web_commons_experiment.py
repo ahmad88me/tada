@@ -144,7 +144,8 @@ def build_model_from_id(id):
 
 def annotate_all():
     runs = OnlineAnnotationRun.objects.filter(status='datasets are added')
-    sorted_runs = sorted(runs, key=lambda r: len(r.cells))
+    # added reverse for the server run
+    sorted_runs = sorted(runs, key=lambda r: len(r.cells), reverse=True)
     for r in sorted_runs:
         print "%s annotating %s" % (str(datetime.now()), r.name)
         annotate_by_id(r.id, log=True)
