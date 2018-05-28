@@ -132,8 +132,10 @@ def annotation_write_to_db(dict_list):
                 entity = Entity(cell=cell, entity=get_coded_text(entity_value))
                 entity.save()
                 for class_value in d[cell_value]["entities"][entity_value]:
+                    import chardet
                     print("will write: <%s>"%class_value)
                     print type(class_value)
+                    print chardet.detect(class_value)
                     cclass = CClass(entity=get_coded_text(entity), cclass=get_coded_text(class_value))
                     cclass.save()
 
