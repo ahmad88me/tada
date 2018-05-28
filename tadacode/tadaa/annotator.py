@@ -114,15 +114,25 @@ def annotation_writer_func(pipe):
 
 
 def annotation_write_to_db(dict_list):
+    # for d in dict_list:
+    #     for cell_value in d.keys():
+    #         cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
+    #         cell.save()
+    #         for entity_value in d[cell_value]["entities"].keys():
+    #             entity = Entity(cell=cell, entity=entity_value)
+    #             entity.save()
+    #             for class_value in d[cell_value]["entities"][entity_value]:
+    #                 cclass = CClass(entity=entity, cclass=class_value)
+    #                 cclass.save()
     for d in dict_list:
         for cell_value in d.keys():
-            cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
+            cell = Cell(text_value=get_coded_text(cell_value), annotation_run=d[cell_value]["ann_run"])
             cell.save()
             for entity_value in d[cell_value]["entities"].keys():
-                entity = Entity(cell=cell, entity=entity_value)
+                entity = Entity(cell=cell, entity=get_coded_text(entity_value))
                 entity.save()
                 for class_value in d[cell_value]["entities"][entity_value]:
-                    cclass = CClass(entity=entity, cclass=class_value)
+                    cclass = CClass(entity=get_coded_text(entity), cclass=get_coded_text(class_value))
                     cclass.save()
 
 
@@ -482,6 +492,17 @@ def get_edges(graph):
 
 def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
+
+
+def get_coded_text(t):
+    """
+    This function to encode/decode the text before storing it in the database to solve encoding issues
+    :param t: text
+    :return: coded text
+    """
+    if isinstance(t, str):
+        return t.decode('utf-8')
+    return t
 
 
 if __name__ == '__main__':

@@ -151,13 +151,14 @@ def annotate_all():
         annotate_by_id(r.id, log=True)
 
 
-# to create empty models (done)
+# to create empty models (done) step 1
 #build_empty_models_from_status()
-# to annotate models (in progress)
+# to annotate models (in progress) step 2
 #build_models()
-#build_empty_models_from_status()
+# testing
 #print sys.argv
 #build_model_from_id(sys.argv[1])
 # annotate_by_id(596)
 #annotate_by_id(sys.argv[1])
-annotate_all()
+# step 4
+#annotate_all()
