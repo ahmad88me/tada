@@ -131,7 +131,7 @@ class OnlineAnnotationRun(models.Model):
 
 class Cell(models.Model):
     annotation_run = models.ForeignKey(OnlineAnnotationRun)
-    text_value = models.CharField(max_length=120)
+    text_value = models.TextField(default='')
 
     @property
     def entities(self):

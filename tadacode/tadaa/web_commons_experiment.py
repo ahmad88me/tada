@@ -154,11 +154,11 @@ def annotate_all():
 # to create empty models (done) step 1
 #build_empty_models_from_status()
 # to annotate models (in progress) step 2
-#build_models()
+build_models()
 # testing
 #print sys.argv
 #build_model_from_id(sys.argv[1])
-build_model_from_id(712)
+#build_model_from_id(712)
 # annotate_by_id(596)
 #annotate_by_id(sys.argv[1])
 # step 4
