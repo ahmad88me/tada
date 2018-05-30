@@ -435,7 +435,7 @@ def dotype(ann_run, endpoint):
         print "%f %s" % (n.score, n.title)
     for te in timed_events:
         print "event: %s took: %.2f seconds" % (te[0], te[1])
-    graph.draw_with_scores()
+    #graph.draw_with_scores()
     graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
     graph_file_name = graph_file_name.replace(' ', '_')
     graph.save(os.path.join(MODELS_DIR, graph_file_name))
