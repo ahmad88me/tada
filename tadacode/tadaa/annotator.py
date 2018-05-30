@@ -1,6 +1,7 @@
 ###############################
 #       For Django script     #
 ###############################
+
 import pandas as pd
 import numpy as np
 import random
@@ -27,6 +28,7 @@ application = get_wsgi_application()
 #######################################
 #       For the annotation script     #
 #######################################
+
 from settings import MODELS_DIR
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -199,7 +201,7 @@ def build_graph_from_nodes(graph, nodes_dict):
     print "all edges are added"
     graph.build_roots()
     print "roots are built\n\n***\n\n\n\n\n***********"
-    #graph.draw("graph-pre.gv")
+    # graph.draw("graph-pre.gv")
     print "will break the cycles"
     graph.break_cycles(log_path=proj_path)
     print "cycles are broken"
@@ -345,7 +347,7 @@ def dotype(ann_run, endpoint):
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
     from easysparql import get_classes_subjects_count
-    #from basic_graph import BasicGraph
+    # from basic_graph import BasicGraph
     from type_graph import TypeGraph
     ann_run.status = 'removing noisy entities'
     ann_run.save()
@@ -353,7 +355,7 @@ def dotype(ann_run, endpoint):
     ann_run.status = 'subclass queries'
     ann_run.save()
     timed_events = []
-    #graph = BasicGraph()
+    # graph = BasicGraph()
     graph = TypeGraph()
     params = []
     processes = []
@@ -435,7 +437,7 @@ def dotype(ann_run, endpoint):
         print "%f %s" % (n.score, n.title)
     for te in timed_events:
         print "event: %s took: %.2f seconds" % (te[0], te[1])
-    #graph.draw_with_scores()
+    # graph.draw_with_scores()
     graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
     graph_file_name = graph_file_name.replace(' ', '_')
     graph.save(os.path.join(MODELS_DIR, graph_file_name))
@@ -443,8 +445,8 @@ def dotype(ann_run, endpoint):
 
     # f = graph.save(os.path.join(MODELS_DIR, graph_file_name))
     # ann_run.graph_file = File(f)
-    #s = graph.save_to_string()
-    #f = ContentFile(s)
+    # s = graph.save_to_string()
+    # f = ContentFile(s)
 
     # with open(os.path.join(MODELS_DIR, graph_file_name), 'w') as f:
     # f = open(os.path.join(MODELS_DIR, graph_file_name), 'w')
@@ -473,7 +475,7 @@ def score_graph(graph, alpha, ann_run):
 
 def get_nodes(graph):
     return [graph.index[t] for t in graph.cache]
-    #return graph.cache
+    # return graph.cache
 
 
 def get_edges(graph):

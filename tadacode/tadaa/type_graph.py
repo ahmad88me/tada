@@ -233,7 +233,7 @@ class TypeGraph(BasicGraph):
         if node.depth == -1:  # depth is not set
             if(len(node.parents)==0):
                 error_msg = "set_depth_for_node: the node: %s should've been in the root?" % node.title
-                raise Exception("")
+                raise Exception("set_depth_for_node: the node: %s should've been in the root?" % node.title)
             max_node = node.parents[0]
             self.set_depth_for_node(max_node)
             for p in node.parents[1:]:
