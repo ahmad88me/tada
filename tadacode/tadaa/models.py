@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 from settings import MODELS_DIR
 
+
 class MLModel(models.Model):
     name = models.CharField(max_length=120, default='')
     file_name = models.CharField(max_length=80, default='')

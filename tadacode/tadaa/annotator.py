@@ -342,7 +342,7 @@ def store_scores(ann_run,scores):
     ann_run.save()
 
 
-def dotype(ann_run, endpoint):
+def dotype(ann_run, endpoint, onlyprefix):
     import time
     from multiprocessing import Process, Lock, Pipe
     from ppool import Pool
@@ -492,6 +492,7 @@ if __name__ == '__main__':
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
     parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
+    parser.add_argument('--onlyprefix', action='store_true', help='To limit to classes that starts with this prefix')
     args = parser.parse_args()
     if args.csvfiles and len(args.csvfiles) > 0:
         print 'csvfiles: %s' % args.csvfiles
@@ -500,7 +501,10 @@ if __name__ == '__main__':
                       endpoint="http://dbpedia.org/sparql")
         print "data set is added successfully. Done"
     if args.dotype:
+        prefix = None
+        if args.onlyprefix:
+            prefix = args.onlyprefix
         ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
         print 'typing the csv file'
-        dotype(ann_run=ann_run, endpoint=endpoint)
+        dotype(ann_run=ann_run, endpoint=endpoint, onlyprefix=prefix)
         print 'done typing the csv file'
