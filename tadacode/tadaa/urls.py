@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 import views
+import urlsapi
 
 urlpatterns = patterns('',
     url(r'^add_model_abox', 'tadaa.views.add_model_abox'),
@@ -23,6 +24,7 @@ urlpatterns = patterns('',
     url(r'live_monitor', views.live_monitor),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^home', 'tadaa.views.home'),
+    url(r'^api/', include(urlsapi)),
     url('', 'tadaa.views.home'),
 )
 
