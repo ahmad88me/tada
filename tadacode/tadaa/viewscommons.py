@@ -1,4 +1,4 @@
-from models import AnnRun
+from models import AnnRun, EntityAnn
 import os
 import settings
 import random
@@ -15,11 +15,13 @@ logger = set_config(logging.getLogger(__name__))
 
 def store_uploaded_csv_files(csv_files):
     """
-    :param csv_files:
-    :return: empty string if success, otherwise will return the error msg
+    :param csv_files: list of files uploaded (request.FILES.getlist)
+    :return: empty string if success, otherwise will return the error msg and also a list of stored files
     """
     if len(csv_files) == 0:
-        logger.error("no csv files are found")
+        error_msg = "no csv files are found"
+        logger.error(error_msg)
+        return error_msg, []
     stored_files = []
     for file in csv_files:
         dest_file_name = 'annotation' + ' - ' + random_string(length=4) + '.csv'
@@ -28,8 +30,10 @@ def store_uploaded_csv_files(csv_files):
             sf = os.path.join(settings.UPLOAD_DIR, dest_file_name)
             stored_files.append('"' + sf + '"')
     if len(stored_files) == 0:
-        logger.error("error saving the csv files")
-    return ""
+        error_msg = "error saving the csv files"
+        logger.error(error_msg)
+        return error_msg, []
+    return "", stored_files
 
 
 def handle_uploaded_file(uploaded_file=None, destination_file=None):
@@ -50,19 +54,18 @@ def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
-def create_entity_model(name, files):
+def create_and_type_entity_column(name, files):
+    proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+    logger.debug(proj_abs_dir)
+    venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
+    logger.debug(venv_python)
     ann_run = AnnRun(name=name, status="started")
     ann_run.save()
+    comm = "%s %s %s --onlyprefix %s --dotype --csvfiles %s" % (venv_python,
+                                       (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                                       ann_run.id,
+                                       "http://dbpedia.org/ontology",
+                                       ",".join(files))
+    logger.debug("comm: %s" % comm)
+    subprocess.Popen(comm, shell=True)
     return ann_run
-    # proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-    # print proj_abs_dir
-    # venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
-    # print venv_python
-    # annotation_run = AnnRun(name=name, status="started")
-    # annotation_run.save()
-    # comm = "%s %s %s --csvfiles %s" % (venv_python,
-    #                                    (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-    #                                    annotation_run.id,
-    #                                    ",".join(files))
-    # logger.debug("comm: %s" % comm)
-    # subprocess.Popen(comm, shell=True)

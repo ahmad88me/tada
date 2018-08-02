@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Tadaa</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css"/>
 
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+
+            <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
             integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
             crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -16,146 +15,51 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
-          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
-            integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
-            crossorigin="anonymous"></script>
 
-
-
-
+    <title>TADA</title>
 
     <style>
-        // for bootstrap 4
+        ul.nav {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            height: 50px
 
+        }
 
-        .darkl{background-color: #333333; color: #FBFBFB;}
-        .darkl:hover { background-color: #434343; color: #FBFBFB;}
-        // dark (orange)
- .progress-dark .bar {
-   #gradient > .vertical(lighten(@orange, 15%), @orange);
- }
- .progress-dark.progress-striped .bar {
-   #gradient > .striped(lighten(@orange, 15%));
- }
-    .bg-info {
-  background-color: #5bc0de !important;
-}
+        li.nav-item {
+            float: left;
+        }
 
-a.bg-info:focus, a.bg-info:hover {
-  background-color: #31b0d5 !important;
-}
+        li.nav-item a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            //height: 20px;
+        }
 
-.bg-dark-solid {
-  background-color: #3a3a3a !important;
-  background-image: none !important;
-}
+        /* Change the link color to #111 (black) on hover */
+        li a:hover {
+            background-color: #111;
+        }
 
-.bg-dark {
-  background-color: #3a3a3a !important;
-  color: white !important;
-}
-
-
-a.bg-dark:focus, a.bg-dark:hover {
-  background-color: #333333 !important;
-}
-
-.btn-file {
-    position: relative;
-    overflow: hidden;
-}
-.btn-file input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
-}
-
-
-
+        .active {
+            background-color: #4CAF50;
+        }
     </style>
-
 </head>
 <body>
-<!-- bootstrap 3 -->
-<!-- original top dark navigation bar-->
-<!--<nav class="navbar navbar-dark">-->
-<!--<a class="navbar-brand" href="/home">Tadaa</a>-->
-<!--<ul class="nav navbar-nav ">-->
-<!--&lt;!&ndash;<li><a href="/add_model">Add Model (T-Box)</a></li>&ndash;&gt;-->
-<!--&lt;!&ndash;<li><a href="/add_model_abox">Add Model (A-Box)</a></li>&ndash;&gt;-->
-<!--&lt;!&ndash;<li><a href="/list_models">Models</a></li>&ndash;&gt;-->
-<!--&lt;!&ndash;<li><a href="/predict">Predict</a></li>&ndash;&gt;-->
-<!--&lt;!&ndash;<li><a href="/list_predictions">List Predictions</a></li>&ndash;&gt;-->
-<!--<li><a href="/online_entity_annotation">Add dataset</a></li>-->
-<!--<li><a href="/list_annotations">Annotate dataset</a></li>-->
-<!--<li><a href="/advanced_annotation">Advanced annotation</a></li>-->
-<!--<li><a href="/about">About</a></li>-->
-<!--</ul>-->
-<!--</nav>-->
-
-
-<!-- Navigation -->
-<!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">-->
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-static-top">
-    <div class="container">
-        <a class="navbar-brand" href="/home">Tadaa</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
-                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ml-auto">
-                <!--<li class="nav-item active">-->
-                <!--<a class="nav-link" href="#">Home-->
-                <!--<span class="sr-only">(current)</span>-->
-                <!--</a>-->
-                <!--</li>-->
-                <!--<li class="nav-item">-->
-                <!--<a class="nav-link" href="#">About</a>-->
-                <!--</li>-->
-                <li class="nav-item"><a class="nav-link" href="/view_annotation_stat">Annotation stats</a></li>
-                <li class="nav-item"><a class="nav-link" href="/live_monitor">Live monitoring</a></li>
-                <li class="nav-item"><a class="nav-link" href="/online_entity_annotation">Add dataset</a></li>
-                <li class="nav-item"><a class="nav-link" href="/list_annotations">Annotate dataset</a></li>
-                <li class="nav-item"><a class="nav-link" href="/advanced_annotation">Advanced annotation</a></li>
-                <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-12 text-center">
-            <h1 class="mt-5"></h1>
-        </div>
-        <div class="col-md-2">
-        </div>
-        <div class="col-md-8">
-
-            {%block content%}
-            {%endblock%}
-        </div>
-        <div class="col-md-2"></div>
-        <div class="col-md-12">
-            {%block contentfull%}{%endblock%}
-        </div>
-    </div>
-</div>
-
+<ul class="nav">
+  <!--<li class="nav-item"><a class="active" href="#home">Home</a></li>-->
+  <li class="nav-item"><a href="e_ann_list">E-Annotations</a></li>
+  <li class="nav-item"><a href="#contact">Contact</a></li>
+  <li class="nav-item"><a href="#about">About</a></li>
+</ul>
+{%block content%}
+{%endblock%}
 </body>
 </html>

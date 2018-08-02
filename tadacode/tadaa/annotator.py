@@ -10,7 +10,8 @@ import os
 import sys
 import math
 
-MAX_NUM_PROCESSES = 10
+#MAX_NUM_PROCESSES = 10
+MAX_NUM_PROCESSES = 1
 
 proj_path = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 # This is so Django knows where to find stuff.
@@ -32,124 +33,101 @@ application = get_wsgi_application()
 from settings import MODELS_DIR
 from django.core.files import File
 from django.core.files.base import ContentFile
-from tadaa.models import OnlineAnnotationRun, Cell, CClass, Entity
+from tadaa.models import AnnRun, EntityAnn, Cell, CClass, Entity
 import argparse
 import json
 
+import time
+import logging
 
-def annotate_csvs(ann_run_id, files, endpoint, gen_class_eli, hierarchy):
+from multiprocessing import Process, Lock, Pipe
+from PPool.Pool import Pool
+import multiprocessing
+#from multiprocessing import Pool
+from type_graph import TypeGraph
+
+from logger import set_config
+
+
+
+
+logger = set_config(logging.getLogger(__name__))
+
+
+def detect_entity_col(csv_file_dir):
     """
-    :param ann_run_id: the id of the annotation run as a string
-    :param files: a list of files in abs dir
-    :param endpoint: the endpoint url
-    :return: Nothing
+    :param csv_file_dir:
+    :return: the index of the entity column, or -1 if it is can't be found
     """
-    from tadaa.models import OnlineAnnotationRun
-    try:
-        ann_run = OnlineAnnotationRun.objects.get(id=ann_run_id)
-    except:
-        ann_run = OnlineAnnotationRun(name=random_string(5), status='started')
-    for f in files:
-        ann_run.status = 'adding dataset: ' + str(f.split(os.path.sep)[-1])
-        ann_run.save()
-        annotate_single_csv(ann_run=ann_run, csv_file=f, endpoint=endpoint, hierarchy=hierarchy)
-    ann_run.status = 'datasets are added'
-    ann_run.save()
+    return 0  # at the moment we assume that the entity column is the first column
 
 
-def annotate_single_csv(ann_run, csv_file, endpoint, hierarchy):
+def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, onlyprefix):
     """
     Assumptions:
         * Only one entity column i.e. not considering the case of multiple columns for the entity (e.g. the case of
         first name column and last name column).
-        * The entity column is the first column.
-    :param ann_run:online annotation run
-    :param csv_file: the directory of the file
-    :param endpoint: the endpoint url
+    :param ann_run_id:
+    :param csv_file_dir:
+    :param endpoint:
+    :param hierarchy:
+    :param entity_col_id: the id the column id
     :return:
     """
-    import time
-    from ppool import Pool
-    from multiprocessing import Lock, Pipe, Process
+    if entity_col_id is None:
+        entity_column_id = detect_entity_col(csv_file_dir)
+    else:
+        entity_column_id = entity_col_id
+    try:
+        ann_run = AnnRun.objects.get(id=ann_run_id)
+    except:
+        ann_run = AnnRun(name=random_string(5), status='started')
+    ann_run.status = 'adding dataset: ' + str(csv_file_dir.split(os.path.sep)[-1])
+    ann_run.save()
+    print "ann_run: "+str(ann_run.id)
+    print "how many entityAnns: "+str(len(EntityAnn.objects.filter(ann_run=ann_run)))
+    print "on reverse: "+str(len(ann_run.entityann_set.all()))
+    # for ea in EntityAnn.objects.filter(ann_run=ann_run):
+    #     print "deleting ea with id: "+str(ea.id)
+    #     ea.delete()
+    EntityAnn.objects.filter(ann_run=ann_run).delete()
+    entity_ann = EntityAnn(ann_run=ann_run, col_id=entity_column_id)
+    entity_ann.save()
     start = time.time()
-    print 'annotating: ' + csv_file
-    mat = pd.read_csv(csv_file).as_matrix()
-    # Here we assume that the entity column is the first one
-    # get entity column
-    entity_column_id = 0
-    # for r in mat:
-    #     annotate_single_cell(ann_run=ann_run, cell_value=r[entity_column_id], endpoint=endpoint, hierarchy=hierarchy)
+    logger.info('annotating: ' + csv_file_dir)
+    mat = pd.read_csv(csv_file_dir).as_matrix()
     params_list = []
-    lock = Lock()
-    a_end, b_end = Pipe()
-
-    v_writer_process = Process(target=annotation_writer_func, args=(b_end,))
-    v_writer_process.start()
-
     for r in mat:
-        params_list.append((ann_run, r[entity_column_id], endpoint, hierarchy, lock, a_end))
+        params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix))
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=annotate_single_cell, params_list=params_list)
     pool.run()
-    print "sending 1"
-    a_end.send(1)
-    print "will ask for the dict list"
-    dict_list = a_end.recv()
-    print "received the dict list"
-    annotation_write_to_db(dict_list)
-    print "1 is sent"
-    v_writer_process.terminate()
     end = time.time()
-    print "Time spent: %f" % (end-start)
+    logger.debug("Time spent: %f" % (end-start))
+    ann_run.status = 'datasets are added'
+    ann_run.save()
 
 
-def annotation_writer_func(pipe):
-    dict_list = []
-    while True:
-        v = pipe.recv()
-        if v == 1:
-            print "annotation_writer_func> will return"
-            pipe.send(dict_list)
-        else:
-            print "annotation_writer_func> will append"
-            dict_list.append(v)
-            print "annotation_writer_func> appended"
-
-
-def annotation_write_to_db(dict_list):
-    for d in dict_list:
-        for cell_value in d.keys():
-            cell = Cell(text_value=cell_value, annotation_run=d[cell_value]["ann_run"])
-            cell.save()
-            for entity_value in d[cell_value]["entities"].keys():
-                entity = Entity(cell=cell, entity=entity_value)
-                entity.save()
-                for class_value in d[cell_value]["entities"][entity_value]:
-                    cclass = CClass(entity=entity, cclass=class_value)
-                    cclass.save()
-
-
-def annotate_single_cell(ann_run, cell_value, endpoint, hierarchy, lock, pipe):
+def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix):
     from easysparql import get_entities, get_classes
-    dcell = {}
-    cell = Cell(text_value=cell_value, annotation_run=ann_run)
-    dcell[cell_value] = {"ann_run": ann_run, "entities": {}}
-    print "cell: "+cell_value
+    print "annotate_single_cell> "
+    print "entity_ann parent name: "
+    print entity_ann.ann_run.name
+    cell = Cell(text_value=cell_value, entity_ann=entity_ann)
+    cell.save()
+    logger.debug("cell: "+str(cell_value))
     for entity in get_entities(subject_name=cell.text_value, endpoint=endpoint):
-        dcell[cell_value]["entities"][entity] = []
+        logger.debug("entity: "+str(entity))
+        e = Entity(cell=cell, entity=entity)
+        e.save()
+        print "will get classes of: " + entity
         classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
-        print "entity: "+entity
         for c in classes:
-            dcell[cell_value]["entities"][entity].append(c)
-    print "will acquire"
-    lock.acquire()
-    print "sending ..."
-    pipe.send(dcell)
-    print "send"
-    lock.release()
-    print "release"
+            if onlyprefix is None or (c.startswith(onlyprefix)):
+                ccclass = CClass(entity=e, cclass=c)
+                ccclass.save()
 
 
-def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
+def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth, onlyprefix):
     """
     :param class_name:
     :param endpoint:
@@ -158,6 +136,7 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
     :param g_pipe:
     :param v_pipe:
     :param depth:
+    :param onlyprefix: filter to only classes that starts with it
     :return:
     """
     print "class_name: %s depth: %d" % (class_name, depth)
@@ -172,12 +151,17 @@ def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth=0):
         v_lock.acquire()
         v_pipe.send(1)
         visited = v_pipe.recv()
-        visited[class_name] = parents
+        if onlyprefix is None:
+            filtered_parents = parents
+        else:
+            filtered_parents = [p for p in parents if p.startswith(onlyprefix)]
+        visited[class_name] = filtered_parents
         v_pipe.send(visited)
         v_lock.release()
 
-        for p in parents:
-            build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1)
+        for p in filtered_parents:
+            build_graph_while_traversing(class_name=p, endpoint=endpoint, v_lock=v_lock, v_pipe=v_pipe, depth=depth+1,
+                                         onlyprefix=onlyprefix)
 
 
 def build_graph_from_nodes(graph, nodes_dict):
@@ -186,29 +170,29 @@ def build_graph_from_nodes(graph, nodes_dict):
     :param nodes_dict: each node (key) contains a list of its parents
     :return:
     """
-    print "adding nodes"
+    logger.debug("adding nodes")
     # add nodes
     for node in nodes_dict:
         graph.add_v(node, None)
 
-    print "all nodes are added"
+    logger.debug("all nodes are added")
     # add edges
 
-    print "adding edges"
+    logger.debug("adding edges")
     for node in nodes_dict:
         for p in nodes_dict[node]:
             graph.add_e(p, node)
-    print "all edges are added"
+    logger.debug("all edges are added")
     graph.build_roots()
-    print "roots are built\n\n***\n\n\n\n\n***********"
+    logger.debug("roots are built\n\n***\n\n\n\n\n***********")
     # graph.draw("graph-pre.gv")
-    print "will break the cycles"
+    logger.debug("will break the cycles")
     graph.break_cycles(log_path=proj_path)
-    print "cycles are broken"
+    logger.debug("cycles are broken")
 
 
-def compute_coverage_score_for_graph(ann_run, graph):
-    for cell in ann_run.cells:
+def compute_coverage_score_for_graph(entity_ann, graph):
+    for cell in entity_ann.cells:
         if len(cell.entities) == 0:
             e_score = 0
         else:
@@ -263,7 +247,6 @@ def count_classes(classes, endpoint):
     """
     print "in count classes"
     from multiprocessing import Process, Lock, Pipe
-    from ppool import Pool
 
     lock = Lock()
     a_end, b_end = Pipe()
@@ -288,23 +271,23 @@ def count_classes(classes, endpoint):
     return d
 
 
-def remove_nodes(ann_run, classes):
-    for cell in ann_run.cells:
+def remove_nodes(entity_ann, classes):
+    for cell in entity_ann.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
                 if cclass.cclass in classes:
                     CClass.objects.get(cclass=cclass.cclass, entity=entity).delete()
 
 
-def remove_empty(ann_run):
-    for cell in ann_run.cells:
+def remove_empty(entity_ann):
+    for cell in entity_ann.cells:
         for entity in cell.entities:
             if len(entity.classes) == 0:
                 Entity.objects.get(id=entity.id).delete()
 
 
-def remove_noise_entities(ann_run):
-    for cell in ann_run.cells:
+def remove_noise_entities(entity_ann):
+    for cell in entity_ann.cells:
         if len(cell.entities) >= 2:
             max_num = 0
             for entity in cell.entities:
@@ -317,13 +300,13 @@ def remove_noise_entities(ann_run):
                     entity.delete()
 
 
-def get_m(ann_run):
+def get_m(entity_ann):
     """
     :param ann_run:
     :return: number of cells that has entities
     """
     s = 0
-    for cell in ann_run.cells:
+    for cell in entity_ann.cells:
         if len(cell.entities) !=0:
             s+=1
     if s!=0:
@@ -343,77 +326,74 @@ def store_scores(ann_run,scores):
 
 
 def dotype(ann_run, endpoint, onlyprefix):
-    import time
-    from multiprocessing import Process, Lock, Pipe
-    from ppool import Pool
-    from easysparql import get_classes_subjects_count
-    # from basic_graph import BasicGraph
-    from type_graph import TypeGraph
     ann_run.status = 'removing noisy entities'
     ann_run.save()
-    remove_noise_entities(ann_run)
+    entity_ann = ann_run.entityann_set.all()[0]
+    remove_noise_entities(entity_ann)
     ann_run.status = 'subclass queries'
     ann_run.save()
     timed_events = []
-    # graph = BasicGraph()
     graph = TypeGraph()
     params = []
-    processes = []
+
     v_lock = Lock()
     v_reader_end, v_writer_end = Pipe()
     v_writer_process = Process(target=v_writer_func, args=({}, v_writer_end))
     v_writer_process.start()
 
-    for cell in ann_run.cells:
+    collected_classes = []
+
+    for cell in entity_ann.cells:
         for entity in cell.entities:
             for cclass in entity.classes:
-                params.append((cclass.cclass, endpoint, v_lock, v_reader_end))
+                if cclass.cclass not in collected_classes:
+                    if onlyprefix is None or (onlyprefix is not None and cclass.cclass.startswith(onlyprefix)):
+                        params.append((cclass.cclass, endpoint, v_lock, v_reader_end, 0, onlyprefix))
+                        collected_classes.append(cclass.cclass)
     start = time.time()
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=build_graph_while_traversing, params_list=params)
-    print "will run the pool"
+    logger.debug("will run the pool")
     pool.run()
-    print "the pool is done"
+    logger.debug("the pool is done")
     end = time.time()
     timed_events.append(("build graph while traversing", end-start))
     v_reader_end.send(1)
     visited = v_reader_end.recv()
     v_writer_process.terminate()
-
-    print "\n\n\n\n"
-    print "build graph from nodes\n\n"
+    logger.debug("build graph from nodes\n\n")
     ann_run.status = 'building the class graph'
     ann_run.save()
     start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
     end = time.time()
     timed_events.append(("build graph2", end-start))
-    print "remove single nodes\n\n"
+    logger.debug("remove single nodes\n\n")
     start = time.time()
-    remove_nodes(ann_run=ann_run, classes=graph.remove_lonely_nodes())
+    remove_nodes(entity_ann=entity_ann, classes=graph.remove_lonely_nodes())
     end = time.time()
     timed_events.append(("remove lonely nodes", end-start))
     start = time.time()
-    remove_empty(ann_run=ann_run)
+    remove_empty(entity_ann=entity_ann)
     end = time.time()
     timed_events.append(("remove empty entities", end - start))
-    print "coverage\n\n"
+    logger.debug("coverage\n\n")
     ann_run.status = 'Computing the coverage scores'
     ann_run.save()
     start = time.time()
-    compute_coverage_score_for_graph(ann_run=ann_run, graph=graph)
+    compute_coverage_score_for_graph(entity_ann=entity_ann, graph=graph)
     graph.set_converage_score()
     end = time.time()
     timed_events.append(("coverage", end-start))
     ann_run.status = 'Performing count queries'
     ann_run.save()
-    print "count subjects \n\n"
+    logger.debug("count subjects \n\n")
     start = time.time()
     classes_counts = count_classes(classes=graph.cache, endpoint=endpoint)
 
     graph.set_nodes_subjects_counts(d=classes_counts)
     end = time.time()
     timed_events.append(("classes counts", end-start))
-    print "specificity\n\n"
+    logger.debug("specificity\n\n")
     ann_run.status = 'Computing the specificity scores'
     ann_run.save()
 
@@ -424,7 +404,7 @@ def dotype(ann_run, endpoint, onlyprefix):
     timed_events.append(("specificity", end-start))
     start = time.time()
     graph.set_depth_for_graph()
-    graph.set_score_for_graph(coverage_weight=0.1, m=get_m(ann_run))
+    graph.set_score_for_graph(coverage_weight=0.1, m=get_m(entity_ann))
     end = time.time()
     timed_events.append(("latest score", end-start))
     ann_run.status = 'Computing the overall scores'
@@ -437,39 +417,26 @@ def dotype(ann_run, endpoint, onlyprefix):
         print "%f %s" % (n.score, n.title)
     for te in timed_events:
         print "event: %s took: %.2f seconds" % (te[0], te[1])
-    # graph.draw_with_scores()
     graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
     graph_file_name = graph_file_name.replace(' ', '_')
     graph.save(os.path.join(MODELS_DIR, graph_file_name))
-    ann_run.graph_file.name = os.path.join(MODELS_DIR, graph_file_name)
-
-    # f = graph.save(os.path.join(MODELS_DIR, graph_file_name))
-    # ann_run.graph_file = File(f)
-    # s = graph.save_to_string()
-    # f = ContentFile(s)
-
-    # with open(os.path.join(MODELS_DIR, graph_file_name), 'w') as f:
-    # f = open(os.path.join(MODELS_DIR, graph_file_name), 'w')
-    # ff = File(f)
-    # ff.write(s)
-    # ff.close()
-    # ff.open('r')
-    # ann_run.graph_file = ff
+    entity_ann.graph_file.name = os.path.join(MODELS_DIR, graph_file_name)
+    entity_ann.save()
     ann_run.status = 'Annotation is complete'
     ann_run.save()
 
 
-def load_graph(ann_run):
+def load_graph(entity_ann):
     from type_graph import TypeGraph
-    f = open(ann_run.graph_file.path, 'r')
+    f = open(entity_ann.graph_file.path, 'r')
     j = json.loads(f.read())
     g = TypeGraph()
-    g.load(j, get_m(ann_run))
+    g.load(j, get_m(entity_ann))
     return g
 
 
-def score_graph(graph, alpha, ann_run):
-    graph.set_score_for_graph(coverage_weight=alpha, m=get_m(ann_run))
+def score_graph(graph, alpha, entity_ann):
+    graph.set_score_for_graph(coverage_weight=alpha, m=get_m(entity_ann))
     return [n.title for n in graph.get_scores()]
 
 
@@ -492,19 +459,26 @@ if __name__ == '__main__':
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
     parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
-    parser.add_argument('--onlyprefix', action='store_true', help='To limit to classes that starts with this prefix')
+    parser.add_argument('--onlyprefix', action='store', help='To limit to classes that starts with this prefix')
+    parser.add_argument('--entitycol', type=int, action='store', help='The id of the entity column in the csv file')
     args = parser.parse_args()
     if args.csvfiles and len(args.csvfiles) > 0:
-        print 'csvfiles: %s' % args.csvfiles
-        print "adding dataset"
-        annotate_csvs(ann_run_id=args.runid, hierarchy=False, files=args.csvfiles[0], gen_class_eli=False,
-                      endpoint="http://dbpedia.org/sparql")
-        print "data set is added successfully. Done"
-    if args.dotype:
+        logger.debug('csvfiles: %s' % args.csvfiles)
+        logger.debug("adding dataset")
+        logger.debug("csv_file_dir: ")
+        logger.debug(args.csvfiles[0])
         prefix = None
         if args.onlyprefix:
             prefix = args.onlyprefix
-        ann_run = OnlineAnnotationRun.objects.get(id=args.runid)
-        print 'typing the csv file'
+        annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0],
+                     endpoint="http://dbpedia.org/sparql", entity_col_id=args.entitycol, onlyprefix=prefix)
+        logger.info("data set is added successfully.")
+    if args.dotype:
+        prefix = None
+        # The hierarchy is not restricted to the passed prefix
+        # if args.onlyprefix:
+        #     prefix = args.onlyprefix
+        ann_run = AnnRun.objects.get(id=args.runid)
+        logger.debug('typing the csv file')
         dotype(ann_run=ann_run, endpoint=endpoint, onlyprefix=prefix)
-        print 'done typing the csv file'
+        logger.info('done typing the csv file')
