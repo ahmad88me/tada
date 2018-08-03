@@ -28,7 +28,7 @@ application = get_wsgi_application()
 
 from tadaa.models import AnnRun
 import settings
-
+from settings import LOG_ABS_DIR
 
 #################################################################################
 #                           JSON to CSV                                         #
@@ -109,11 +109,11 @@ def annotate_models():
         ann_run.status="started"
         ann_run.save()
         csv_file_dir = '"'+os.path.join(proj_path, settings.UPLOAD_DIR, ann_run.name)+'"'
-        comm = "%s %s %s --onlyprefix %s --dotype --logid --csvfiles %s" % (venv_python,
+        comm = "%s %s %s --onlyprefix %s --dotype --logdir --csvfiles %s" % (venv_python,
                                            (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                                            ann_run.id,
                                            "http://dbpedia.org/ontology",
-                                            str(ann_run.id),
+                                            os.path.join(LOG_ABS_DIR, str(ann_run.id)+'.log') ,
                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
         subprocess.Popen(comm, shell=True)

@@ -30,7 +30,7 @@ application = get_wsgi_application()
 #       For the annotation script     #
 #######################################
 
-from settings import MODELS_DIR
+from settings import MODELS_DIR, LOG_ABS_DIR
 from django.core.files import File
 from django.core.files.base import ContentFile
 from tadaa.models import AnnRun, EntityAnn, Cell, CClass, Entity
@@ -51,7 +51,7 @@ from logger import set_config
 
 
 
-logger = set_config(logging.getLogger(__name__))
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
 
 
 def detect_entity_col(csv_file_dir):
@@ -462,10 +462,10 @@ if __name__ == '__main__':
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     parser.add_argument('--onlyprefix', action='store', help='To limit to classes that starts with this prefix')
     parser.add_argument('--entitycol', type=int, action='store', help='The id of the entity column in the csv file')
-    parser.add_argument('--logid', action='store', help='suffix to the log file')
+    parser.add_argument('--logdir', action='store', help='suffix to the log file')
     args = parser.parse_args()
-    if args.logid:
-        logger = set_config(logging.getLogger(__name__), extra=args.logid.replace(" ", ""))
+    if args.logdir:
+        logger = set_config(logging.getLogger(__name__), logdir=args.logdir)
     if args.csvfiles and len(args.csvfiles) > 0:
         logger.debug('csvfiles: %s' % args.csvfiles)
         logger.debug("adding dataset")

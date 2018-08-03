@@ -1,10 +1,11 @@
 import logging
 
 
-def set_config(logger, extra=""):
-    if extra != "":
-        extra = "-" + extra
-    handler = logging.FileHandler('tada%s.log' % extra)
+def set_config(logger, logdir=""):
+    if logdir != "":
+        handler = logging.FileHandler(logdir)
+    else:
+        handler = logging.FileHandler('tada.log')
     formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)

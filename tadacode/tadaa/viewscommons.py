@@ -5,12 +5,12 @@ import random
 import string
 import subprocess
 import logging
-
+from settings import LOG_ABS_DIR
 
 from logger import set_config
 
 
-logger = set_config(logging.getLogger(__name__))
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
 
 
 def store_uploaded_csv_files(csv_files):
