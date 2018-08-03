@@ -10,8 +10,8 @@ import os
 import sys
 import math
 
-#MAX_NUM_PROCESSES = 10
-MAX_NUM_PROCESSES = 1
+MAX_NUM_PROCESSES = 10
+#MAX_NUM_PROCESSES = 1
 
 proj_path = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 # This is so Django knows where to find stuff.
@@ -454,6 +454,7 @@ def random_string(length=4):
 
 
 if __name__ == '__main__':
+    global logger
     endpoint = "http://dbpedia.org/sparql"
     parser = argparse.ArgumentParser(description='Annotation module to annotate a given annotation run')
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
@@ -461,7 +462,10 @@ if __name__ == '__main__':
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
     parser.add_argument('--onlyprefix', action='store', help='To limit to classes that starts with this prefix')
     parser.add_argument('--entitycol', type=int, action='store', help='The id of the entity column in the csv file')
+    parser.add_argument('--logid', action='store', help='suffix to the log file')
     args = parser.parse_args()
+    if args.logid:
+        logger = set_config(logging.getLogger(__name__), extra=args.logid.replace(" ", ""))
     if args.csvfiles and len(args.csvfiles) > 0:
         logger.debug('csvfiles: %s' % args.csvfiles)
         logger.debug("adding dataset")

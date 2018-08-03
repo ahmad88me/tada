@@ -20,9 +20,9 @@ def entity_ann_recompute(request):
     eanns = EntityAnn.objects.all()
     if 'ann' not in request.GET or 'alpha' not in request.GET:
         if len(eanns) > 0:
-            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': 0.3, 'selected': eanns[0].id})
+            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': 0.1, 'selected': eanns[0].id})
         else:
-            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': 0.3, 'selected': 0})
+            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': 0.1, 'selected': 0})
     else:
         from annotator import load_graph, score_graph, get_nodes, get_edges
         alpha = float(request.GET['alpha'])
@@ -32,12 +32,12 @@ def entity_ann_recompute(request):
         #graph.draw_with_scores()
         return render(request, 'entity_ann_recompute.html',
                       {'anns': eanns, 'alpha': alpha, 'network': 'network',
-                       'highlights': results[:5], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
+                       'highlights': results[:3], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
                        'results': results, 'selected': entity_ann.id})
 
 
-def home(request):
-    return render(request, 'home.html')
+def about(request):
+    return render(request, 'about.html')
 
 # import os
 # import string

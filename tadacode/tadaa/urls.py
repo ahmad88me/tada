@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'entity_ann_results', views.entity_ann_results),
     url(r'entity_ann_recompute', views.entity_ann_recompute),
     url(r'^api/', include(urlsapi)),
-    url(r'', views.home),
+    url(r'', views.about),
     #url('', 'tadaa.views.home'),
 ]
 

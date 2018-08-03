@@ -19,22 +19,27 @@
     <title>TADA</title>
 
     <style>
+
+
+
         ul.nav {
             list-style-type: none;
             margin: 0;
             padding: 0;
             overflow: hidden;
             background-color: #333;
-            height: 50px
-
+            height: 50px;
         }
+
 
         li.nav-item {
             float: left;
         }
 
         li.nav-item a {
-            display: block;
+            display: inline-block;
+            #display: block;
+            #color: #333;
             color: white;
             text-align: center;
             padding: 14px 16px;
@@ -51,14 +56,24 @@
             background-color: #4CAF50;
         }
     </style>
+
+
 </head>
 <body>
-<ul class="nav">
+
+
+
+<ul class="nav ">
   <!--<li class="nav-item"><a class="active" href="#home">Home</a></li>-->
   <li class="nav-item"><a href="e_ann_list">E-Annotations</a></li>
-  <li class="nav-item"><a href="#contact">Contact</a></li>
-  <li class="nav-item"><a href="#about">About</a></li>
+  <li class="nav-item"><a href="about">About</a></li>
 </ul>
+
+
+
+
+
+
 {%block content%}
 {%endblock%}
 </body>

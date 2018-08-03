@@ -21,16 +21,10 @@
 
 
 
-
-
-
 <script>
     $('#mynetwork').css('width', $('#basearea').css('width'));
 
 </script>
-
-
-
 
 
 
@@ -41,9 +35,9 @@
         {%for n in nodes%}
 
             {%if n.title in highlights%}
-            {id: "{{n.title}}", label: "{{n.label}}", color: '#f44242', shape: 'box' },
+            {id: "{{n.title}}", label: "{{n.label}}", color: '#f4ee41', shape: 'box' },
             {%else %}
-            {id: "{{n.title}}", label: "{{n.label}}", color: '#7BE141', shape: 'box' },
+            {id: "{{n.title}}", label: "{{n.label}}", color: '#41f44c', shape: 'box' },
             {%endif%}
 
 
@@ -122,9 +116,22 @@
 
 
 <table>
+<thead>
+    <tr>
+      <th>Top K</th>
+      <th>Concept</th>
+    </tr>
+  </thead>
+
 {%for r in results%}
     <tr>
-        <td><a href="{{r}}">{{r}}</a></td>
+        <td>{{forloop.counter}}</td>
+        <td><a href="{{r}}">{{r}}</a>
+
+            <!--{%if r in highlights%}-->
+                <!--<span>&#x2714</span>-->
+            <!--{%endif%}-->
+        </td>
     </tr>
     {%endfor%}
 </table>

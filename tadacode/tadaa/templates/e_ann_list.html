@@ -6,9 +6,9 @@
     <tr>
         <th>ID</th>
         <th>Name</th>
-        <th>See annotation results</th>
+        <th>Status</th>
         <th>See raw results</th>
-        <th>Recompute the results</th>
+        <th>Annotation results</th>
     </tr>
     </thead>
     <tbody>
@@ -16,9 +16,9 @@
     <tr>
         <td>{{eann.id}}</td>
         <td>{{eann.ann_run.name}} (id={{eann.ann_run.id}})</td>
-        <td><a href="entity_ann_results?id={{eann.id}}">Results</a></td>
-        <td><a href="entity_ann_raw_results?id={{eann.id}}">Raw</a></td>
-        <td><a href="entity_ann_recompute?id={{eann.id}}">Recompute</a></td>
+        <td>{{eann.ann_run.status}}</td>
+        <td><a href="entity_ann_raw_results?id={{eann.id}}">raw</a></td>
+        <td><a href="entity_ann_recompute?id={{eann.id}}">results</a></td>
 
     </tr>
     {%endfor%}
