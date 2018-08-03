@@ -33,6 +33,9 @@ from settings import LOG_ABS_DIR
 #################################################################################
 #                           JSON to CSV                                         #
 #################################################################################
+import logging
+from logger import set_config
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
 
 
 def web_commons_json_table_to_csv(in_file_dir, out_file_dir):
@@ -104,7 +107,7 @@ def build_empty_models_from_status():
 
 
 def annotate_models():
-    anns = AnnRun.object.filter(status='Created')
+    anns = AnnRun.objects.filter(status='Created')
     for ann_run in anns:
         ann_run.status="started"
         ann_run.save()
