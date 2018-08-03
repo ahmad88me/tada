@@ -1,3 +1,4 @@
+from collections import Counter
 from django.shortcuts import render, redirect
 from models import EntityAnn, AnnRun
 
@@ -34,6 +35,12 @@ def entity_ann_recompute(request):
                       {'anns': eanns, 'alpha': alpha, 'network': 'network',
                        'highlights': results[:3], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
                        'results': results, 'selected': entity_ann.id})
+
+
+def live_monitor(request):
+    statuses = [s.status for s in AnnRun.objects.all()]
+    c = Counter(statuses)
+    return render(request, 'live_monitor.html', {'counters': dict(c)})
 
 
 def about(request):
