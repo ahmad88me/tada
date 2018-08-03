@@ -112,11 +112,11 @@ def annotate_models():
         ann_run.status="started"
         ann_run.save()
         csv_file_dir = '"'+os.path.join(proj_path, settings.UPLOAD_DIR, ann_run.name)+'"'
-        comm = "%s %s %s --onlyprefix %s --dotype --logdir --csvfiles %s" % (venv_python,
+        comm = "%s %s %s --onlyprefix %s --dotype --logdir %s --csvfiles %s" % (venv_python,
                                            (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                                           ann_run.id,
+                                           str(ann_run.id),
                                            "http://dbpedia.org/ontology",
-                                            os.path.join(LOG_ABS_DIR, str(ann_run.id)+'.log') ,
+                                            os.path.join(LOG_ABS_DIR, str(ann_run.id)+'.log'),
                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
         subprocess.Popen(comm, shell=True)
