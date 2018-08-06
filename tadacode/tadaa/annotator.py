@@ -2,7 +2,6 @@
 #       For Django script     #
 ###############################
 
-import pandas as pd
 import numpy as np
 import random
 import string
@@ -72,6 +71,7 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     :param entity_col_id: the id the column id
     :return:
     """
+    import pandas as pd
     if entity_col_id is None:
         entity_column_id = detect_entity_col(csv_file_dir)
     else:
