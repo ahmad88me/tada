@@ -36,4 +36,4 @@ urlpatterns = [
 
 from django.conf.urls.static import static
 import settings
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + urlpatterns
