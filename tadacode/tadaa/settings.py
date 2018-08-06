@@ -88,7 +88,7 @@ if os.environ['db'] == 'mysql':
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             # We commented this so the connection will be open once needed again.
-            #'CONN_MAX_AGE': 3600,
+            'CONN_MAX_AGE': 3600,
             'OPTIONS': {
                 'read_default_file': os.path.join(BASE_DIR, 'mysql.cnf'),
                 'charset': 'utf8mb4'
