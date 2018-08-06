@@ -25,6 +25,8 @@ from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()
 
+import django
+
 #######################################
 #       For the annotation script     #
 #######################################
@@ -111,6 +113,7 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
 def annotate_single_cell(entity_ann_id, cell_value, endpoint, hierarchy, onlyprefix):
     from easysparql import get_entities, get_classes
     print "annotate_single_cell> "
+    django.db.close_old_connections()  # for db mutli threading
     entity_ann = EntityAnn.objects.get(id=entity_ann_id)
     print "entity_ann parent name: "
     print entity_ann.ann_run.name
