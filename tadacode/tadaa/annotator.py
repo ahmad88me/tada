@@ -49,8 +49,6 @@ from type_graph import TypeGraph
 from logger import set_config
 
 
-
-
 logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
 
 
@@ -119,7 +117,7 @@ def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix
         logger.debug("entity: "+str(entity))
         e = Entity(cell=cell, entity=entity)
         e.save()
-        print "will get classes of: " + entity
+        logger.debug("will get classes of: " + entity)
         classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
         for c in classes:
             if onlyprefix is None or (c.startswith(onlyprefix)):
@@ -419,8 +417,10 @@ def dotype(ann_run, endpoint, onlyprefix):
         print "event: %s took: %.2f seconds" % (te[0], te[1])
     graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
     graph_file_name = graph_file_name.replace(' ', '_')
-    graph.save(os.path.join(MODELS_DIR, graph_file_name))
-    entity_ann.graph_file.name = os.path.join(MODELS_DIR, graph_file_name)
+    graph_file_dir = os.path.join(MODELS_DIR, graph_file_name)
+    logger.debug(graph_file_dir)
+    graph.save(graph_file_dir)
+    #entity_ann.graph_file.name = graph_file_dir
     entity_ann.save()
     ann_run.status = 'Annotation is complete'
     ann_run.save()
