@@ -26,6 +26,7 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 import django
+from django.db import transaction
 
 #######################################
 #       For the annotation script     #
@@ -113,23 +114,27 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
 def annotate_single_cell(entity_ann_id, cell_value, endpoint, hierarchy, onlyprefix):
     from easysparql import get_entities, get_classes
     print "annotate_single_cell> "
-    django.db.close_old_connections()  # for db mutli threading
-    entity_ann = EntityAnn.objects.get(id=entity_ann_id)
+    # django.db.close_old_connections()  # for db mutli threading
+    with transaction.atomic():
+        entity_ann = EntityAnn.objects.get(id=entity_ann_id)
     print "entity_ann parent name: "
     print entity_ann.ann_run.name
-    cell = Cell(text_value=cell_value, entity_ann=entity_ann)
-    cell.save()
+    with transaction.atomic():
+        cell = Cell(text_value=cell_value, entity_ann=entity_ann)
+        cell.save()
     logger.debug("cell: "+str(cell_value))
     for entity in get_entities(subject_name=cell.text_value, endpoint=endpoint):
         logger.debug("entity: "+str(entity))
-        e = Entity(cell=cell, entity=entity)
-        e.save()
+        with transaction.atomic():
+            e = Entity(cell=cell, entity=entity)
+            e.save()
         logger.debug("will get classes of: " + entity)
         classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
         for c in classes:
             if onlyprefix is None or (c.startswith(onlyprefix)):
-                ccclass = CClass(entity=e, cclass=c)
-                ccclass.save()
+                with transaction.atomic():
+                    ccclass = CClass(entity=e, cclass=c)
+                    ccclass.save()
 
 
 def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth, onlyprefix):
