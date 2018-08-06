@@ -421,6 +421,7 @@ def dotype(ann_run, endpoint, onlyprefix):
     logger.debug("graph_file_dir: "+graph_file_dir)
     graph.save(graph_file_dir)
     entity_ann.graph_file.name = graph_file_name
+    entity_ann.graph_file.path = graph_file_dir
     entity_ann.save()
     ann_run.status = 'Annotation is complete'
     ann_run.save()
