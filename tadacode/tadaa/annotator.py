@@ -418,7 +418,7 @@ def dotype(ann_run, endpoint, onlyprefix):
     graph_file_name = "%d %s.json" % (ann_run.id, ann_run.name)
     graph_file_name = graph_file_name.replace(' ', '_')
     graph_file_dir = os.path.join(MODELS_DIR, graph_file_name)
-    logger.debug(graph_file_dir)
+    logger.debug("graph_file_dir: "+graph_file_dir)
     graph.save(graph_file_dir)
     #entity_ann.graph_file.name = graph_file_dir
     entity_ann.save()
