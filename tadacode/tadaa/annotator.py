@@ -9,8 +9,8 @@ import os
 import sys
 import math
 
-#MAX_NUM_PROCESSES = 10
-MAX_NUM_PROCESSES = 1
+MAX_NUM_PROCESSES = 10
+#MAX_NUM_PROCESSES = 1
 
 proj_path = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 # This is so Django knows where to find stuff.
