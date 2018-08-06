@@ -97,11 +97,12 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     start = time.time()
     logger.info('annotating: ' + csv_file_dir)
     mat = pd.read_csv(csv_file_dir).as_matrix()
+    lock = Lock()
     params_list = []
     for r in mat:
-        # params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix))
+        params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix, lock))
         # So the connection is not copied to each thread, instead each will have its own
-        params_list.append((entity_ann.id, r[entity_column_id], endpoint, hierarchy, onlyprefix))
+        #params_list.append((entity_ann.id, r[entity_column_id], endpoint, hierarchy, onlyprefix))
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=annotate_single_cell, params_list=params_list)
     pool.run()
     end = time.time()
@@ -110,31 +111,33 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     ann_run.save()
 
 
-#def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix):
-def annotate_single_cell(entity_ann_id, cell_value, endpoint, hierarchy, onlyprefix):
+def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix, lock):
+#def annotate_single_cell(entity_ann_id, cell_value, endpoint, hierarchy, onlyprefix):
     from easysparql import get_entities, get_classes
     print "annotate_single_cell> "
     # django.db.close_old_connections()  # for db mutli threading
-    with transaction.atomic():
-        entity_ann = EntityAnn.objects.get(id=entity_ann_id)
+    # entity_ann = EntityAnn.objects.get(id=entity_ann_id)
     print "entity_ann parent name: "
     print entity_ann.ann_run.name
-    with transaction.atomic():
-        cell = Cell(text_value=cell_value, entity_ann=entity_ann)
-        cell.save()
+    lock.acquire()
+    cell = Cell(text_value=cell_value, entity_ann=entity_ann)
+    cell.save()
+    lock.release()
     logger.debug("cell: "+str(cell_value))
     for entity in get_entities(subject_name=cell.text_value, endpoint=endpoint):
         logger.debug("entity: "+str(entity))
-        with transaction.atomic():
-            e = Entity(cell=cell, entity=entity)
-            e.save()
+        lock.acquire()
+        e = Entity(cell=cell, entity=entity)
+        e.save()
+        lock.release()
         logger.debug("will get classes of: " + entity)
         classes = get_classes(entity=entity, endpoint=endpoint, hierarchy=hierarchy)
         for c in classes:
             if onlyprefix is None or (c.startswith(onlyprefix)):
-                with transaction.atomic():
-                    ccclass = CClass(entity=e, cclass=c)
-                    ccclass.save()
+                lock.acquire()
+                ccclass = CClass(entity=e, cclass=c)
+                ccclass.save()
+                lock.release()
 
 
 def build_graph_while_traversing(class_name, endpoint, v_lock, v_pipe, depth, onlyprefix):
