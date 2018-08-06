@@ -36,7 +36,7 @@ TEMPLATES = [
 
 UPLOAD_DIR = os.path.join(BASE_DIR, 'local_uploads')
 MODELS_DIR = os.path.join(BASE_DIR, 'local_models')
-LOG_ABS_DIR = os.path.join(BASE_DIR, 'local_logs')
+LOG_DIR = os.path.join(BASE_DIR, 'local_logs')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 

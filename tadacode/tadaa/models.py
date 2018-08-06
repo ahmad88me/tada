@@ -17,7 +17,8 @@ class AnnRun(models.Model):
 class EntityAnn(models.Model):
     ann_run = models.ForeignKey(AnnRun, on_delete=models.CASCADE)
     results = models.CharField(max_length=500, default='')
-    graph_file = models.FileField(upload_to=MODELS_DIR, default=os.path.join(MODELS_DIR, 'default.graph'))
+    #graph_file = models.FileField(upload_to=MODELS_DIR, default=os.path.join(MODELS_DIR, 'default.graph'))
+    graph_dir = models.CharField(max_length=250, default=os.path.join(MODELS_DIR, 'default.graph'))
     col_id = models.PositiveIntegerField()
 
     @property

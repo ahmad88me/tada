@@ -28,14 +28,14 @@ application = get_wsgi_application()
 
 from tadaa.models import AnnRun
 import settings
-from settings import LOG_ABS_DIR
+from settings import LOG_DIR
 
 #################################################################################
 #                           JSON to CSV                                         #
 #################################################################################
 import logging
 from logger import set_config
-logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_DIR, 'tada.log'))
 
 
 def web_commons_json_table_to_csv(in_file_dir, out_file_dir):
@@ -116,7 +116,7 @@ def annotate_models():
                                            (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                                            str(ann_run.id),
                                            "http://dbpedia.org/ontology",
-                                            os.path.join(LOG_ABS_DIR, str(ann_run.id)+'.log'),
+                                            os.path.join(LOG_DIR, str(ann_run.id)+'.log'),
                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
         subprocess.Popen(comm, shell=True)

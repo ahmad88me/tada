@@ -29,7 +29,7 @@ application = get_wsgi_application()
 #       For the annotation script     #
 #######################################
 
-from settings import MODELS_DIR, LOG_ABS_DIR
+from settings import MODELS_DIR, LOG_DIR
 from django.core.files import File
 from django.core.files.base import ContentFile
 from tadaa.models import AnnRun, EntityAnn, Cell, CClass, Entity
@@ -48,7 +48,7 @@ from type_graph import TypeGraph
 from logger import set_config
 
 
-logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_ABS_DIR, 'tada.log'))
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_DIR, 'tada.log'))
 
 
 def detect_entity_col(csv_file_dir):
@@ -420,8 +420,8 @@ def dotype(ann_run, endpoint, onlyprefix):
     graph_file_dir = os.path.join(MODELS_DIR, graph_file_name)
     logger.debug("graph_file_dir: "+graph_file_dir)
     graph.save(graph_file_dir)
-    entity_ann.graph_file.name = graph_file_name
-    entity_ann.graph_file.path = graph_file_dir
+    # entity_ann.graph_file.name = graph_file_name
+    entity_ann.graph_dir = graph_file_dir
     entity_ann.save()
     ann_run.status = 'Annotation is complete'
     ann_run.save()
@@ -429,7 +429,7 @@ def dotype(ann_run, endpoint, onlyprefix):
 
 def load_graph(entity_ann):
     from type_graph import TypeGraph
-    f = open(entity_ann.graph_file.path, 'r')
+    f = open(entity_ann.graph_dir, 'r')
     j = json.loads(f.read())
     g = TypeGraph()
     g.load(j, get_m(entity_ann))
