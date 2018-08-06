@@ -96,7 +96,9 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     mat = pd.read_csv(csv_file_dir).as_matrix()
     params_list = []
     for r in mat:
-        params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix))
+        # params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix))
+        # So the connection is not copied to each thread, instead each will have its own
+        params_list.append((entity_ann.id, r[entity_column_id], endpoint, hierarchy, onlyprefix))
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=annotate_single_cell, params_list=params_list)
     pool.run()
     end = time.time()
@@ -105,9 +107,11 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     ann_run.save()
 
 
-def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix):
+#def annotate_single_cell(entity_ann, cell_value, endpoint, hierarchy, onlyprefix):
+def annotate_single_cell(entity_ann_id, cell_value, endpoint, hierarchy, onlyprefix):
     from easysparql import get_entities, get_classes
     print "annotate_single_cell> "
+    entity_ann = EntityAnn.objects.get(entity_ann_id)
     print "entity_ann parent name: "
     print entity_ann.ann_run.name
     cell = Cell(text_value=cell_value, entity_ann=entity_ann)
