@@ -120,7 +120,7 @@ def annotate_models():
                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
         subprocess.Popen(comm, shell=True)
-        return ann_run
+        #return ann_run
 
 
 def workflow():
