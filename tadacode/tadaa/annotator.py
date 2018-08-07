@@ -8,6 +8,7 @@ import string
 import os
 import sys
 import math
+import traceback
 
 MAX_NUM_PROCESSES = 10
 #MAX_NUM_PROCESSES = 1
@@ -490,9 +491,16 @@ if __name__ == '__main__':
         prefix = None
         if args.onlyprefix:
             prefix = args.onlyprefix
-        annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0],
-                     endpoint="http://dbpedia.org/sparql", entity_col_id=args.entitycol, onlyprefix=prefix)
-        logger.info("data set is added successfully.")
+        try:
+            annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0],
+                         endpoint="http://dbpedia.org/sparql", entity_col_id=args.entitycol, onlyprefix=prefix)
+            logger.info("data set is added successfully.")
+        except Exception as e:
+            logger.error("exception: ")
+            logger.error(str(e))
+            err_msg = traceback.extract_stack
+            logger.error(err_msg)
+
     if args.dotype:
         prefix = None
         # The hierarchy is not restricted to the passed prefix
@@ -500,5 +508,11 @@ if __name__ == '__main__':
         #     prefix = args.onlyprefix
         ann_run = AnnRun.objects.get(id=args.runid)
         logger.debug('typing the csv file')
-        dotype(ann_run=ann_run, endpoint=endpoint, onlyprefix=prefix)
-        logger.info('done typing the csv file')
+        try:
+            dotype(ann_run=ann_run, endpoint=endpoint, onlyprefix=prefix)
+            logger.info('done typing the csv file')
+        except Exception as e:
+            logger.error("exception: ")
+            logger.error(str(e))
+            err_msg = traceback.extract_stack
+            logger.error(err_msg)
