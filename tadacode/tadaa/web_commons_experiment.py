@@ -119,7 +119,7 @@ def annotate_models():
                                             os.path.join(LOG_DIR, str(ann_run.id)+'.log'),
                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
-        subprocess.Popen(comm, shell=True)
+        subprocess.call(comm, shell=True)
         #return ann_run
 
 
