@@ -19,21 +19,11 @@ def entity_ann_raw_results(request):
 
 def entity_ann_recompute(request):
     eanns = EntityAnn.objects.all()
-    if 'alpha' not in request.GET:
-        alpha = 0.1
-    else:
-        try:
-            alpha = float(request.GET['float'])
-        except:
-            alpha = 0.1
-    if 'id' not in request.GET:
-        if len(eanns) > 0:
-            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': alpha, 'selected': eanns[0].id})
-        else:
-            return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': alpha, 'selected': 0})
-    else:
+    alpha = 0.1
+
+    if 'alpha' in request.GET and 'ann' in request.GET:
         from annotator import load_graph, score_graph, get_nodes, get_edges
-        entity_ann = EntityAnn.objects.get(id=request.GET['id'])
+        entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
         graph = load_graph(entity_ann=entity_ann)
         results = score_graph(entity_ann=entity_ann, alpha=alpha, graph=graph)
         #graph.draw_with_scores()
@@ -41,6 +31,18 @@ def entity_ann_recompute(request):
                       {'anns': eanns, 'alpha': alpha, 'network': 'network',
                        'highlights': results[:3], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
                        'results': results, 'selected': entity_ann.id})
+    else:
+        if len(eanns) == 0:
+            selected = 0
+        else:
+            selected = eanns[0].id
+            if 'ann' in request.GET:
+                try:
+                    entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
+                    selected = entity_ann.id
+                except:
+                    pass
+        return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': alpha, 'selected': selected})
 
 
 def live_monitor(request):
