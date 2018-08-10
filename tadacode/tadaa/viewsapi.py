@@ -61,3 +61,13 @@ def get_col_type(request):
         graph = load_graph(entity_ann=entity_ann)
         results = score_graph(entity_ann=entity_ann, alpha=alpha, graph=graph)
         return JsonResponse({'results': results[:k], 'alpha': alpha, 'k': k})
+
+
+def webcommons_get_col_type(request):
+    if 'file_name' in request.GET:
+        ann_run = AnnRun.objects.get(name=request.GET['file_name'])
+        eann = ann_run.objects.entityann_set.all()[0]
+        request.GET['id'] = str(eann.id)
+        return get_col_type(request)
+    else:
+        return JsonResponse({'error': 'file_name is not passed'}, status=400)
