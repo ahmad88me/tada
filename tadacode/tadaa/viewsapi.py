@@ -66,9 +66,9 @@ def get_col_type(request):
 def webcommons_get_col_type(request):
     if 'file_name' in request.GET:
         ann_run = AnnRun.objects.get(name__contains=request.GET['file_name'])
-        eann = ann_run.entityann_set.all()[0]
+        #eann = ann_run.entityann_set.all()[0]
         request.GET = request.GET.copy()
-        request.GET['id'] = str(eann.id)
+        request.GET['id'] = str(ann_run.id)
         return get_col_type(request)
     else:
         return JsonResponse({'error': 'file_name is not passed'}, status=400)
