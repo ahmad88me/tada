@@ -19,7 +19,7 @@ def entity_ann_raw_results(request):
 
 def entity_ann_recompute(request):
     eanns = EntityAnn.objects.all()
-    if 'ann' not in request.GET or 'alpha' not in request.GET:
+    if 'id' not in request.GET or 'alpha' not in request.GET:
         if len(eanns) > 0:
             return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': 0.1, 'selected': eanns[0].id})
         else:
@@ -27,7 +27,7 @@ def entity_ann_recompute(request):
     else:
         from annotator import load_graph, score_graph, get_nodes, get_edges
         alpha = float(request.GET['alpha'])
-        entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
+        entity_ann = EntityAnn.objects.get(id=request.GET['id'])
         graph = load_graph(entity_ann=entity_ann)
         results = score_graph(entity_ann=entity_ann, alpha=alpha, graph=graph)
         #graph.draw_with_scores()
