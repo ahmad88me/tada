@@ -23,10 +23,13 @@ def entity_ann_recompute(request):
 
     if 'alpha' in request.GET and 'ann' in request.GET:
         from annotator import load_graph, score_graph, get_nodes, get_edges
+        try:
+            alpha = float(request.GET['alpha'])
+        except:
+            pass
         entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
         graph = load_graph(entity_ann=entity_ann)
         results = score_graph(entity_ann=entity_ann, alpha=alpha, graph=graph)
-        #graph.draw_with_scores()
         return render(request, 'entity_ann_recompute.html',
                       {'anns': eanns, 'alpha': alpha, 'network': 'network',
                        'highlights': results[:3], 'nodes': get_nodes(graph), 'edges': get_edges(graph),
