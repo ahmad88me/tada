@@ -8,7 +8,7 @@ ENDPOINT = "http://tadaa.linkeddata.es/api/webcommons_get_col_type"
 def check_single_file(file_name, concept, fast=True):
     alphas = [0.1, 0.05, 0.01, 0.005, 0.001]
     url = "%s?k=5&file_name=%s&alpha=" % (ENDPOINT, file_name)
-    k_list = [5,3,1]
+    k_list = [10, 5, 3, 1]
     k_a = {}
     if not fast:
         alphas = []
@@ -45,6 +45,8 @@ def check_single_file(file_name, concept, fast=True):
             if k not in k_a:
                 k_a[k] = "alpha outside the scope"
                 print "%30s, %20s, %s, %s" % (file_name, concept, str(k), "alpha outside the scope")
+            else:
+                print "%30s, %20s, %s, %s" % (file_name, concept, str(k), k_a[k])
     else:
         check_single_file(file_name, concept, fast=False)
 
