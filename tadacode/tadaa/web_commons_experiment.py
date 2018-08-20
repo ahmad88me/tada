@@ -33,9 +33,10 @@ from settings import LOG_DIR
 #################################################################################
 #                           JSON to CSV                                         #
 #################################################################################
+import sys
 import logging
 from logger import set_config
-logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_DIR, 'tada.log'))
+logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_DIR, 'tada_v1.log'))
 
 
 def web_commons_json_table_to_csv(in_file_dir, out_file_dir):
@@ -92,7 +93,7 @@ def build_status_file():
 #web_commons_to_csv()
 
 ######################################################################################
-#                          Test the web commons
+#                          Test the web commons v2
 ######################################################################################
 
 
@@ -128,16 +129,45 @@ def workflow():
     annotate_models()
 
 
-workflow()
-# to create empty models (done) step 1
-#build_empty_models_from_status()
-# to annotate models (in progress) step 2
-# build_models()
-# testing
-#print sys.argv
-#build_model_from_id(sys.argv[1])
-#build_model_from_id(712)
-# annotate_by_id(596)
-#annotate_by_id(sys.argv[1])
-# step 4
-#annotate_all()
+#workflow()
+
+######################################################################################
+#                          Test the web commons v1
+######################################################################################
+
+
+def build_empty_models_v1(file_dir):
+    import pandas as pd
+    df = pd.read_csv(file_dir, header=None)
+    for index, row in df.iterrows():
+        file_name = 'v1_'+row[0]
+        if len(AnnRun.objects.filter(name=file_name)) == 0:
+            annotation_run = AnnRun(name=file_name, status='Created')
+            annotation_run.save()
+
+
+def annotate_models_v1(data_folder):
+    anns = AnnRun.objects.filter(status='Created')
+    for ann_run in anns:
+        ann_run.status="started"
+        ann_run.save()
+        csv_file_dir = '"'+os.path.join(data_folder, ann_run.name[3:])+'"'
+        comm = "%s %s %s --onlyprefix %s --dotype --logdir %s --csvfiles %s" % (venv_python,
+                                           (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                                           str(ann_run.id),
+                                           "http://dbpedia.org/ontology",
+                                            os.path.join(LOG_DIR, str(ann_run.id)+'.log'),
+                                           csv_file_dir)
+        logger.debug("comm: %s" % comm)
+        subprocess.call(comm, shell=True)
+        #return ann_run
+
+
+def workflow_v1(file_dir, data_folder):
+    build_empty_models_v1(file_dir)
+    annotate_models_v1(data_folder)
+
+
+file_dir = sys.argv[1]
+data_folder = sys.argv[2]
+workflow_v1(file_dir, data_folder)

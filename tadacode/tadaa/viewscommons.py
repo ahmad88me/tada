@@ -1,3 +1,6 @@
+#
+# This file Contains views that are common between the views for the website and the api views
+#
 from models import AnnRun, EntityAnn
 import os
 import settings
