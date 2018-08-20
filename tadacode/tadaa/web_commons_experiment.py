@@ -151,7 +151,7 @@ def annotate_models_v1(data_folder):
     for ann_run in anns:
         ann_run.status="started"
         ann_run.save()
-        csv_file_name = ann_run.name[3:].split('.')[0]+"csv"
+        csv_file_name = ann_run.name[3:].split('.')[0]+".csv"
         csv_file_dir = '"'+os.path.join(data_folder, csv_file_name)+'"'
         comm = "%s %s %s --onlyprefix %s --dotype --logdir %s --csvfiles %s" % (venv_python,
                                            (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
