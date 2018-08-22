@@ -9,4 +9,4 @@ rdflib==4.2.2
 six==1.11.0
 SPARQLWrapper==1.8.0
 PPool==0.1.0
-
+requests==2.19.1

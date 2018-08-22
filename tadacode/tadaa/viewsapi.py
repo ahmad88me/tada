@@ -24,8 +24,8 @@ def type_entity_col(request):
         if error_msg != "":
             return JsonResponse({'error': error_msg}, status=400)
         ann_run = viewscommons.create_and_type_entity_column(name, stored_files)
-        JsonResponse({'id': str(ann_run.id), 'name': ann_run.name, 'msg': 'The entity column is being annotated'})
-        return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
+        return JsonResponse({'id': str(ann_run.id), 'name': ann_run.name, 'msg': 'The entity column is being annotated'})
+        #return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
     else:
         return JsonResponse({'error': 'Only POST is supported'}, status=405)
 
