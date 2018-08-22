@@ -20,7 +20,7 @@ def type_entity_col(request):
         if len(files) > 0:
             error_msg, stored_files = viewscommons.store_uploaded_csv_files(files)
         else:
-            error_msg, stored_files = viewscommons.store_url_csv_files(files)
+            error_msg, stored_files = viewscommons.store_url_csv_files(request.POST['csv_url'])
         if error_msg != "":
             return JsonResponse({'error': error_msg}, status=400)
         ann_run = viewscommons.create_and_type_entity_column(name, stored_files)
