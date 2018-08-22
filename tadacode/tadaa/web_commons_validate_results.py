@@ -53,7 +53,7 @@ def check_single_file(file_name, concept, fast=True):
 
 #check_single_file("1438042986423_95_20150728002306-00125-ip-10-236-191-2_88435628_5", "http://dbpedia.org/ontology/PoliticalParty")
 
-def validate():
+def validate_v2():
     params_list = []
     f = open("local_data/web_commons_classes.csv")
     reader = csv.reader(f)
@@ -68,4 +68,21 @@ def validate():
     pool = Pool(max_num_of_processes=10, func=check_single_file, params_list=params_list)
     pool.run()
 
-validate()
+
+def validate_v1():
+    import sys
+    import pandas as pd
+    params_list = []
+    #f = open("local_data/web_commons_v1/classes_instance.csv")
+    df = pd.read_csv("local_data/web_commons_v1/classes_instance.csv", header=None)
+    for index, row in df.iterrows():
+        file_name = 'v1_'+row[0]
+        concept = row[2]
+        params_list.append((file_name.strip(), concept.strip()))
+        #print(file_name, concept)
+    pool = Pool(max_num_of_processes=10, func=check_single_file, params_list=params_list)
+    pool.run()
+
+
+#validate_v2()
+validate_v1()

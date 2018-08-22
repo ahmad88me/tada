@@ -17,8 +17,10 @@ def type_entity_col(request):
         if len(anns) != 0:  # the name already taken
             return JsonResponse({'error': 'the name is already exists, please choose another one'}, status=400)
         files = request.FILES.getlist('csv_file')
-        error_msg, stored_files = viewscommons.store_uploaded_csv_files(files)
-
+        if len(files) > 0:
+            error_msg, stored_files = viewscommons.store_uploaded_csv_files(files)
+        else:
+            error_msg, stored_files = viewscommons.store_url_csv_files(files)
         if error_msg != "":
             return JsonResponse({'error': error_msg}, status=400)
         ann_run = viewscommons.create_and_type_entity_column(name, stored_files)

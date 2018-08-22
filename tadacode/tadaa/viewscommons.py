@@ -8,12 +8,37 @@ import random
 import string
 import subprocess
 import logging
+import requests
 from settings import LOG_DIR
 
 from logger import set_config
 
 
 logger = set_config(logging.getLogger(__name__), logdir=os.path.join(LOG_DIR, 'tada.log'))
+
+
+def store_url_csv_files(csv_url):
+    """
+    :param csv_url: csv_file_url
+    :return: empty string if success, otherwise will return the error msg and also a list of stored files
+    """
+    if csv_url.strip() == '':
+        error_msg = "URL is empty"
+        logger.error(error_msg)
+        return error_msg, []
+    try:
+        r = requests.get(csv_url, allow_redirects=True)
+        dest_file_name = 'annotation' + ' - ' + random_string(length=4) + '.csv'
+        dest_file_abs_dir = os.path.join(settings.UPLOAD_DIR, dest_file_name)
+        f = open(dest_file_abs_dir, 'wb')
+        f.write(r.content)
+        f.close()
+        return "", ['"'+dest_file_abs_dir+'"']
+    except Exception as e:
+        error_msg = "error saving the file: "+str(e)
+        logger.error(error_msg)
+        return error_msg, []
+
 
 
 def store_uploaded_csv_files(csv_files):
