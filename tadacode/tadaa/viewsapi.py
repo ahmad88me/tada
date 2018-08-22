@@ -13,7 +13,9 @@ def type_entity_col(request):
             name = viewscommons.random_string(4)
         else:
             name = request.POST['name'].strip()
-
+        anns = AnnRun.objects.filter(name=name)
+        if len(anns) != 0:  # the name already taken
+            return JsonResponse({'error': 'the name is already exists, please choose another one'}, status=400)
         files = request.FILES.getlist('csv_file')
         error_msg, stored_files = viewscommons.store_uploaded_csv_files(files)
 
@@ -33,8 +35,8 @@ def get_col_type(request):
     else:
         alpha = 0.1
         k = 1
-        if 'id' not in request.GET:
-            return JsonResponse({'error': 'annotation run id should be passed'}, status=400)
+        if 'id' not in request.GET and 'name' not in request.GET:
+            return JsonResponse({'error': 'annotation run id or name should be passed'}, status=400)
         if 'alpha' in request.GET:
             try:
                 alpha = float(request.GET['alpha'])
@@ -50,7 +52,10 @@ def get_col_type(request):
                 return JsonResponse({'error': 'k should be an integer between 1 and %d'% MAX_K}, status=400)
 
         from annotator import load_graph, score_graph, get_nodes, get_edges
-        anns = AnnRun.objects.filter(id=request.GET['id'])
+        if 'id' in request.GET:
+            anns = AnnRun.objects.filter(id=request.GET['id'])
+        else:
+            anns = AnnRun.objects.filter(name=request.GET['name'])
         if len(anns) != 1:
             return JsonResponse({'error': 'incorrect annotation run id'}, status=400)
         ann_run = anns[0]
