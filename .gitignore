@@ -21,8 +21,8 @@ graph-pre.gv.pdf
 *graph*.gv.pdf
 
 # local data commons
-tadacode/local_data/*.csv
-
+#tadacode/local_data/*.csv
+tadacode/local_data/*
 tadacode/local_uploads/*.csv
 tadacode/local_models/*.csv
 
