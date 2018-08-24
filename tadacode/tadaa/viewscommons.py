@@ -82,17 +82,18 @@ def random_string(length=4):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
-def create_and_type_entity_column(name, files):
+def create_and_type_entity_column(name, files, entity_col_id):
     proj_abs_dir = (os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
     logger.debug(proj_abs_dir)
     venv_python = os.path.join(proj_abs_dir, '.venv', 'bin', 'python')
     logger.debug(venv_python)
     ann_run = AnnRun(name=name, status="started")
     ann_run.save()
-    comm = "%s %s %s --onlyprefix %s --dotype --csvfiles %s" % (venv_python,
+    comm = "%s %s %s --onlyprefix %s --dotype --entitycol %d --csvfiles %s" % (venv_python,
                                        (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
                                        ann_run.id,
                                        "http://dbpedia.org/ontology",
+                                        entity_col_id,
                                        ",".join(files))
     logger.debug("comm: %s" % comm)
     subprocess.Popen(comm, shell=True)

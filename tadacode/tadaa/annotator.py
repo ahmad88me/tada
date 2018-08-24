@@ -101,6 +101,7 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     lock = Lock()
     params_list = []
     for r in mat:
+        logger.info('entity_column_id check: '+str((entity_column_id, r[entity_column_id])))
         params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix, lock))
         # So the connection is not copied to each thread, instead each will have its own
         #params_list.append((entity_ann.id, r[entity_column_id], endpoint, hierarchy, onlyprefix))

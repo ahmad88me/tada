@@ -8,6 +8,15 @@ from models import EntityAnn, AnnRun
 
 @csrf_exempt
 def type_entity_col(request):
+    """
+    post values:
+        name: (Optional) The name of the annotation run
+        csv_file: The content of the CSV file (not the URL)
+        entity_col_id: (Optional) The id of the entity column, 0 if not provided
+    :param request:
+    :return:
+    """
+    entity_col_id = 0
     if request.method == "POST":
         if 'name' not in request.POST or request.POST['name'].strip() == '':
             name = viewscommons.random_string(4)
@@ -23,7 +32,12 @@ def type_entity_col(request):
             error_msg, stored_files = viewscommons.store_url_csv_files(request.POST['csv_url'])
         if error_msg != "":
             return JsonResponse({'error': error_msg}, status=400)
-        ann_run = viewscommons.create_and_type_entity_column(name, stored_files)
+        if 'entity_col_id' in request.POST:
+            try:
+                entity_col_id = int(request.POST['entity_col_id'])
+            except Exception as e:
+                return JsonResponse({'error': 'entity_col_id should be an integer'})
+        ann_run = viewscommons.create_and_type_entity_column(name, stored_files, entity_col_id=entity_col_id)
         return JsonResponse({'id': str(ann_run.id), 'name': ann_run.name, 'msg': 'The entity column is being annotated'})
         #return render(request, 'online_entity_annotation.html', {'msg': 'app is running'})
     else:
