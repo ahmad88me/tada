@@ -161,12 +161,12 @@ def annotate_models_v1(file_dir, data_folder):
         csv_file_name = ann_run.name[3:].split('.')[0]+".csv"
         csv_file_dir = '"'+os.path.join(data_folder, csv_file_name)+'"'
         comm = "%s %s %s --onlyprefix %s --dotype --entitycol %d --logdir %s --csvfiles %s" % (venv_python,
-                                           (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
-                                           str(ann_run.id),
+                                            (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'annotator.py')),
+                                            str(ann_run.id),
+                                            "http://dbpedia.org/ontology",
                                             enn_ent_col_dict[ann_run.name],
-                                           "http://dbpedia.org/ontology",
                                             os.path.join(LOG_DIR, str(ann_run.id)+'.log'),
-                                           csv_file_dir)
+                                            csv_file_dir)
         logger.debug("comm: %s" % comm)
         subprocess.call(comm, shell=True)
         #return ann_run
