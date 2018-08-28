@@ -502,7 +502,7 @@ if __name__ == '__main__':
         if args.onlyprefix:
             prefix = args.onlyprefix
         try:
-            annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0], camel_case=camelcase,
+            annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0], camel_case=camel_case,
                          endpoint="http://dbpedia.org/sparql", entity_col_id=args.entitycol, onlyprefix=prefix)
             logger.info("data set is added successfully.")
         except Exception as e:
