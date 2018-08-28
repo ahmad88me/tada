@@ -63,7 +63,7 @@ def detect_entity_col(csv_file_dir):
     return 0  # at the moment we assume that the entity column is the first column
 
 
-def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, onlyprefix):
+def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, onlyprefix, camel_case):
     """
     Assumptions:
         * Only one entity column i.e. not considering the case of multiple columns for the entity (e.g. the case of
@@ -101,8 +101,13 @@ def annotate_csv(ann_run_id, csv_file_dir, endpoint, hierarchy, entity_col_id, o
     lock = Lock()
     params_list = []
     for r in mat:
-        logger.info('entity_column_id check: '+str((entity_column_id, r[entity_column_id])))
-        params_list.append((entity_ann, r[entity_column_id], endpoint, hierarchy, onlyprefix, lock))
+        if camel_case:
+            cell_val = r[entity_column_id].title()
+        else:
+            cell_val = r[entity_column_id]
+        cell_val = cell_val.strip()
+        logger.info('entity_column_id check: '+str((entity_column_id, cell_val)))
+        params_list.append((entity_ann, cell_val, endpoint, hierarchy, onlyprefix, lock))
         # So the connection is not copied to each thread, instead each will have its own
         #params_list.append((entity_ann.id, r[entity_column_id], endpoint, hierarchy, onlyprefix))
     pool = Pool(max_num_of_processes=MAX_NUM_PROCESSES, func=annotate_single_cell, params_list=params_list)
@@ -478,6 +483,7 @@ if __name__ == '__main__':
     parser.add_argument('runid', type=int, metavar='Annotation_Run_ID', help='the id of the Annotation Run ')
     parser.add_argument('--csvfiles', action='append', nargs='+', help='the list of csv files to be annotated')
     parser.add_argument('--dotype', action='store_true', help='To conclude the type/class of the given csv file')
+    parser.add_argument('--camelcase', action='store_true', help='To make each cell in the subject column into camelcase')
     parser.add_argument('--onlyprefix', action='store', help='To limit to classes that starts with this prefix')
     parser.add_argument('--entitycol', type=int, action='store', help='The id of the entity column in the csv file')
     parser.add_argument('--logdir', action='store', help='suffix to the log file')
@@ -489,11 +495,14 @@ if __name__ == '__main__':
         logger.debug("adding dataset")
         logger.debug("csv_file_dir: ")
         logger.debug(args.csvfiles[0])
+        camel_case = False
+        if args.camelcase:
+            camel_case = True
         prefix = None
         if args.onlyprefix:
             prefix = args.onlyprefix
         try:
-            annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0],
+            annotate_csv(ann_run_id=args.runid, hierarchy=False, csv_file_dir=args.csvfiles[0][0], camel_case=camelcase,
                          endpoint="http://dbpedia.org/sparql", entity_col_id=args.entitycol, onlyprefix=prefix)
             logger.info("data set is added successfully.")
         except Exception as e:
