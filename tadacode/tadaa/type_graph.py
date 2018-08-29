@@ -231,9 +231,11 @@ class TypeGraph(BasicGraph):
 
     def set_depth_for_node(self, node):
         if node.depth == -1:  # depth is not set
-            if(len(node.parents)==0):
-                error_msg = "set_depth_for_node: the node: %s should've been in the root?" % node.title
-                raise Exception("set_depth_for_node: the node: %s should've been in the root?" % node.title)
+            # Using onlyprefix in the annotation model cause this, so I'll comment it for now
+            # Date: 29 August, 2018
+            # if(len(node.parents)==0):
+            #     error_msg = "set_depth_for_node: the node: %s should've been in the root?" % node.title
+            #     raise Exception("set_depth_for_node: the node: %s should've been in the root?" % node.title)
             max_node = node.parents[0]
             self.set_depth_for_node(max_node)
             for p in node.parents[1:]:
