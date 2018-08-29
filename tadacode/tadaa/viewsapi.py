@@ -94,3 +94,27 @@ def webcommons_get_col_type(request):
         return get_col_type(request)
     else:
         return JsonResponse({'error': 'file_name is not passed'}, status=400)
+
+
+def check_status(request):
+    """
+    This is mainly for AINNotation
+    :param request:
+    :return:
+    """
+    if 'name' in request.GET:
+        name = request.GET['name']
+        anns = AnnRun.objects.filter(name=name)
+        if len(anns) == 1:
+            ann = anns[0]
+            if ann.status == 'Annotation is complete':
+                status = 'Annotated'
+            else:
+                status = 'In progress'
+        elif len(anns) == 0:
+            status = 'Not enabled'
+        else:
+            status = 'Multiple runs with the same name'
+        return JsonResponse({'status': status})
+    else:
+        return JsonResponse({'error': 'name is not passed'})
