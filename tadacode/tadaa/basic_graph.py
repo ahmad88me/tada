@@ -98,11 +98,14 @@ class BasicGraph(object):
                 else:
                     print "not caught"
             if node.parents == node.childs == []:
-                del self.index[n]
-                self.cache.remove(n)
+                # del self.index[n]
+                # self.cache.remove(n)
                 removed_titles.append(n)
         print "debug lonely nodes: "
         print removed_titles
+        for n in removed_titles:
+            del self.index[n]
+            self.cache.remove(n)
         return removed_titles
 
     def break_cycles(self):
