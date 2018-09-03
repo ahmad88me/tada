@@ -386,8 +386,6 @@ def dotype(ann_run, endpoint, onlyprefix):
     ann_run.save()
     start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
-    logger.debug("verify roots1 - building graph")
-    graph.verify_roots()
     end = time.time()
     timed_events.append(("build graph2", end-start))
     logger.debug("remove single nodes\n\n")
