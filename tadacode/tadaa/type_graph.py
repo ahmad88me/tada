@@ -68,13 +68,13 @@ class TypeGraph(BasicGraph):
         l = node.path_specificity
         d = node.depth
         # fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
-        print "fs> %s" % node.title
-        if l==-1:
-            print "parents: %s " % (str([p.title for p in node.parents]))
-            print "childs: %s" % (str([ch.title for ch in node.childs]))
-        print "fs> l: %s d: %s" % (str(l), str(d))
-        print "fs> first half %s" % (str(1.0/(l+1)**epsilon))
-        print "fs> second half %s" % (str(1.0/(d+1)**delta))
+        # print "fs> %s" % node.title
+        # if l==-1:
+        #     print "parents: %s " % (str([p.title for p in node.parents]))
+        #     print "childs: %s" % (str([ch.title for ch in node.childs]))
+        # print "fs> l: %s d: %s" % (str(l), str(d))
+        # print "fs> first half %s" % (str(1.0/(l+1)**epsilon))
+        # print "fs> second half %s" % (str(1.0/(d+1)**delta))
         fs_score = 1.0/(l+1)**epsilon - 1.0/(d+1)**delta + 1
         return fs_score
 
@@ -239,9 +239,7 @@ class TypeGraph(BasicGraph):
         if node.parents == []:
             node.specificity_score = 1
         else:
-            print "compute_specificity_for_node> node: %s (%d)" % (node.title, node.num_of_subjects)
             for p in node.parents:
-                print "compute_specificity_for_node> parent: %s (%d)" % (p.title, p.num_of_subjects)
             node.specificity_score = node.num_of_subjects * 1.0 / max([p.num_of_subjects for p in node.parents])
 
         for child in node.childs:
