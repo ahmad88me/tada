@@ -418,7 +418,9 @@ def dotype(ann_run, endpoint, onlyprefix):
     ann_run.save()
 
     start = time.time()
+    logger.debug("specificity score")
     graph.set_specificity_score()
+    logger.debug("specificity path")
     graph.set_path_specificity()
     end = time.time()
     timed_events.append(("specificity", end-start))
