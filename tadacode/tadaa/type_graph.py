@@ -217,6 +217,9 @@ class TypeGraph(BasicGraph):
         if node.parents == []:
             node.specificity_score = 1
         else:
+            print "compute_specificity_for_node> node: %s (%d)" %(node.title, node.num_of_subjects)
+            for p in node.parents:
+                print "compute_specificity_for_node> parent: %s (%d)" % (p.title, p.num_of_subjects)
             node.specificity_score = node.num_of_subjects * 1.0 / max([p.num_of_subjects for p in node.parents])
 
         for child in node.childs:
