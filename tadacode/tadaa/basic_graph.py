@@ -81,6 +81,7 @@ class BasicGraph(object):
     def remove_lonely_nodes(self):
         removed_titles = []
         if "http://dbpedia.org/ontology/Wikidata:Q11424" not in self.cache:
+            print "ERROR: The wikidata target is not found"
             raise Exception("The wikidata target is not found")
         for n in self.cache:
             node = self.index[n]
@@ -98,6 +99,8 @@ class BasicGraph(object):
                 del self.index[n]
                 self.cache.remove(n)
                 removed_titles.append(n)
+        print "lonely nodes: "
+        print removed_titles
         return removed_titles
 
     def break_cycles(self):
