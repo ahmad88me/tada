@@ -35,6 +35,19 @@ class TypeGraph(BasicGraph):
         self.m = 0
         super(TypeGraph, self).__init__(*args, **kwargs)
 
+    def verify_roots(self):
+        # just to test the roots
+        print "checking root"
+        #logger.debug("checking root")
+        for t in self.cache:
+            node = self.index[t]
+            if node.parents == [] and node not in self.roots:
+                print "checking root> %s" % node.title
+                print "parents: %s " % (str([p.title for p in node.parents]))
+                print "childs: %s" % (str([ch.title for ch in node.childs]))
+                raise Exception("checking root error")
+
+
     # new specificity function
     def fs(self, node, delta=0.01, epsilon=10):
         """

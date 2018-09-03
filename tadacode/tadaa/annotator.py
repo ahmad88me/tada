@@ -386,15 +386,21 @@ def dotype(ann_run, endpoint, onlyprefix):
     ann_run.save()
     start = time.time()
     build_graph_from_nodes(graph=graph, nodes_dict=visited)
+    logger.debug("verify roots1 - building graph")
+    graph.verify_roots()
     end = time.time()
     timed_events.append(("build graph2", end-start))
     logger.debug("remove single nodes\n\n")
     start = time.time()
     remove_nodes(entity_ann=entity_ann, classes=graph.remove_lonely_nodes())
+    logger.debug("verify roots2 - remove nodes")
+    graph.verify_roots()
     end = time.time()
     timed_events.append(("remove lonely nodes", end-start))
     start = time.time()
     remove_empty(entity_ann=entity_ann)
+    logger.debug("verify roots3 - remove empty")
+    graph.verify_roots()
     end = time.time()
     timed_events.append(("remove empty entities", end - start))
     logger.debug("coverage\n\n")
@@ -424,21 +430,8 @@ def dotype(ann_run, endpoint, onlyprefix):
     logger.debug("specificity path")
     graph.set_path_specificity()
     end = time.time()
-
-
-
-    
-    #just to test the roots
-    print "checking root"
-    logger.debug("checking root")
-    for t in graph.cache:
-        node = graph.index[t]
-        if node.parents == [] and node not in graph.roots:
-            print "checking root> %s" % node.title
-            raise Exception("checking root error")
-
-
-
+    logger.debug("verify roots - last")
+    graph.verify_roots()
 
     timed_events.append(("specificity", end-start))
     start = time.time()
