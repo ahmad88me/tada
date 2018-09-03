@@ -56,6 +56,9 @@ class TypeGraph(BasicGraph):
         d = node.depth
         # fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
         print "fs> %s" % node.title
+        if l==-1:
+            print "parents: %s " % (str([p.title for p in node.parents]))
+            print "childs: %s" % (str([ch.title for ch in node.childs]))
         print "fs> l: %s d: %s" % (str(l), str(d))
         print "fs> first half %s" % (str(1.0/(l+1)**epsilon))
         print "fs> second half %s" % (str(1.0/(d+1)**delta))
