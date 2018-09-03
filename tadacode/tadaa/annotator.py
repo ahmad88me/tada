@@ -296,8 +296,9 @@ def remove_nodes(entity_ann, classes):
         for entity in cell.entities:
             for cclass in entity.classes:
                 if cclass.cclass in classes:
+                    print "removing lonely node: %s" %  cclass.cclass
                     CClass.objects.get(cclass=cclass.cclass, entity=entity).delete()
-
+                        
 
 def remove_empty(entity_ann):
     for cell in entity_ann.cells:
@@ -423,6 +424,22 @@ def dotype(ann_run, endpoint, onlyprefix):
     logger.debug("specificity path")
     graph.set_path_specificity()
     end = time.time()
+
+
+
+    
+    #just to test the roots
+    print "checking root"
+    logger.debug("checking root")
+    for t in graph.cache:
+        node = graph.index[t]
+        if node.parents == [] and node not in graph.roots:
+            print "checking root> %s" % node.title
+            raise Exception("checking root error")
+
+
+
+
     timed_events.append(("specificity", end-start))
     start = time.time()
     logger.debug("set depth for graph")
