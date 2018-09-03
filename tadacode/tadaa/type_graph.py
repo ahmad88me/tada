@@ -55,6 +55,9 @@ class TypeGraph(BasicGraph):
         l = node.path_specificity
         d = node.depth
         # fs_score = 1.0/(x+1)**10 - 1.0/(d+1)**0.1
+        print "fs> l: %s d: %s" % (str(l), str(d))
+        print "fs> first half %s" % (str(1.0/(l+1)**epsilon))
+        print "fs> second half %s" % (str(1.0/(d+1)**delta))
         fs_score = 1.0/(l+1)**epsilon - 1.0/(d+1)**delta + 1
         return fs_score
 
