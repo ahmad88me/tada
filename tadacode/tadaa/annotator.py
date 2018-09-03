@@ -296,7 +296,7 @@ def remove_nodes(entity_ann, classes):
         for entity in cell.entities:
             for cclass in entity.classes:
                 if cclass.cclass in classes:
-                    print "removing lonely node: %s" %  cclass.cclass
+                    print "removing lonely node: %s" % cclass.cclass
                     CClass.objects.get(cclass=cclass.cclass, entity=entity).delete()
                         
 

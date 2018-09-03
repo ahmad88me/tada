@@ -80,8 +80,20 @@ class BasicGraph(object):
 
     def remove_lonely_nodes(self):
         removed_titles = []
+        if "http://dbpedia.org/ontology/Wikidata:Q11424" not in self.cache:
+            raise Exception("The wikidata target is not found")
         for n in self.cache:
             node = self.index[n]
+            if n == "http://dbpedia.org/ontology/Wikidata:Q11424":
+                print "wiki target: "
+                print "parents: "
+                print node.parents
+                print "childs: "
+                print node.childs
+                if node.parents == node.childs == []:
+                    print "caught"
+                else:
+                    print "not caught"
             if node.parents == node.childs == []:
                 del self.index[n]
                 self.cache.remove(n)
