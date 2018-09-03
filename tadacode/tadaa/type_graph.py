@@ -69,6 +69,8 @@ class TypeGraph(BasicGraph):
         :param m: the number of cells that has entities and types
         :return: the coverage score
         """
+        if m==0:
+            print "m is zero for node: %s" % (node.title)
         return node.coverage_score/m
 
     def break_cycles(self, log_path=None):
