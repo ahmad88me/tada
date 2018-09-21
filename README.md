@@ -3,6 +3,9 @@
 ## New ideas (2018, Sept)
 1. Use a subset of the entity column and try different set of combinations tto get matches. Once the functions (text manipulationes e.g. Transform them to Camel Case) they are applied to the rest of the values in that column. It will be much faster as exact can be used. We can also look for cell values that results in a smaller number of entities to ease entity disambiguation when performing entity linking (Inspired by zhang2017effective).
 2. As an application of our  approach, we can use it to correct knowledge base entity names or names in CSV files. 
+3. Study how much concepts/types/hierarchy is important/used/covered in different knowledge graphs. (e.g. test with Wikidata and Wikipedia). 
+4. Study the intersection of knowledge bases and the covered domains. 
+5. Check the right amount of depth/hierarchy in different knowledge graphs using CSV files, Wikipedia, and how humans annotate such concepts.
 
 ## Get the prerequisites
 1. [python](https://www.python.org/downloads/)
