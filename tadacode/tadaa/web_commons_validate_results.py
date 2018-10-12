@@ -84,5 +84,44 @@ def validate_v1():
     pool.run()
 
 
+def check_single_entry(file_name, concept, from_alpha, to_alpha, inc):
+    url = "%s?k=5&file_name=%s&alpha=" % (ENDPOINT, file_name)
+    k_list = [10, 5, 3, 1]
+    k_a = {}
+    alphas = []
+    for aa in range(int((to_alpha-from_alpha)/inc)):
+        alphas.append(from_alpha+aa*inc)
+    for a in alphas:
+        r = requests.get(url+str(a))
+        result = r.json()
+        for k in k_list:
+            if k in k_a:
+                continue
+            if result["results"] == []:
+                k_a[k]="no results"
+                # print "%30s, %20s, %s, %s" % (file_name, concept, str(k), "no results")
+                # return
+            else:
+                # print "res: <%s> and concept <%s>" % (result["results"][0], concept)
+                if concept in result["results"][:k]:
+                #if result["results"][0] == concept:
+                    # print "%30s, %20s, %s, %s" % (file_name, concept, str(k), str(a))
+                    # return
+                    k_a[k] = str(a)
+        if result["results"] == []:
+            for k in k_list:
+                k_a[k] = "no results"
+            break
+        if len(k_list) == len(k_a.keys()):  # all required info are gathered, no need to continue
+            break
+
+    for k in k_list:
+        if k not in k_a:
+            k_a[k] = "alpha outside the scope"
+            print "%30s, %20s, %s, %s" % (file_name, concept, str(k), "alpha outside the scope")
+        else:
+            print "%30s, %20s, %s, %s" % (file_name, concept, str(k), k_a[k])
+
+check_single_entry("v1_55961337_0_6548713781034932742.tar.gz", "http://dbpedia.org/ontology/Country", 0.1,0.3, 0.001)
 #validate_v2()
-validate_v1()
+#validate_v1()
