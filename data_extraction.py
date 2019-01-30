@@ -192,6 +192,7 @@ def data_and_meta_from_a_mixed_file(file_name=None, original_file_name=None, has
 #               Save Class/Property to a CSV file             #
 ###############################################################
 
+
 def save_data_and_meta_to_files(data=None, meta_data=None, destination_folder="local_data"):
     if data is None:
         print "save_data_and_meta_to_files> data should not be None"
@@ -236,35 +237,3 @@ def save_model(model=None, meta_data=None, file_name=None):
         f.write("\n")
     f.close()
     return fname
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

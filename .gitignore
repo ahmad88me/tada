@@ -1,3 +1,4 @@
+
 # sqlite3 database file
 .venv
 *.sqlite3
@@ -22,9 +23,9 @@ graph-pre.gv.pdf
 
 # local data commons
 #tadacode/local_data/*.csv
-tadacode/local_data/*
-tadacode/local_uploads/*.csv
-tadacode/local_models/*.csv
+local_data/*
+local_uploads/*.csv
+local_models/*.csv
 
 # any file or folder with local 
 #*local*
