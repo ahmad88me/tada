@@ -23,10 +23,7 @@ def entity_ann_recompute(request):
 
     if 'alpha' in request.GET and 'ann' in request.GET:
         from annotator import load_graph, score_graph, get_nodes, get_edges
-        try:
-            alpha = float(request.GET['alpha'])
-        except:
-            pass
+        alpha = float(request.GET['alpha'])
         entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
         graph = load_graph(entity_ann=entity_ann)
         results = score_graph(entity_ann=entity_ann, alpha=alpha, graph=graph)
@@ -40,11 +37,8 @@ def entity_ann_recompute(request):
         else:
             selected = eanns[0].id
             if 'ann' in request.GET:
-                try:
-                    entity_ann = EntityAnn.objects.get(id=request.GET['ann'])
-                    selected = entity_ann.id
-                except:
-                    pass
+                entity_ann = EntityAnn.objects.get(id=request.GET['ann'].strip())
+                selected = entity_ann.id
         return render(request, 'entity_ann_recompute.html', {'anns': eanns, 'alpha': alpha, 'selected': selected})
 
 
